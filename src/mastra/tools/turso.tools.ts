@@ -234,6 +234,39 @@ export async function listTherapyResearch(goalId: number) {
   }));
 }
 
+export async function getResearchForNote(noteId: number) {
+  const result = await turso.execute({
+    sql: `SELECT tr.* FROM therapy_research tr
+          INNER JOIN notes_research nr ON tr.id = nr.research_id
+          WHERE nr.note_id = ?
+          ORDER BY tr.relevance_score DESC, tr.created_at DESC`,
+    args: [noteId],
+  });
+
+  return result.rows.map((row) => ({
+    id: row.id as number,
+    goalId: row.goal_id as number,
+    therapeuticGoalType: row.therapeutic_goal_type as string,
+    title: row.title as string,
+    authors: JSON.parse(row.authors as string) as string[],
+    year: (row.year as number) || null,
+    journal: (row.journal as string) || null,
+    doi: (row.doi as string) || null,
+    url: (row.url as string) || null,
+    abstract: (row.abstract as string) || null,
+    keyFindings: JSON.parse(row.key_findings as string) as string[],
+    therapeuticTechniques: JSON.parse(
+      row.therapeutic_techniques as string,
+    ) as string[],
+    evidenceLevel: (row.evidence_level as string) || null,
+    relevanceScore: row.relevance_score as number,
+    extractedBy: row.extracted_by as string,
+    extractionConfidence: row.extraction_confidence as number,
+    createdAt: row.created_at as string,
+    updatedAt: row.updated_at as string,
+  }));
+}
+
 // ============================================
 // Notes
 // ============================================
@@ -445,6 +478,7 @@ export const tursoTools = {
   listGoals,
   upsertTherapyResearch,
   listTherapyResearch,
+  getResearchForNote,
   getNoteById,
   getNoteBySlug,
   listNotesForEntity,

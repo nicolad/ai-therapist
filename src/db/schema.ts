@@ -136,3 +136,11 @@ export const audioAssets = sqliteTable("audio_assets", {
     .notNull()
     .default(sql`CURRENT_TIMESTAMP`),
 });
+
+export const notesResearch = sqliteTable("notes_research", {
+  noteId: integer("note_id").notNull(),
+  researchId: integer("research_id").notNull(),
+  createdAt: text("created_at")
+    .notNull()
+    .default(sql`CURRENT_TIMESTAMP`),
+});

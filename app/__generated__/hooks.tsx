@@ -509,7 +509,7 @@ export type GetNoteQueryVariables = Exact<{
 }>;
 
 
-export type GetNoteQuery = { __typename?: 'Query', note?: { __typename?: 'Note', id: number, entityId: number, entityType: string, userId: string, noteType?: string | null, slug?: string | null, content: string, createdBy?: string | null, tags?: Array<string> | null, createdAt: string, updatedAt: string } | null };
+export type GetNoteQuery = { __typename?: 'Query', note?: { __typename?: 'Note', id: number, entityId: number, entityType: string, userId: string, noteType?: string | null, slug?: string | null, content: string, createdBy?: string | null, tags?: Array<string> | null, createdAt: string, updatedAt: string, linkedResearch?: Array<{ __typename?: 'Research', id: number, title: string, authors: Array<string>, year?: number | null, journal?: string | null, url?: string | null, therapeuticGoalType: string, relevanceScore: number }> | null } | null };
 
 export type GetNotesQueryVariables = Exact<{
   entityId: Scalars['Int']['input'];
@@ -831,6 +831,16 @@ export const GetNoteDocument = gql`
     content
     createdBy
     tags
+    linkedResearch {
+      id
+      title
+      authors
+      year
+      journal
+      url
+      therapeuticGoalType
+      relevanceScore
+    }
     createdAt
     updatedAt
   }
