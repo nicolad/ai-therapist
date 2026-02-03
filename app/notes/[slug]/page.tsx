@@ -192,29 +192,25 @@ function NotePageContent() {
                         />
                       </Accordion.Trigger>
                     </Accordion.Header>
-                    <Accordion.Content
-                      className="AccordionContent"
-                      style={{
-                        overflow: "hidden",
-                        fontSize: "14px",
-                      }}
-                    >
-                      <Flex direction="column" gap="2" p="3">
-                        {research.journal && (
-                          <Text
-                            size="2"
-                            color="gray"
-                            style={{ fontStyle: "italic" }}
-                          >
-                            {research.journal}
-                          </Text>
-                        )}
-                        {research.url && (
-                          <Link href={research.url} target="_blank" size="2">
-                            View Paper →
-                          </Link>
-                        )}
-                      </Flex>
+                    <Accordion.Content className="AccordionContent">
+                      <div className="AccordionContentText">
+                        <Flex direction="column" gap="2">
+                          {research.journal && (
+                            <Text
+                              size="2"
+                              color="gray"
+                              style={{ fontStyle: "italic" }}
+                            >
+                              {research.journal}
+                            </Text>
+                          )}
+                          {research.url && (
+                            <Link href={research.url} target="_blank" size="2">
+                              View Paper →
+                            </Link>
+                          )}
+                        </Flex>
+                      </div>
                     </Accordion.Content>
                   </Accordion.Item>
                 ))}
