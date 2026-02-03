@@ -1,5 +1,16 @@
-import { turso } from "../db/turso";
+import { createClient } from "@libsql/client";
 import { z } from "zod";
+
+const url =
+  process.env.TURSO_DATABASE_URL ||
+  process.env.DATABASE_URL ||
+  "file:./therapeutic.db";
+const authToken = process.env.TURSO_AUTH_TOKEN;
+
+const turso = createClient({
+  url,
+  authToken,
+});
 
 /**
  * Turso Tools for Mastra Workflows

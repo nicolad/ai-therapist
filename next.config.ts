@@ -3,14 +3,13 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   /* config options here */
   webpack: (config) => {
-    // Exclude graphql-schema directory from compilation
+    // Exclude generated schema files from hot reloading
     config.watchOptions = {
       ...config.watchOptions,
-      ignored: ["**/graphql-schema/**", "**/node_modules/**"],
+      ignored: ["**/schema/**/*.generated.*", "**/node_modules/**"],
     };
     return config;
   },
-  // Exclude graphql-schema from TypeScript checking
   typescript: {
     ignoreBuildErrors: false,
   },

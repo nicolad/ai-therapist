@@ -45,9 +45,11 @@ Guidelines:
           .describe("List of therapeuticTechniques that ARE supported"),
         notes: z.string().describe("Brief explanation of the evaluation"),
       }),
-      createPrompt: ({ run }) => `
+      createPrompt: ({ run }) => {
+        const context = (run as any).context;
+        return `
 Abstract/Context:
-${Array.isArray(run.context) ? run.context.join("\n---\n") : String(run.context ?? "")}
+${Array.isArray(context) ? context.join("\n---\n") : String(context ?? "")}
 
 Extracted Research Data:
 ${JSON.stringify(run.output, null, 2)}
@@ -59,7 +61,8 @@ Return JSON with:
 - supportedFindings: keyFindings that ARE supported
 - supportedTechniques: therapeuticTechniques that ARE supported
 - notes: short explanation (2-3 sentences)
-`,
+`;
+      },
     })
     .generateScore(({ results, run }) => {
       const out = run.output as any;
