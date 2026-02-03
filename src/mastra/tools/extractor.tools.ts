@@ -1,7 +1,11 @@
-import { openai } from "@ai-sdk/openai";
+import { createDeepSeek } from "@ai-sdk/deepseek";
 import { generateObject } from "ai";
 import { z } from "zod";
 import type { PaperDetails } from "./sources.tools";
+
+const deepseek = createDeepSeek({
+  apiKey: process.env.DEEPSEEK_API_KEY,
+});
 
 /**
  * Research Extraction Tools
@@ -58,7 +62,7 @@ export async function extractResearch(params: {
   const { therapeuticGoalType, goalTitle, goalDescription, paper } = params;
 
   const { object } = await generateObject({
-    model: openai("gpt-4o"),
+    model: deepseek("deepseek-chat"),
     schema: TherapyResearchSchema,
     prompt: `Extract therapeutic research information from this paper.
 
@@ -89,7 +93,7 @@ IMPORTANT:
 
   return {
     ...object,
-    extractedBy: "mastra:gpt-4o:v1",
+    extractedBy: "mastra:deepseek-chat:v1",
   };
 }
 
@@ -104,7 +108,7 @@ export async function repairResearch(params: {
   const { extracted, abstract, feedback } = params;
 
   const { object } = await generateObject({
-    model: openai("gpt-4o"),
+    model: deepseek("deepseek-chat"),
     schema: TherapyResearchSchema,
     prompt: `Repair this research extraction based on feedback.
 
@@ -127,7 +131,7 @@ Instructions:
 
   return {
     ...object,
-    extractedBy: "mastra:gpt-4o:v1-repaired",
+    extractedBy: "mastra:deepseek-chat:v1-repaired",
   };
 }
 
@@ -142,7 +146,7 @@ export async function planResearchQuery(params: {
   const { title, description, notes } = params;
 
   const { object } = await generateObject({
-    model: openai("gpt-4o"),
+    model: deepseek("deepseek-chat"),
     schema: z.object({
       therapeuticGoalType: z.string().describe("Type of therapeutic goal"),
       keywords: z.array(z.string()).describe("Search keywords (5-8 terms)"),

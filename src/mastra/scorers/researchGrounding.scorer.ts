@@ -16,7 +16,7 @@ export function createResearchGroundingScorer() {
     description:
       "Check that keyFindings/techniques are supported by the provided abstract/context",
     judge: {
-      model: "openai/gpt-4o",
+      model: "deepseek/deepseek-chat",
       instructions: `You are a strict scientific evaluator. Only mark a finding as supported if the abstract explicitly supports it.
 
 Guidelines:

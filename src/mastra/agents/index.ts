@@ -1,16 +1,19 @@
-import { openai } from "@ai-sdk/openai";
+import { createDeepSeek } from "@ai-sdk/deepseek";
 import { elevenlabs } from "@ai-sdk/elevenlabs";
 import { Agent } from "@mastra/core/agent";
 import { CompositeVoice } from "@mastra/core/voice";
-import { OpenAIVoice } from "@mastra/voice-openai";
 import { ElevenLabsVoice } from "@mastra/voice-elevenlabs";
 import { Memory } from "@mastra/memory";
 import { LibSQLStore } from "@mastra/libsql";
 
+const deepseek = createDeepSeek({
+  apiKey: process.env.DEEPSEEK_API_KEY,
+});
+
 // Agent-level storage for conversation history
 const agentStorage = new LibSQLStore({
   id: "agent-memory-storage",
-  url: process.env.DATABASE_URL || "file:./agent-memory.db",
+  url: process.env.DATABASE_URL || "file:./therapeutic.db",
   authToken: process.env.TURSO_AUTH_TOKEN,
 });
 
@@ -89,8 +92,13 @@ export const storyTellerAgent = new Agent({
   id: "story-teller-agent",
   name: "Story Teller Agent",
   instructions: storyInstructions,
-  model: openai("gpt-4o"),
-  voice: new OpenAIVoice(),
+  model: deepseek("deepseek-chat"),
+  voice: new ElevenLabsVoice({
+    speechModel: {
+      apiKey: process.env.ELEVENLABS_API_KEY,
+    },
+    speaker: "JBFqnCBsd6RMkjVDRZzb", // George - Professional, calm voice
+  }),
   memory: new Memory({
     storage: agentStorage,
   }),
@@ -159,29 +167,12 @@ Draw from:
 "Welcome. I'm glad you're here, taking this time for yourself. [pause] Today, we're going to work together on [specific goal]. This is a common challenge that many people face, and there are proven techniques that can help. [pause] Find a comfortable position, and let's begin..."
 `;
 
-// Therapeutic Agent with OpenAI Voice
+// Therapeutic Agent with ElevenLabs Voice
 export const therapeuticAgent = new Agent({
   id: "therapeutic-agent",
   name: "Therapeutic Audio Agent",
   instructions: therapeuticInstructions,
-  model: openai("gpt-4o"),
-  voice: new OpenAIVoice({
-    speechModel: {
-      name: "tts-1-hd",
-    },
-    speaker: "nova", // Calm, warm voice
-  }),
-  memory: new Memory({
-    storage: agentStorage,
-  }),
-});
-
-// Therapeutic Agent with ElevenLabs Voice (Premium Quality)
-export const therapeuticAgentElevenLabs = new Agent({
-  id: "therapeutic-agent-elevenlabs",
-  name: "Therapeutic Audio Agent (ElevenLabs)",
-  instructions: therapeuticInstructions,
-  model: openai("gpt-4o"),
+  model: deepseek("deepseek-chat"),
   voice: new ElevenLabsVoice({
     speechModel: {
       apiKey: process.env.ELEVENLABS_API_KEY,

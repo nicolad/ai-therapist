@@ -2,11 +2,7 @@ import { createLogger } from "@mastra/core/logger";
 import { Mastra } from "@mastra/core/mastra";
 import { LibSQLStore, LibSQLVector } from "@mastra/libsql";
 
-import {
-  storyTellerAgent,
-  therapeuticAgent,
-  therapeuticAgentElevenLabs,
-} from "./agents";
+import { storyTellerAgent, therapeuticAgent } from "./agents";
 import { generateTherapyResearchWorkflow } from "./workflows";
 
 const url =
@@ -35,7 +31,6 @@ export const mastra = new Mastra({
   agents: {
     storyTellerAgent,
     therapeuticAgent,
-    therapeuticAgentElevenLabs,
   },
   storage,
   vectors,

@@ -13,5 +13,4 @@ export const mastraClient = new MastraClient({
 export const AGENTS = {
   STORY_TELLER: "storyTellerAgent",
   THERAPEUTIC: "therapeuticAgent",
-  THERAPEUTIC_ELEVENLABS: "therapeuticAgentElevenLabs",
 } as const;

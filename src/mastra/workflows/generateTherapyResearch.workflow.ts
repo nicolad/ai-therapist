@@ -1,5 +1,6 @@
 import { createWorkflow, createStep } from "@mastra/core/workflows";
 import { z } from "zod";
+import { createDeepSeek } from "@ai-sdk/deepseek";
 import { createResearchGroundingScorer } from "../scorers";
 import {
   createFaithfulnessScorer,
@@ -11,6 +12,10 @@ import { tursoTools } from "../tools/turso.tools";
 import { ragTools } from "../tools/rag.tools";
 import { sourceTools } from "../tools/sources.tools";
 import { extractorTools } from "../tools/extractor.tools";
+
+const deepseek = createDeepSeek({
+  apiKey: process.env.DEEPSEEK_API_KEY,
+});
 
 /**
  * Deep Research Workflow
@@ -148,7 +153,24 @@ const extractOneStep = createStep({
     research: z.any().optional(),
     reason: z.string().optional(),
   }),
-
+  scorers: {
+    faithfulness: {
+      scorer: createFaithfulnessScorer({
+        model: deepseek("deepseek-chat"),
+      }),
+      sampling: { type: "ratio", rate: 1 },
+    },
+    hallucination: {
+      scorer: createHallucinationScorer({
+        model: deepseek("deepseek-chat"),
+      }),
+      sampling: { type: "ratio", rate: 1 },
+    },
+    completeness: {
+      scorer: createCompletenessScorer(),
+      sampling: { type: "ratio", rate: 1 },
+    },
+  },
   execute: async ({ inputData }) => {
     // 1. Fetch paper details
     const paper = await sourceTools.fetchPaperDetails(inputData.candidate);
@@ -360,8 +382,8 @@ export const generateTherapyResearchWorkflow = createWorkflow({
       outputSchema: z.any(),
       execute: async ({ inputData }) => {
         // Access the workflow's original input via inputData
-        const workflowInput = (inputData as any)?.userId 
-          ? inputData 
+        const workflowInput = (inputData as any)?.userId
+          ? inputData
           : { userId: "unknown", goalId: 0 };
         return {
           userId: workflowInput.userId,
