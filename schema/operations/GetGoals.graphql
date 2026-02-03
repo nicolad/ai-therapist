@@ -1,0 +1,14 @@
+query GetGoals($familyMemberId: Int, $status: String, $userId: String!) {
+  goals(familyMemberId: $familyMemberId, status: $status, userId: $userId) {
+    id
+    title
+    description
+    status
+    priority
+    targetDate
+    familyMemberId
+    userId
+    createdAt
+    updatedAt
+  }
+}

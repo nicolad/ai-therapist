@@ -59,6 +59,7 @@ export type CreateNoteInput = {
   entityType: Scalars['String']['input'];
   noteType?: InputMaybe<Scalars['String']['input']>;
   tags?: InputMaybe<Array<Scalars['String']['input']>>;
+  userId: Scalars['String']['input'];
 };
 
 export type DeleteGoalResult = {
@@ -326,18 +327,21 @@ export type QueryGenerationJobsArgs = {
 
 export type QueryGoalArgs = {
   id: Scalars['Int']['input'];
+  userId: Scalars['String']['input'];
 };
 
 
 export type QueryGoalsArgs = {
   familyMemberId?: InputMaybe<Scalars['Int']['input']>;
   status?: InputMaybe<Scalars['String']['input']>;
+  userId: Scalars['String']['input'];
 };
 
 
 export type QueryNotesArgs = {
   entityId: Scalars['Int']['input'];
   entityType: Scalars['String']['input'];
+  userId: Scalars['String']['input'];
 };
 
 
@@ -348,6 +352,7 @@ export type QueryTherapeuticQuestionsArgs = {
 
 export type QueryTherapyResearchArgs = {
   goalId: Scalars['Int']['input'];
+  userId: Scalars['String']['input'];
 };
 
 export type Subscription = {
@@ -471,6 +476,7 @@ export type GenerateLongFormTextRomanianMutation = { __typename?: 'Mutation', ge
 export type GetGoalsQueryVariables = Exact<{
   familyMemberId?: InputMaybe<Scalars['Int']['input']>;
   status?: InputMaybe<Scalars['String']['input']>;
+  userId: Scalars['String']['input'];
 }>;
 
 
@@ -479,6 +485,7 @@ export type GetGoalsQuery = { __typename?: 'Query', goals: Array<{ __typename?: 
 export type GetNotesQueryVariables = Exact<{
   entityId: Scalars['Int']['input'];
   entityType: Scalars['String']['input'];
+  userId: Scalars['String']['input'];
 }>;
 
 
@@ -687,8 +694,8 @@ export type GenerateLongFormTextRomanianMutationHookResult = ReturnType<typeof u
 export type GenerateLongFormTextRomanianMutationResult = Apollo.MutationResult<GenerateLongFormTextRomanianMutation>;
 export type GenerateLongFormTextRomanianMutationOptions = Apollo.BaseMutationOptions<GenerateLongFormTextRomanianMutation, GenerateLongFormTextRomanianMutationVariables>;
 export const GetGoalsDocument = gql`
-    query GetGoals($familyMemberId: Int, $status: String) {
-  goals(familyMemberId: $familyMemberId, status: $status) {
+    query GetGoals($familyMemberId: Int, $status: String, $userId: String!) {
+  goals(familyMemberId: $familyMemberId, status: $status, userId: $userId) {
     id
     title
     description
@@ -717,10 +724,11 @@ export const GetGoalsDocument = gql`
  *   variables: {
  *      familyMemberId: // value for 'familyMemberId'
  *      status: // value for 'status'
+ *      userId: // value for 'userId'
  *   },
  * });
  */
-export function useGetGoalsQuery(baseOptions?: Apollo.QueryHookOptions<GetGoalsQuery, GetGoalsQueryVariables>) {
+export function useGetGoalsQuery(baseOptions: Apollo.QueryHookOptions<GetGoalsQuery, GetGoalsQueryVariables> & ({ variables: GetGoalsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
         const options = {...defaultOptions, ...baseOptions}
         return Apollo.useQuery<GetGoalsQuery, GetGoalsQueryVariables>(GetGoalsDocument, options);
       }
@@ -740,8 +748,8 @@ export type GetGoalsLazyQueryHookResult = ReturnType<typeof useGetGoalsLazyQuery
 export type GetGoalsSuspenseQueryHookResult = ReturnType<typeof useGetGoalsSuspenseQuery>;
 export type GetGoalsQueryResult = Apollo.QueryResult<GetGoalsQuery, GetGoalsQueryVariables>;
 export const GetNotesDocument = gql`
-    query GetNotes($entityId: Int!, $entityType: String!) {
-  notes(entityId: $entityId, entityType: $entityType) {
+    query GetNotes($entityId: Int!, $entityType: String!, $userId: String!) {
+  notes(entityId: $entityId, entityType: $entityType, userId: $userId) {
     id
     entityId
     entityType
@@ -770,6 +778,7 @@ export const GetNotesDocument = gql`
  *   variables: {
  *      entityId: // value for 'entityId'
  *      entityType: // value for 'entityType'
+ *      userId: // value for 'userId'
  *   },
  * });
  */

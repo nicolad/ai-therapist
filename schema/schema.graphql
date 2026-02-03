@@ -1,0 +1,302 @@
+type Query {
+  goals(familyMemberId: Int, status: String, userId: String!): [Goal!]!
+  goal(id: Int!, userId: String!): Goal
+  therapyResearch(goalId: Int!, userId: String!): [TherapyResearch!]!
+  therapeuticQuestions(goalId: Int!): [TherapeuticQuestion!]!
+  notes(entityId: Int!, entityType: String!, userId: String!): [Note!]!
+  generationJob(id: String!): GenerationJob
+  generationJobs(goalId: Int, status: String): [GenerationJob!]!
+}
+
+type Mutation {
+  # Goals
+  createGoal(input: CreateGoalInput!): Goal!
+  updateGoal(id: Int!, input: UpdateGoalInput!): Goal!
+  deleteGoal(id: Int!): DeleteGoalResult!
+
+  # Async generation workflows
+  generateTherapyResearch(goalId: Int!): GenerateResearchResult!
+  deleteTherapyResearch(goalId: Int!): DeleteResearchResult!
+  generateTherapeuticQuestions(goalId: Int!): GenerateQuestionsResult!
+  deleteTherapeuticQuestions(goalId: Int!): DeleteQuestionsResult!
+  generateLongFormText(
+    goalId: Int!
+    language: String
+    minutes: Int
+  ): GenerateLongFormTextResult!
+  generateAudio(
+    goalId: Int!
+    storyId: Int
+    text: String
+    language: String
+    voice: String
+  ): GenerateAudioResult!
+
+  # Notes
+  createNote(input: CreateNoteInput!): Note!
+  updateNote(id: Int!, input: UpdateNoteInput!): Note!
+  deleteNote(id: Int!): DeleteNoteResult!
+}
+
+type Subscription {
+  researchJobStatus(jobId: String!): GenerationJob!
+  audioJobStatus(jobId: String!): GenerationJob!
+}
+
+# ============================================
+# Core Types
+# ============================================
+
+type Goal {
+  id: Int!
+  familyMemberId: Int!
+  userId: String!
+  title: String!
+  description: String
+  targetDate: String
+  status: String!
+  priority: String!
+  createdAt: String!
+  updatedAt: String!
+  research: [TherapyResearch!]!
+  questions: [TherapeuticQuestion!]!
+  stories: [GoalStory!]!
+  notes: [Note!]!
+  therapeuticText: String
+  therapeuticTextLanguage: String
+  therapeuticTextGeneratedAt: String
+}
+
+type GoalStory {
+  id: Int!
+  goalId: Int!
+  language: String!
+  minutes: Int!
+  text: String!
+  createdAt: String!
+  updatedAt: String!
+  segments: [TextSegment!]!
+  audioAssets: [AudioAsset!]!
+}
+
+type TextSegment {
+  id: Int!
+  goalId: Int!
+  storyId: Int
+  idx: Int!
+  text: String!
+  createdAt: String!
+}
+
+type TherapyResearch {
+  id: Int!
+  goalId: Int!
+  therapeuticGoalType: String!
+  title: String!
+  authors: [String!]!
+  year: Int
+  journal: String
+  doi: String
+  url: String
+  abstract: String
+  keyFindings: [String!]!
+  therapeuticTechniques: [String!]!
+  evidenceLevel: String
+  relevanceScore: Float!
+  extractedBy: String!
+  extractionConfidence: Float!
+  createdAt: String!
+  updatedAt: String!
+  goal: Goal
+}
+
+type TherapeuticQuestion {
+  id: Int!
+  goalId: Int!
+  question: String!
+  researchId: Int
+  researchTitle: String
+  rationale: String!
+  generatedAt: String!
+  createdAt: String!
+  updatedAt: String!
+}
+
+type Note {
+  id: Int!
+  entityId: Int!
+  entityType: String!
+  userId: String!
+  noteType: String
+  content: String!
+  createdBy: String
+  tags: [String!]
+  createdAt: String!
+  updatedAt: String!
+}
+
+# ============================================
+# Audio & Job Types (Turso-only)
+# ============================================
+
+type GenerationJob {
+  id: String!
+  userId: String!
+  type: JobType!
+  goalId: Int!
+  storyId: Int
+  status: JobStatus!
+  progress: Float!
+  result: JobResult
+  error: JobError
+  createdAt: String!
+  updatedAt: String!
+}
+
+enum JobType {
+  AUDIO
+  RESEARCH
+  QUESTIONS
+  LONGFORM
+}
+
+enum JobStatus {
+  RUNNING
+  SUCCEEDED
+  FAILED
+}
+
+type JobResult {
+  audioUrl: String
+  manifestUrl: String
+  segmentUrls: [String!]
+  assetId: String
+  count: Int
+  text: String
+  questions: [TherapeuticQuestion!]
+}
+
+type JobError {
+  message: String!
+  code: String
+  details: String
+}
+
+type AudioAsset {
+  id: String!
+  userId: String!
+  goalId: Int!
+  storyId: Int
+  language: String!
+  voice: String!
+  mimeType: String!
+  manifest: AudioManifest!
+  createdAt: String!
+}
+
+type AudioManifest {
+  segmentCount: Int!
+  totalDuration: Float
+  segments: [AudioSegmentInfo!]!
+}
+
+type AudioSegmentInfo {
+  idx: Int!
+  duration: Float
+  url: String!
+}
+
+# ============================================
+# Input Types
+# ============================================
+
+input CreateGoalInput {
+  familyMemberId: Int!
+  title: String!
+  description: String
+  targetDate: String
+  priority: String
+}
+
+input UpdateGoalInput {
+  title: String
+  description: String
+  status: String
+  priority: String
+  targetDate: String
+}
+
+input CreateNoteInput {
+  entityId: Int!
+  entityType: String!
+  userId: String!
+  noteType: String
+  content: String!
+  createdBy: String
+  tags: [String!]
+}
+
+input UpdateNoteInput {
+  noteType: String
+  content: String
+  createdBy: String
+  tags: [String!]
+}
+
+# ============================================
+# Result Types
+# ============================================
+
+type GenerateResearchResult {
+  success: Boolean!
+  message: String
+  jobId: String
+  count: Int
+}
+
+type GenerateLongFormTextResult {
+  success: Boolean!
+  message: String
+  jobId: String
+  storyId: Int
+  text: String
+  audioUrl: String
+  manifestUrl: String
+  segmentUrls: [String!]
+}
+
+type GenerateAudioResult {
+  success: Boolean!
+  message: String
+  jobId: String!
+  audioUrl: String
+}
+
+type GenerateQuestionsResult {
+  success: Boolean!
+  message: String
+  jobId: String
+  questions: [TherapeuticQuestion!]!
+}
+
+type DeleteGoalResult {
+  success: Boolean!
+  message: String
+}
+
+type DeleteQuestionsResult {
+  success: Boolean!
+  message: String
+  deletedCount: Int!
+}
+
+type DeleteResearchResult {
+  success: Boolean!
+  message: String
+  deletedCount: Int!
+}
+
+type DeleteNoteResult {
+  success: Boolean!
+  message: String
+}

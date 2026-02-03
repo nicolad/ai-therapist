@@ -261,6 +261,34 @@ export async function listNotesForEntity(
   }));
 }
 
+export async function createNote(params: {
+  entityId: number;
+  entityType: string;
+  userId: string;
+  content: string;
+  noteType: string | null;
+  createdBy: string | null;
+  tags: string[];
+}) {
+  const tagsJson = JSON.stringify(params.tags);
+  const result = await turso.execute({
+    sql: `INSERT INTO notes (entity_id, entity_type, user_id, note_type, content, created_by, tags)
+          VALUES (?, ?, ?, ?, ?, ?, ?)
+          RETURNING id`,
+    args: [
+      params.entityId,
+      params.entityType,
+      params.userId,
+      params.noteType,
+      params.content,
+      params.createdBy,
+      tagsJson,
+    ],
+  });
+
+  return result.rows[0].id as number;
+}
+
 // ============================================
 // Generation Jobs
 // ============================================
@@ -352,6 +380,7 @@ export const tursoTools = {
   upsertTherapyResearch,
   listTherapyResearch,
   listNotesForEntity,
+  createNote,
   createGenerationJob,
   updateGenerationJob,
   getGenerationJob,

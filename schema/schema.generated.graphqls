@@ -1,0 +1,271 @@
+type AudioAsset {
+  createdAt: String!
+  goalId: Int!
+  id: String!
+  language: String!
+  manifest: AudioManifest!
+  mimeType: String!
+  storyId: Int
+  userId: String!
+  voice: String!
+}
+
+type AudioManifest {
+  segmentCount: Int!
+  segments: [AudioSegmentInfo!]!
+  totalDuration: Float
+}
+
+type AudioSegmentInfo {
+  duration: Float
+  idx: Int!
+  url: String!
+}
+
+input CreateGoalInput {
+  description: String
+  familyMemberId: Int!
+  priority: String
+  targetDate: String
+  title: String!
+}
+
+input CreateNoteInput {
+  content: String!
+  createdBy: String
+  entityId: Int!
+  entityType: String!
+  noteType: String
+  tags: [String!]
+  userId: String!
+}
+
+type DeleteGoalResult {
+  message: String
+  success: Boolean!
+}
+
+type DeleteNoteResult {
+  message: String
+  success: Boolean!
+}
+
+type DeleteQuestionsResult {
+  deletedCount: Int!
+  message: String
+  success: Boolean!
+}
+
+type DeleteResearchResult {
+  deletedCount: Int!
+  message: String
+  success: Boolean!
+}
+
+type GenerateAudioResult {
+  audioUrl: String
+  jobId: String!
+  message: String
+  success: Boolean!
+}
+
+type GenerateLongFormTextResult {
+  audioUrl: String
+  jobId: String
+  manifestUrl: String
+  message: String
+  segmentUrls: [String!]
+  storyId: Int
+  success: Boolean!
+  text: String
+}
+
+type GenerateQuestionsResult {
+  jobId: String
+  message: String
+  questions: [TherapeuticQuestion!]!
+  success: Boolean!
+}
+
+type GenerateResearchResult {
+  count: Int
+  jobId: String
+  message: String
+  success: Boolean!
+}
+
+type GenerationJob {
+  createdAt: String!
+  error: JobError
+  goalId: Int!
+  id: String!
+  progress: Float!
+  result: JobResult
+  status: JobStatus!
+  storyId: Int
+  type: JobType!
+  updatedAt: String!
+  userId: String!
+}
+
+type Goal {
+  createdAt: String!
+  description: String
+  familyMemberId: Int!
+  id: Int!
+  notes: [Note!]!
+  priority: String!
+  questions: [TherapeuticQuestion!]!
+  research: [TherapyResearch!]!
+  status: String!
+  stories: [GoalStory!]!
+  targetDate: String
+  therapeuticText: String
+  therapeuticTextGeneratedAt: String
+  therapeuticTextLanguage: String
+  title: String!
+  updatedAt: String!
+  userId: String!
+}
+
+type GoalStory {
+  audioAssets: [AudioAsset!]!
+  createdAt: String!
+  goalId: Int!
+  id: Int!
+  language: String!
+  minutes: Int!
+  segments: [TextSegment!]!
+  text: String!
+  updatedAt: String!
+}
+
+type JobError {
+  code: String
+  details: String
+  message: String!
+}
+
+type JobResult {
+  assetId: String
+  audioUrl: String
+  count: Int
+  manifestUrl: String
+  questions: [TherapeuticQuestion!]
+  segmentUrls: [String!]
+  text: String
+}
+
+enum JobStatus {
+  FAILED
+  RUNNING
+  SUCCEEDED
+}
+
+enum JobType {
+  AUDIO
+  LONGFORM
+  QUESTIONS
+  RESEARCH
+}
+
+type Mutation {
+  createGoal(input: CreateGoalInput!): Goal!
+  createNote(input: CreateNoteInput!): Note!
+  deleteGoal(id: Int!): DeleteGoalResult!
+  deleteNote(id: Int!): DeleteNoteResult!
+  deleteTherapeuticQuestions(goalId: Int!): DeleteQuestionsResult!
+  deleteTherapyResearch(goalId: Int!): DeleteResearchResult!
+  generateAudio(goalId: Int!, language: String, storyId: Int, text: String, voice: String): GenerateAudioResult!
+  generateLongFormText(goalId: Int!, language: String, minutes: Int): GenerateLongFormTextResult!
+  generateTherapeuticQuestions(goalId: Int!): GenerateQuestionsResult!
+  generateTherapyResearch(goalId: Int!): GenerateResearchResult!
+  updateGoal(id: Int!, input: UpdateGoalInput!): Goal!
+  updateNote(id: Int!, input: UpdateNoteInput!): Note!
+}
+
+type Note {
+  content: String!
+  createdAt: String!
+  createdBy: String
+  entityId: Int!
+  entityType: String!
+  id: Int!
+  noteType: String
+  tags: [String!]
+  updatedAt: String!
+  userId: String!
+}
+
+type Query {
+  generationJob(id: String!): GenerationJob
+  generationJobs(goalId: Int, status: String): [GenerationJob!]!
+  goal(id: Int!, userId: String!): Goal
+  goals(familyMemberId: Int, status: String, userId: String!): [Goal!]!
+  notes(entityId: Int!, entityType: String!, userId: String!): [Note!]!
+  therapeuticQuestions(goalId: Int!): [TherapeuticQuestion!]!
+  therapyResearch(goalId: Int!, userId: String!): [TherapyResearch!]!
+}
+
+type Subscription {
+  audioJobStatus(jobId: String!): GenerationJob!
+  researchJobStatus(jobId: String!): GenerationJob!
+}
+
+type TextSegment {
+  createdAt: String!
+  goalId: Int!
+  id: Int!
+  idx: Int!
+  storyId: Int
+  text: String!
+}
+
+type TherapeuticQuestion {
+  createdAt: String!
+  generatedAt: String!
+  goalId: Int!
+  id: Int!
+  question: String!
+  rationale: String!
+  researchId: Int
+  researchTitle: String
+  updatedAt: String!
+}
+
+type TherapyResearch {
+  abstract: String
+  authors: [String!]!
+  createdAt: String!
+  doi: String
+  evidenceLevel: String
+  extractedBy: String!
+  extractionConfidence: Float!
+  goal: Goal
+  goalId: Int!
+  id: Int!
+  journal: String
+  keyFindings: [String!]!
+  relevanceScore: Float!
+  therapeuticGoalType: String!
+  therapeuticTechniques: [String!]!
+  title: String!
+  updatedAt: String!
+  url: String
+  year: Int
+}
+
+input UpdateGoalInput {
+  description: String
+  priority: String
+  status: String
+  targetDate: String
+  title: String
+}
+
+input UpdateNoteInput {
+  content: String
+  createdBy: String
+  noteType: String
+  tags: [String!]
+}

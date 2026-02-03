@@ -1,0 +1,14 @@
+query GetNotes($entityId: Int!, $entityType: String!, $userId: String!) {
+  notes(entityId: $entityId, entityType: $entityType, userId: $userId) {
+    id
+    entityId
+    entityType
+    userId
+    noteType
+    content
+    createdBy
+    tags
+    createdAt
+    updatedAt
+  }
+}
