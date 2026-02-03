@@ -110,77 +110,25 @@ function NotePageContent() {
     <Flex direction="column" gap="4">
       <Card>
         <Flex direction="column" gap="4">
-          <Flex justify="between" align="start">
-            <Flex direction="column" gap="2" style={{ flex: 1 }}>
-              <Flex align="center" gap="2">
-                <Badge color="blue">{note.noteType || "General"}</Badge>
-                <Text size="1" color="gray">
-                  Created {new Date(note.createdAt).toLocaleDateString()}
-                </Text>
-              </Flex>
-              {note.tags && note.tags.length > 0 && (
-                <Flex gap="2" wrap="wrap">
-                  {note.tags.map((tag, idx) => (
-                    <Badge key={idx} variant="soft">
-                      {tag}
-                    </Badge>
-                  ))}
-                </Flex>
-              )}
+          <Flex direction="column" gap="2">
+            <Flex align="center" gap="2">
+              <Badge color="blue">{note.noteType || "General"}</Badge>
+              <Text size="1" color="gray">
+                Created {new Date(note.createdAt).toLocaleDateString()}
+              </Text>
             </Flex>
-            {!isEditing && (
-              <Flex gap="2">
-                <Button
-                  variant="soft"
-                  onClick={handleEdit}
-                  disabled={updating || deleting}
-                >
-                  <Pencil1Icon />
-                  Edit
-                </Button>
-                <Button
-                  variant="soft"
-                  color="red"
-                  onClick={handleDelete}
-                  disabled={updating || deleting}
-                >
-                  <TrashIcon />
-                  Delete
-                </Button>
+            {note.tags && note.tags.length > 0 && (
+              <Flex gap="2" wrap="wrap">
+                {note.tags.map((tag, idx) => (
+                  <Badge key={idx} variant="soft">
+                    {tag}
+                  </Badge>
+                ))}
               </Flex>
             )}
           </Flex>
 
-          {isEditing ? (
-            <Flex direction="column" gap="3">
-              <TextArea
-                value={editContent}
-                onChange={(e) => setEditContent(e.target.value)}
-                placeholder="Note content..."
-                rows={8}
-              />
-              <TextArea
-                value={editTags}
-                onChange={(e) => setEditTags(e.target.value)}
-                placeholder="Tags (comma separated)..."
-                rows={1}
-              />
-              <Flex gap="2">
-                <Button onClick={handleSave} disabled={updating}>
-                  {updating ? <Spinner /> : "Save"}
-                </Button>
-                <Button
-                  variant="soft"
-                  onClick={() => setIsEditing(false)}
-                  disabled={updating}
-                >
-                  Cancel
-                </Button>
-              </Flex>
-            </Flex>
-          ) : (
-            <Text style={{ whiteSpace: "pre-wrap" }}>{note.content}</Text>
-          )}
+          <Text style={{ whiteSpace: "pre-wrap" }}>{note.content}</Text>
 
           {note.updatedAt !== note.createdAt && (
             <Text size="1" color="gray">

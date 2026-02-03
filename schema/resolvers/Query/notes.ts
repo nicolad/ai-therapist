@@ -1,7 +1,7 @@
 import type { QueryResolvers } from "./../../types.generated";
 import { tursoTools } from "@/src/mastra/tools/turso.tools";
 
-export const notes: NonNullable<QueryResolvers['notes']> = async (
+export const notes: NonNullable<QueryResolvers["notes"]> = async (
   _parent,
   args,
   _ctx,
