@@ -202,6 +202,7 @@ type Query {
   generationJobs(goalId: Int, status: String): [GenerationJob!]!
   goal(id: Int!, userId: String!): Goal
   goals(familyMemberId: Int, status: String, userId: String!): [Goal!]!
+  note(id: Int!, userId: String!): Note
   notes(entityId: Int!, entityType: String!, userId: String!): [Note!]!
   therapeuticQuestions(goalId: Int!): [TherapeuticQuestion!]!
   therapyResearch(goalId: Int!, userId: String!): [TherapyResearch!]!

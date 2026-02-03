@@ -1,6 +1,6 @@
 import type { MutationResolvers } from "./../../types.generated";
 
-export const updateNote: NonNullable<MutationResolvers["updateNote"]> = async (
+export const updateNote: NonNullable<MutationResolvers['updateNote']> = async (
   _parent,
   _arg,
   _ctx,

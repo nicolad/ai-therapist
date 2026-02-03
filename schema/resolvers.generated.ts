@@ -4,6 +4,7 @@
 import    { generationJobs as Query_generationJobs } from './resolvers/Query/generationJobs';
 import    { goal as Query_goal } from './resolvers/Query/goal';
 import    { goals as Query_goals } from './resolvers/Query/goals';
+import    { note as Query_note } from './resolvers/Query/note';
 import    { notes as Query_notes } from './resolvers/Query/notes';
 import    { therapeuticQuestions as Query_therapeuticQuestions } from './resolvers/Query/therapeuticQuestions';
 import    { therapyResearch as Query_therapyResearch } from './resolvers/Query/therapyResearch';
@@ -42,7 +43,7 @@ import    { TextSegment } from './resolvers/TextSegment';
 import    { TherapeuticQuestion } from './resolvers/TherapeuticQuestion';
 import    { TherapyResearch } from './resolvers/TherapyResearch';
     export const resolvers: Resolvers = {
-      Query: { generationJob: Query_generationJob,generationJobs: Query_generationJobs,goal: Query_goal,goals: Query_goals,notes: Query_notes,therapeuticQuestions: Query_therapeuticQuestions,therapyResearch: Query_therapyResearch },
+      Query: { generationJob: Query_generationJob,generationJobs: Query_generationJobs,goal: Query_goal,goals: Query_goals,note: Query_note,notes: Query_notes,therapeuticQuestions: Query_therapeuticQuestions,therapyResearch: Query_therapyResearch },
       Mutation: { createGoal: Mutation_createGoal,createNote: Mutation_createNote,deleteGoal: Mutation_deleteGoal,deleteNote: Mutation_deleteNote,deleteTherapeuticQuestions: Mutation_deleteTherapeuticQuestions,deleteTherapyResearch: Mutation_deleteTherapyResearch,generateAudio: Mutation_generateAudio,generateLongFormText: Mutation_generateLongFormText,generateTherapeuticQuestions: Mutation_generateTherapeuticQuestions,generateTherapyResearch: Mutation_generateTherapyResearch,updateGoal: Mutation_updateGoal,updateNote: Mutation_updateNote },
       Subscription: { audioJobStatus: Subscription_audioJobStatus,researchJobStatus: Subscription_researchJobStatus },
       AudioAsset: AudioAsset,

@@ -17,6 +17,7 @@ import {
   useGetNotesQuery,
   useCreateNoteMutation,
 } from "@/app/__generated__/hooks";
+import { useRouter } from "next/navigation";
 
 interface NotesListProps {
   entityId: number;
@@ -29,6 +30,7 @@ export default function NotesList({
   entityType,
   userId,
 }: NotesListProps) {
+  const router = useRouter();
   const [showAddNote, setShowAddNote] = useState(false);
   const [newNoteContent, setNewNoteContent] = useState("");
   const [newNoteTags, setNewNoteTags] = useState("");
@@ -140,10 +142,25 @@ export default function NotesList({
       ) : (
         <Flex direction="column" gap="3">
           {notes.map((note) => (
-            <Card key={note.id}>
+            <Card 
+              key={note.id}
+              style={{ cursor: "pointer" }}
+              onClick={() => router.push(`/notes/${note.id}`)}
+            >
               <Flex direction="column" gap="2" p="4">
                 <Flex justify="between" align="start">
-                  <Text style={{ whiteSpace: "pre-wrap" }}>{note.content}</Text>
+                  <Text 
+                    style={{ 
+                      whiteSpace: "pre-wrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      display: "-webkit-box",
+                      WebkitLineClamp: 3,
+                      WebkitBoxOrient: "vertical",
+                    }}
+                  >
+                    {note.content}
+                  </Text>
                 </Flex>
                 <Flex gap="2" align="center" wrap="wrap">
                   {note.tags &&

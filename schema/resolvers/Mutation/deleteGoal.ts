@@ -1,6 +1,6 @@
 import type { MutationResolvers } from "./../../types.generated";
 
-export const deleteGoal: NonNullable<MutationResolvers["deleteGoal"]> = async (
+export const deleteGoal: NonNullable<MutationResolvers['deleteGoal']> = async (
   _parent,
   _arg,
   _ctx,

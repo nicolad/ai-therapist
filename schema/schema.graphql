@@ -4,6 +4,7 @@ type Query {
   therapyResearch(goalId: Int!, userId: String!): [TherapyResearch!]!
   therapeuticQuestions(goalId: Int!): [TherapeuticQuestion!]!
   notes(entityId: Int!, entityType: String!, userId: String!): [Note!]!
+  note(id: Int!, userId: String!): Note
   generationJob(id: String!): GenerationJob
   generationJobs(goalId: Int, status: String): [GenerationJob!]!
 }

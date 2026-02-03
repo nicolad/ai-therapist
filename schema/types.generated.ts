@@ -308,6 +308,7 @@ export type Query = {
   generationJobs: Array<GenerationJob>;
   goal?: Maybe<Goal>;
   goals: Array<Goal>;
+  note?: Maybe<Note>;
   notes: Array<Note>;
   therapeuticQuestions: Array<TherapeuticQuestion>;
   therapyResearch: Array<TherapyResearch>;
@@ -334,6 +335,12 @@ export type QuerygoalArgs = {
 export type QuerygoalsArgs = {
   familyMemberId?: InputMaybe<Scalars['Int']['input']>;
   status?: InputMaybe<Scalars['String']['input']>;
+  userId: Scalars['String']['input'];
+};
+
+
+export type QuerynoteArgs = {
+  id: Scalars['Int']['input'];
   userId: Scalars['String']['input'];
 };
 
@@ -752,6 +759,7 @@ export type QueryResolvers<ContextType = GraphQLContext, ParentType extends Reso
   generationJobs?: Resolver<Array<ResolversTypes['GenerationJob']>, ParentType, ContextType, Partial<QuerygenerationJobsArgs>>;
   goal?: Resolver<Maybe<ResolversTypes['Goal']>, ParentType, ContextType, RequireFields<QuerygoalArgs, 'id' | 'userId'>>;
   goals?: Resolver<Array<ResolversTypes['Goal']>, ParentType, ContextType, RequireFields<QuerygoalsArgs, 'userId'>>;
+  note?: Resolver<Maybe<ResolversTypes['Note']>, ParentType, ContextType, RequireFields<QuerynoteArgs, 'id' | 'userId'>>;
   notes?: Resolver<Array<ResolversTypes['Note']>, ParentType, ContextType, RequireFields<QuerynotesArgs, 'entityId' | 'entityType' | 'userId'>>;
   therapeuticQuestions?: Resolver<Array<ResolversTypes['TherapeuticQuestion']>, ParentType, ContextType, RequireFields<QuerytherapeuticQuestionsArgs, 'goalId'>>;
   therapyResearch?: Resolver<Array<ResolversTypes['TherapyResearch']>, ParentType, ContextType, RequireFields<QuerytherapyResearchArgs, 'goalId' | 'userId'>>;
