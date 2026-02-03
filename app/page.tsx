@@ -13,6 +13,7 @@ import {
 export default function Home() {
   return (
     <Theme
+      appearance="dark"
       accentColor="indigo"
       grayColor="slate"
       radius="medium"
@@ -59,9 +60,7 @@ export default function Home() {
               <Heading size="4">Features</Heading>
               <Flex direction="column" gap="2">
                 <Text>✅ Evidence-based therapy research generation</Text>
-                <Text>
-                  ✅ Multi-language audio content (OpenAI & ElevenLabs)
-                </Text>
+                <Text>✅ Multi-language audio content (ElevenLabs)</Text>
                 <Text>✅ libSQL storage for conversation history</Text>
                 <Text>✅ GraphQL API for goal management</Text>
                 <Text>✅ Real-time progress tracking</Text>
