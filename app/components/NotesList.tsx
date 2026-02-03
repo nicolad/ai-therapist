@@ -142,15 +142,15 @@ export default function NotesList({
       ) : (
         <Flex direction="column" gap="3">
           {notes.map((note) => (
-            <Card 
+            <Card
               key={note.id}
               style={{ cursor: "pointer" }}
               onClick={() => router.push(`/notes/${note.id}`)}
             >
               <Flex direction="column" gap="2" p="4">
                 <Flex justify="between" align="start">
-                  <Text 
-                    style={{ 
+                  <Text
+                    style={{
                       whiteSpace: "pre-wrap",
                       overflow: "hidden",
                       textOverflow: "ellipsis",
