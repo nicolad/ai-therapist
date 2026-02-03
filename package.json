@@ -18,6 +18,7 @@
     "@mastra/voice-elevenlabs": "latest",
     "@mastra/memory": "latest",
     "@mastra/libsql": "latest",
+    "@mastra/evals": "latest",
     "mastra": "latest",
     "ai": "^4.0.0",
     "@ai-sdk/openai": "^1.2.5",
