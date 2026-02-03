@@ -1,7 +1,7 @@
 import type { MutationResolvers } from "./../../types.generated";
 import { tursoTools } from "@/src/mastra/tools/turso.tools";
 
-export const createNote: NonNullable<MutationResolvers['createNote']> = async (
+export const createNote: NonNullable<MutationResolvers["createNote"]> = async (
   _parent,
   args,
   _ctx,
@@ -11,6 +11,7 @@ export const createNote: NonNullable<MutationResolvers['createNote']> = async (
     entityType: args.input.entityType,
     userId: args.input.userId,
     content: args.input.content,
+    slug: args.input.slug || null,
     noteType: args.input.noteType || null,
     createdBy: args.input.createdBy || null,
     tags: args.input.tags || [],
@@ -35,6 +36,7 @@ export const createNote: NonNullable<MutationResolvers['createNote']> = async (
     entityType: createdNote.entityType,
     userId: createdNote.userId,
     noteType: createdNote.noteType || null,
+    slug: createdNote.slug || null,
     content: createdNote.content,
     createdBy: createdNote.createdBy || null,
     tags: createdNote.tags,

@@ -145,7 +145,13 @@ export default function NotesList({
             <Card
               key={note.id}
               style={{ cursor: "pointer" }}
-              onClick={() => router.push(`/notes/${note.slug || note.id}`)}
+              onClick={() => {
+                if (!note.slug) {
+                  console.warn(`Note ${note.id} has no slug`);
+                  return;
+                }
+                router.push(`/notes/${note.slug}`);
+              }}
             >
               <Flex direction="column" gap="2" p="4">
                 <Flex justify="between" align="start">

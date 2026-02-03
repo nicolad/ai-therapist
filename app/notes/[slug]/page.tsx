@@ -25,21 +25,16 @@ import {
 function NotePageContent() {
   const router = useRouter();
   const params = useParams();
-  const idParam = params.id as string;
+  const slug = params.slug as string;
   const userId = "demo-user";
-
-  // Determine if param is numeric id or slug
-  const isNumericId = /^\d+$/.test(idParam);
-  const noteId = isNumericId ? parseInt(idParam) : undefined;
-  const noteSlug = !isNumericId ? idParam : undefined;
 
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState("");
   const [editTags, setEditTags] = useState("");
 
   const { data, loading, error } = useGetNoteQuery({
-    variables: { id: noteId, slug: noteSlug, userId },
-    skip: !idParam,
+    variables: { slug, userId },
+    skip: !slug,
   });
 
   const [updateNote, { loading: updating }] = useUpdateNoteMutation({

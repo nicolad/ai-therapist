@@ -14,7 +14,7 @@ import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/
  * Learn more about it here: https://the-guild.dev/graphql/codegen/plugins/presets/preset-client#reducing-bundle-size
  */
 type Documents = {
-    "mutation CreateNote($input: CreateNoteInput!) {\n  createNote(input: $input) {\n    id\n    entityId\n    entityType\n    userId\n    noteType\n    content\n    createdBy\n    tags\n    createdAt\n    updatedAt\n  }\n}": typeof types.CreateNoteDocument,
+    "mutation CreateNote($input: CreateNoteInput!) {\n  createNote(input: $input) {\n    id\n    entityId\n    entityType\n    userId\n    noteType\n    slug\n    content\n    createdBy\n    tags\n    createdAt\n    updatedAt\n  }\n}": typeof types.CreateNoteDocument,
     "mutation DeleteNote($id: Int!) {\n  deleteNote(id: $id) {\n    success\n    message\n  }\n}": typeof types.DeleteNoteDocument,
     "mutation DeleteResearch($goalId: Int!) {\n  deleteResearch(goalId: $goalId) {\n    success\n    message\n    deletedCount\n  }\n}": typeof types.DeleteResearchDocument,
     "mutation GenerateAudio($goalId: Int!, $storyId: Int, $text: String, $language: String, $voice: String) {\n  generateAudio(\n    goalId: $goalId\n    storyId: $storyId\n    text: $text\n    language: $language\n    voice: $voice\n  ) {\n    success\n    message\n    jobId\n    audioUrl\n  }\n}": typeof types.GenerateAudioDocument,
@@ -26,7 +26,7 @@ type Documents = {
     "mutation UpdateNote($id: Int!, $input: UpdateNoteInput!) {\n  updateNote(id: $id, input: $input) {\n    id\n    entityId\n    entityType\n    userId\n    noteType\n    content\n    createdBy\n    tags\n    createdAt\n    updatedAt\n  }\n}": typeof types.UpdateNoteDocument,
 };
 const documents: Documents = {
-    "mutation CreateNote($input: CreateNoteInput!) {\n  createNote(input: $input) {\n    id\n    entityId\n    entityType\n    userId\n    noteType\n    content\n    createdBy\n    tags\n    createdAt\n    updatedAt\n  }\n}": types.CreateNoteDocument,
+    "mutation CreateNote($input: CreateNoteInput!) {\n  createNote(input: $input) {\n    id\n    entityId\n    entityType\n    userId\n    noteType\n    slug\n    content\n    createdBy\n    tags\n    createdAt\n    updatedAt\n  }\n}": types.CreateNoteDocument,
     "mutation DeleteNote($id: Int!) {\n  deleteNote(id: $id) {\n    success\n    message\n  }\n}": types.DeleteNoteDocument,
     "mutation DeleteResearch($goalId: Int!) {\n  deleteResearch(goalId: $goalId) {\n    success\n    message\n    deletedCount\n  }\n}": types.DeleteResearchDocument,
     "mutation GenerateAudio($goalId: Int!, $storyId: Int, $text: String, $language: String, $voice: String) {\n  generateAudio(\n    goalId: $goalId\n    storyId: $storyId\n    text: $text\n    language: $language\n    voice: $voice\n  ) {\n    success\n    message\n    jobId\n    audioUrl\n  }\n}": types.GenerateAudioDocument,
@@ -55,7 +55,7 @@ export function gql(source: string): unknown;
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function gql(source: "mutation CreateNote($input: CreateNoteInput!) {\n  createNote(input: $input) {\n    id\n    entityId\n    entityType\n    userId\n    noteType\n    content\n    createdBy\n    tags\n    createdAt\n    updatedAt\n  }\n}"): (typeof documents)["mutation CreateNote($input: CreateNoteInput!) {\n  createNote(input: $input) {\n    id\n    entityId\n    entityType\n    userId\n    noteType\n    content\n    createdBy\n    tags\n    createdAt\n    updatedAt\n  }\n}"];
+export function gql(source: "mutation CreateNote($input: CreateNoteInput!) {\n  createNote(input: $input) {\n    id\n    entityId\n    entityType\n    userId\n    noteType\n    slug\n    content\n    createdBy\n    tags\n    createdAt\n    updatedAt\n  }\n}"): (typeof documents)["mutation CreateNote($input: CreateNoteInput!) {\n  createNote(input: $input) {\n    id\n    entityId\n    entityType\n    userId\n    noteType\n    slug\n    content\n    createdBy\n    tags\n    createdAt\n    updatedAt\n  }\n}"];
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

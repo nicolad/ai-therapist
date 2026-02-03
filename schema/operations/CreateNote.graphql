@@ -5,6 +5,7 @@ mutation CreateNote($input: CreateNoteInput!) {
     entityType
     userId
     noteType
+    slug
     content
     createdBy
     tags

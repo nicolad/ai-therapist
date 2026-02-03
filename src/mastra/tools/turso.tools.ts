@@ -320,20 +320,32 @@ export async function createNote(params: {
   entityType: string;
   userId: string;
   content: string;
+  slug?: string | null;
   noteType: string | null;
   createdBy: string | null;
   tags: string[];
 }) {
   const tagsJson = JSON.stringify(params.tags);
+
+  // Auto-generate slug from content if not provided
+  const slug =
+    params.slug ||
+    params.content
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .substring(0, 50);
+
   const result = await turso.execute({
-    sql: `INSERT INTO notes (entity_id, entity_type, user_id, note_type, content, created_by, tags)
-          VALUES (?, ?, ?, ?, ?, ?, ?)
+    sql: `INSERT INTO notes (entity_id, entity_type, user_id, note_type, slug, content, created_by, tags)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?)
           RETURNING id`,
     args: [
       params.entityId,
       params.entityType,
       params.userId,
       params.noteType,
+      slug,
       params.content,
       params.createdBy,
       tagsJson,
