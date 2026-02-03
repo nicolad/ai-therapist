@@ -1,0 +1,179 @@
+extend type Query {
+  goals(familyMemberId: Int, status: String): [Goal!]!
+  goal(id: Int!): Goal
+  therapyResearch(goalId: Int!): [TherapyResearch!]!
+  therapeuticQuestions(goalId: Int!): [TherapeuticQuestion!]!
+  notes(entityId: Int!, entityType: String!): [Note!]!
+}
+
+extend type Mutation {
+  createGoal(input: CreateGoalInput!): Goal!
+  updateGoal(id: Int!, input: UpdateGoalInput!): Goal!
+  deleteGoal(id: Int!): DeleteGoalResult!
+  generateTherapyResearch(goalId: Int!): GenerateResearchResult!
+  deleteTherapyResearch(goalId: Int!): DeleteResearchResult!
+  generateTherapeuticQuestions(goalId: Int!): GenerateQuestionsResult!
+  deleteTherapeuticQuestions(goalId: Int!): DeleteQuestionsResult!
+  generateLongFormText(
+    goalId: Int!
+    language: String
+    minutes: Int
+  ): GenerateLongFormTextResult!
+  generateAudio(
+    goalId: Int!
+    storyId: Int
+    text: String
+    language: String
+    voice: String
+  ): GenerateAudioResult!
+  createNote(input: CreateNoteInput!): Note!
+  updateNote(id: Int!, input: UpdateNoteInput!): Note!
+  deleteNote(id: Int!): DeleteNoteResult!
+}
+
+type GenerateResearchResult {
+  success: Boolean!
+  message: String
+  count: Int!
+}
+
+type GenerateLongFormTextResult {
+  success: Boolean!
+  message: String
+  text: String
+  audioUrl: String
+  manifestUrl: String
+  segmentUrls: [String!]
+}
+
+type GenerateAudioResult {
+  success: Boolean!
+  message: String
+  jobId: String
+  audioUrl: String
+}
+
+type GenerateQuestionsResult {
+  success: Boolean!
+  message: String
+  questions: [TherapeuticQuestion!]!
+}
+
+type TherapeuticQuestion {
+  id: Int!
+  goalId: Int!
+  question: String!
+  researchId: Int
+  researchTitle: String
+  rationale: String!
+  generatedAt: String!
+  createdAt: String!
+  updatedAt: String!
+}
+
+type DeleteGoalResult {
+  success: Boolean!
+  message: String
+}
+
+type DeleteQuestionsResult {
+  success: Boolean!
+  message: String
+  deletedCount: Int!
+}
+
+type DeleteResearchResult {
+  success: Boolean!
+  message: String
+  deletedCount: Int!
+}
+
+input CreateGoalInput {
+  familyMemberId: Int!
+  title: String!
+  description: String
+  targetDate: String
+  priority: String
+}
+
+input UpdateGoalInput {
+  title: String
+  description: String
+  status: String
+  priority: String
+  targetDate: String
+}
+
+type Goal {
+  id: Int!
+  familyMemberId: Int!
+  userId: String!
+  title: String!
+  description: String
+  targetDate: String
+  status: String!
+  priority: String!
+  createdAt: String!
+  updatedAt: String!
+  research: [TherapyResearch!]!
+  therapeuticText: String
+  therapeuticTextLanguage: String
+  therapeuticTextGeneratedAt: String
+  notes: [Note!]!
+}
+
+type TherapyResearch {
+  id: Int!
+  goalId: Int!
+  therapeuticGoalType: String!
+  title: String!
+  authors: [String!]!
+  goal: Goal
+  year: Int
+  journal: String
+  doi: String
+  url: String
+  abstract: String
+  keyFindings: [String!]!
+  therapeuticTechniques: [String!]!
+  evidenceLevel: String
+  relevanceScore: Float!
+  extractedBy: String!
+  extractionConfidence: Float!
+  createdAt: String!
+  updatedAt: String!
+}
+
+type Note {
+  id: Int!
+  entityId: Int!
+  entityType: String!
+  userId: String!
+  noteType: String
+  content: String!
+  createdBy: String
+  tags: [String!]
+  createdAt: String!
+  updatedAt: String!
+}
+
+input CreateNoteInput {
+  entityId: Int!
+  entityType: String!
+  noteType: String
+  content: String!
+  createdBy: String
+  tags: [String!]
+}
+
+input UpdateNoteInput {
+  noteType: String
+  content: String
+  createdBy: String
+  tags: [String!]
+}
+
+type DeleteNoteResult {
+  success: Boolean!
+  message: String
+}
