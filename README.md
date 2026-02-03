@@ -61,7 +61,7 @@ Interactive storytelling with branching narratives and OpenAI voice.
 import { storyTellerAgent } from "@/src/mastra/agents";
 
 const response = await storyTellerAgent.generate(
-  "Create a science fiction story about a barista in Seattle"
+  "Create a science fiction story about a barista in Seattle",
 );
 ```
 
@@ -73,7 +73,7 @@ Evidence-based therapeutic content with OpenAI TTS (tts-1-hd, nova voice).
 import { therapeuticAgent } from "@/src/mastra/agents";
 
 const audio = await therapeuticAgent.voice.speak(
-  "Welcome to your mindfulness practice..."
+  "Welcome to your mindfulness practice...",
 );
 ```
 
@@ -85,7 +85,7 @@ Premium quality therapeutic audio using ElevenLabs (George voice).
 import { therapeuticAgentElevenLabs } from "@/src/mastra/agents";
 
 const audio = await therapeuticAgentElevenLabs.voice.speak(
-  "Take a deep breath in... and slowly exhale..."
+  "Take a deep breath in... and slowly exhale...",
 );
 ```
 
@@ -131,7 +131,7 @@ import { createAudioFileFromText } from "@/lib/elevenlabs";
 // Generates MP3 file with therapeutic voice settings
 const filename = await createAudioFileFromText(
   "Your therapeutic content here",
-  "JBFqnCBsd6RMkjVDRZzb" // George voice
+  "JBFqnCBsd6RMkjVDRZzb", // George voice
 );
 ```
 
@@ -141,11 +141,13 @@ The application includes a complete GraphQL schema for managing therapeutic goal
 
 ```graphql
 mutation CreateGoal {
-  createGoal(input: {
-    title: "Reduce anxiety in social situations"
-    description: "Practice CBT techniques before social events"
-    therapeuticApproach: CBT
-  }) {
+  createGoal(
+    input: {
+      title: "Reduce anxiety in social situations"
+      description: "Practice CBT techniques before social events"
+      therapeuticApproach: CBT
+    }
+  ) {
     id
     title
     createdAt
@@ -176,9 +178,10 @@ ai-therapist/
 ├── lib/                   # Utilities
 │   ├── elevenlabs.ts     # ElevenLabs SDK integration
 │   └── mastra-client.ts  # Mastra client constants
-├── graphql-schema/        # GraphQL schema & resolvers
+├── schema/                # GraphQL schema & generated types
 │   ├── schema.graphql    # Type definitions
-│   └── resolvers/        # Query/mutation resolvers
+│   ├── operations/       # GraphQL operations
+│   └── *.generated.*     # Auto-generated types & resolvers
 └── example.env           # Environment variables template
 ```
 
@@ -204,11 +207,11 @@ DATABASE_URL=file:./therapeutic.db
 
 ## Voice Providers
 
-| Provider | Package | Features | Use Case |
-|----------|---------|----------|----------|
-| OpenAI | `@mastra/voice-openai` | TTS, STT | Fast, cost-effective |
-| ElevenLabs | `@mastra/voice-elevenlabs` | Premium TTS | Production audio |
-| AI SDK | `@ai-sdk/elevenlabs` | Direct SDK access | Advanced features |
+| Provider   | Package                    | Features          | Use Case             |
+| ---------- | -------------------------- | ----------------- | -------------------- |
+| OpenAI     | `@mastra/voice-openai`     | TTS, STT          | Fast, cost-effective |
+| ElevenLabs | `@mastra/voice-elevenlabs` | Premium TTS       | Production audio     |
+| AI SDK     | `@ai-sdk/elevenlabs`       | Direct SDK access | Advanced features    |
 
 ## Technologies
 
