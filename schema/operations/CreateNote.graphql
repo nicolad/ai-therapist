@@ -1,0 +1,14 @@
+mutation CreateNote($input: CreateNoteInput!) {
+  createNote(input: $input) {
+    id
+    entityId
+    entityType
+    userId
+    noteType
+    content
+    createdBy
+    tags
+    createdAt
+    updatedAt
+  }
+}

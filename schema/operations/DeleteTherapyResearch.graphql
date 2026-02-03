@@ -1,0 +1,7 @@
+mutation DeleteTherapyResearch($goalId: Int!) {
+  deleteTherapyResearch(goalId: $goalId) {
+    success
+    message
+    deletedCount
+  }
+}
