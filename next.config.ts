@@ -13,10 +13,7 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: false,
   },
-  // Exclude from pages
-  pageExtensions: ["tsx", "ts", "jsx", "js"]
-    .map((ext) => `page.${ext}`)
-    .concat(["tsx", "ts", "jsx", "js"]),
+  output: "standalone",
 };
 
 export default nextConfig;

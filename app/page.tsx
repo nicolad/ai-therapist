@@ -9,8 +9,11 @@ import {
   Card,
   Button,
 } from "@radix-ui/themes";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
+  const router = useRouter();
+
   return (
     <Theme
       appearance="dark"
@@ -37,7 +40,21 @@ export default function Home() {
                   Manage therapeutic goals with evidence-based research and
                   generate personalized audio content.
                 </Text>
-                <Button size="3">Get Started</Button>
+              </Flex>
+            </Card>
+
+            <Card
+              style={{ flex: "1", minWidth: "300px", cursor: "pointer" }}
+              onClick={() => router.push("/notes")}
+            >
+              <Flex direction="column" gap="3">
+                <Heading size="5">Notes</Heading>
+                <Text>
+                  View and manage your therapeutic notes and reflections.
+                </Text>
+                <Button variant="soft" style={{ marginTop: "0.5rem" }}>
+                  View Notes →
+                </Button>
               </Flex>
             </Card>
 
@@ -45,12 +62,8 @@ export default function Home() {
               <Flex direction="column" gap="3">
                 <Heading size="5">Voice Features</Heading>
                 <Text>
-                  Generate therapeutic audio with OpenAI or ElevenLabs
-                  text-to-speech.
+                  Generate therapeutic audio with ElevenLabs text-to-speech.
                 </Text>
-                <Button size="3" variant="outline">
-                  Learn More
-                </Button>
               </Flex>
             </Card>
           </Flex>
@@ -62,8 +75,6 @@ export default function Home() {
                 <Text>✅ Evidence-based therapy research generation</Text>
                 <Text>✅ Multi-language audio content (ElevenLabs)</Text>
                 <Text>✅ libSQL storage for conversation history</Text>
-                <Text>✅ GraphQL API for goal management</Text>
-                <Text>✅ Real-time progress tracking</Text>
               </Flex>
             </Flex>
           </Card>
