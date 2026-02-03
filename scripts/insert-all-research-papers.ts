@@ -1,112 +1,19 @@
 import { createClient } from "@libsql/client";
+import * as dotenv from "dotenv";
+import * as fs from "fs";
+import * as path from "path";
+
+// Load environment variables
+dotenv.config();
 
 const client = createClient({
-  url: "libsql://ai-therapist-vad7ai.aws-eu-west-1.turso.io",
-  authToken:
-    "***REMOVED***",
+  url: process.env.DATABASE_URL!,
+  authToken: process.env.TURSO_AUTH_TOKEN!,
 });
 
-const csvData = `rank,year,title,series_or_venue,url
-1,"2026","The Work-from-Home Wage Premium","Federal Reserve Bank of San Francisco Working Paper 2026-02 / CEPR DP20996","https://www.frbsf.org/research-and-insights/publications/working-papers/2026/02/the-work-from-home-wage-premium/"
-2,"2026","The Welfare Implications of Job Retention Schemes","IMF Working Paper 2026/015","https://www.imf.org/en/publications/wp/issues/2026/01/30/the-welfare-implications-of-job-retention-schemes-573549"
-3,"2026","Measuring the Ins and Outs of Remote Work: New Evidence from …","AEA Annual Meeting 2026 program paper","https://www.aeaweb.org/conference/2026/program/paper/RNk7i6bR"
-4,"2026","Younger Firms and CEOs Allow More Work from Home","CEPR Discussion Paper 21094","https://cepr.org/publications/dp21094"
-5,"2026","Working from home increases work–home distances","Journal of Urban Economics (ScienceDirect)","https://www.sciencedirect.com/science/article/pii/S0094119026000033"
-6,"2026","SWAA January 2026 Updates","WFH Research (Barrero, Bloom, Davis)","https://wfhresearch.com/wp-content/uploads/2026/01/WFHResearch_updates_January2026.pdf"
-7,"2025","Opioids and Post-COVID Labor-Force Participation","NBER Working Paper w33717","https://www.nber.org/papers/w33717"
-8,"2025","Measuring Work from Home","NBER Working Paper w33508","https://www.nber.org/papers/w33508"
-9,"2025","Has the Rise of Work from Home Reduced the Motherhood Penalty?","NBER Working Paper w34147","https://www.nber.org/papers/w34147"
-10,"2025","Job Amenity Shocks and Labor Reallocation","NBER Working Paper w33787","https://www.nber.org/papers/w33787"
-11,"2025","Technological Disruption in the Labor Market","NBER Working Paper w33323","https://www.nber.org/papers/w33323"
-12,"2025","Social Substitution? Time Use Responses to Increased Work from Home","NBER Working Paper w34239","https://www.nber.org/papers/w34239"
-13,"2025","Labor Market Matching Efficiency and Korea's Low Post-Pandemic Unemployment","IMF Working Paper 2025/082","https://www.imf.org/en/publications/wp/issues/2025/05/02/labor-market-matching-efficiency-and-koreas-low-post-pandemic-unemployment-566483"
-14,"2025","Oil Shocks and Labor Market Developments","IMF Working Paper 2025/145","https://www.imf.org/en/publications/wp/issues/2025/07/18/oil-shocks-and-labor-market-developments-568665"
-15,"2025","Labor Markets, Migration, and EU Integration in the Western Balkans","IMF Working Paper 2025/226","https://www.imf.org/en/publications/wp/issues/2025/10/31/labor-markets-migration-and-eu-integration-in-the-western-balkans-571329"
-16,"2025","The Labour Market Impact of the COVID-19 Pandemic on Individuals with Disabilities: The Case of Ireland","IZA Discussion Paper 18088","https://docs.iza.org/dp18088.pdf"
-17,"2025","How did the remote work revolution change our work and leisure time?","AEA Annual Meeting 2026 program paper","https://www.aeaweb.org/conference/2026/program/paper/fnY372QS"
-18,"2024","Cross-Country Analysis of Labor Markets during the COVID-19 Pandemic","NBER Working Paper w33029","https://www.nber.org/papers/w33029"
-19,"2024","Extraordinary Labor Market Developments and the 2022-23 Disinflation","NBER Working Paper w32584","https://www.nber.org/papers/w32584"
-20,"2024","Voluntary Minimum Wages","NBER Working Paper w32546","https://www.nber.org/papers/w32546"
-21,"2024","Employee Ownership, Employment, and Work-from-Home Locations during the COVID-19 Pandemic","NBER Working Paper w33310","https://www.nber.org/papers/w33310"
-22,"2024","Job Search, Wages, and Inflation","NBER Working Paper w33042","https://www.nber.org/papers/w33042"
-23,"2023","Competition at Work in the Low Wage Labor Market","NBER Working Paper w31010","https://www.nber.org/papers/w31010"
-24,"2023","Where Are the Workers? From Great Resignation to Quiet Quitting","NBER Working Paper w30833","https://www.nber.org/papers/w30833"
-25,"2023","The Evolution of Work from Home","NBER Working Paper w31686","https://www.nber.org/papers/w31686"
-26,"2023","How Effective were Job-Retention Schemes during the COVID-19 Pandemic? A Microsimulation Approach for European Countries","IMF Working Paper 2023/003","https://www.imf.org/-/media/files/publications/wp/2023/english/wpiea2023003-print-pdf.pdf"
-27,"2023","Worker flows and reallocation during the recovery","Labour Economics (ScienceDirect)","https://www.sciencedirect.com/science/article/abs/pii/S092753712300074X"
-28,"2022","Missing Workers and Missing Jobs Since the Pandemic","NBER Working Paper w30717","https://www.nber.org/papers/w30717"
-29,"2022","Has the Willingness to Work Fallen during the Covid Pandemic?","NBER Working Paper w29784","https://www.nber.org/papers/w29784"
-30,"2022","Working from Home Around the World","NBER Working Paper w30446","https://www.nber.org/papers/w30446"
-31,"2022","Substance Abuse during the Pandemic: Implications for Labor Force Participation","NBER Working Paper w29932","https://www.nber.org/papers/w29932"
-32,"2022","European Labor Markets and the COVID-19 Pandemic: Fallout and the Path Ahead","IMF Departmental Paper","https://www.imf.org/en/publications/departmental-papers-policy-papers/issues/2022/03/02/european-labor-markets-and-the-covid-19-pandemic-fallout-and-the-path-ahead-512327"
-33,"2021","Why Working from Home Will Stick","NBER Working Paper w28731","https://www.nber.org/papers/w28731"
-34,"2021","The Gendered Impact of the COVID-19 Recession on the US Labor Market","NBER Working Paper w28505","https://www.nber.org/papers/w28505"
-35,"2021","Maximum Employment and the Participation Cycle","NBER Working Paper w29222","https://www.nber.org/papers/w29222"
-36,"2021","The Effectiveness of Job-Retention Schemes: COVID-19 Evidence From the German States","IMF Working Paper 2021/242","https://www.imf.org/en/publications/wp/issues/2021/10/01/the-effectiveness-of-job-retention-schemes-covid-19-evidence-from-the-german-states-474182"
-37,"2020","The U.S. Labor Market during the Beginning of the Pandemic Recession","NBER Working Paper w27159","https://www.nber.org/papers/w27159"
-38,"2024","Pandemic layoffs and stay-at-home orders: Evidence from Bangladesh","IZA Discussion Paper 18270","https://docs.iza.org/dp18270.pdf"
-39,"2024","Wages and Employment in the Netherlands, 2017-2023","IZA Discussion Paper 18269","https://docs.iza.org/dp18269.pdf"
-40,"2024","The Determinants and Effects of Remote Work Arrangements on Business and Employees","IZA Discussion Paper 18217","https://docs.iza.org/dp18217.pdf"
-41,"2024","The Tale of Two Startups: Surviving COVID-19","IZA Discussion Paper 18199","https://docs.iza.org/dp18199.pdf"
-42,"2024","A New Equilibrium: COVID-19 Lockdowns and Work From Home Persistence","IZA Discussion Paper 18179","https://docs.iza.org/dp18179.pdf"
-43,"2024","The Short-Term Effects of COVID-19 on Labour Market Outcomes of Recent Immigrants to Canada","IZA Discussion Paper 18147","https://docs.iza.org/dp18147.pdf"
-44,"2024","Teleworking and Travel Purposes: UK Evidence after the Pandemic","IZA Discussion Paper 18089","https://docs.iza.org/dp18089.pdf"
-45,"2024","Do Women Pay for Working from Home? The Effect of Remote Work on the Gender Pay Gap","IZA Discussion Paper 17975","https://docs.iza.org/dp17975.pdf"
-46,"2023","School Closures and Parental Labor Supply: Evidence from the United States","IZA Discussion Paper 17926","https://docs.iza.org/dp17926.pdf"
-47,"2023","The Big Shift in Working Arrangements: Eight Ways in Which the COVID-19 Pandemic Changed Work","IZA Discussion Paper 17653","https://docs.iza.org/dp17653.pdf"
-48,"2023","Did COVID-19 (Permanently) Raise the Demand for Teleworkable Jobs? Evidence from Italy","IZA Discussion Paper 17613","https://docs.iza.org/dp17613.pdf"
-49,"2023","Economic Shocks and Worker Careers: Evidence from the Great Recession and the COVID-19 Pandemic","IZA Discussion Paper 17268","https://docs.iza.org/dp17268.pdf"
-50,"2023","An Intersectional Analysis of the Labour Market Impacts of the COVID-19 Pandemic in Canada","IZA Discussion Paper 17235","https://docs.iza.org/dp17235.pdf"
-51,"2022","Back to Work? The Labor Market Effects of Relaxing COVID-19 Restrictions in Ecuador","IZA Discussion Paper 16325","https://docs.iza.org/dp16325.pdf"
-52,"2022","State-Level Trucking Employment and the COVID-19 Pandemic in the U.S.","IZA Discussion Paper 16265","https://docs.iza.org/dp16265.pdf"
-53,"2022","Social Gradients in Employment during and after the COVID-19 Pandemic","IZA Discussion Paper 16260","https://docs.iza.org/dp16260.pdf"
-54,"2022","Did COVID-19 Deteriorate Mismatch in the Japanese Labor Market? Evidence from Job Board Data","IZA Discussion Paper 15917","https://docs.iza.org/dp15917.pdf"
-55,"2022","Labour Market Expectations and Unemployment in Europe During the COVID-19 Pandemic: Impacts and Policy Implications","IZA Discussion Paper 15905","https://docs.iza.org/dp15905.pdf"
-56,"2022","Unions as Insurance: Evidence from the COVID-19 Pandemic","IZA Discussion Paper 15893","https://docs.iza.org/dp15893.pdf"
-57,"2022","Time Savings When Working from Home","IZA Discussion Paper 15870","https://docs.iza.org/dp15870.pdf"
-58,"2022","Creative Disruption: Technology, Innovation and Labour Demand in the Wake of COVID-19","IZA Discussion Paper 15762","https://docs.iza.org/dp15762.pdf"
-59,"2022","The Uneven Effect of COVID School Closures: Parents in Teleworkable vs. Non-teleworkable Occupations","IZA Discussion Paper 15734","https://docs.iza.org/dp15734.pdf"
-60,"2022","Teleworking and Life Satisfaction during COVID-19: The Importance of Family Structure","IZA Discussion Paper 15715","https://docs.iza.org/dp15715.pdf"
-61,"2021","Were Small Businesses More Likely to Permanently Close in the Pandemic?","IZA Discussion Paper 15445","https://docs.iza.org/dp15445.pdf"
-62,"2021","Sweden's COVID-19 Recession: How Foreign and Domestic Infections Struck against Firms and Workers","IZA Discussion Paper 15408","https://docs.iza.org/dp15408.pdf"
-63,"2021","Inequalities in Job Loss and Income Loss in Sub-Saharan Africa during the COVID-19 Crisis","IZA Discussion Paper 15406","https://docs.iza.org/dp15406.pdf"
-64,"2021","The Great Canadian Recovery: The Impact of COVID-19 on Canada's Labour Market","IZA Discussion Paper 15404","https://docs.iza.org/dp15404.pdf"
-65,"2021","Corporate Training and Skill Gaps: Did COVID-19 Stem EU Convergence in Training Investments?","IZA Discussion Paper 15343","https://docs.iza.org/dp15343.pdf"
-66,"2021","Perceived Returns to Job Search","IZA Discussion Paper 15307","https://docs.iza.org/dp15307.pdf"
-67,"2021","Lockdown and Rural Joblessness in India: Gender Inequality in Employment?","IZA Discussion Paper 15270","https://docs.iza.org/dp15270.pdf"
-68,"2021","Pandemic Depression: COVID-19 and the Mental Health of the Self-Employed","IZA Discussion Paper 15260","https://docs.iza.org/dp15260.pdf"
-69,"2021","Working from Home during a Pandemic – A Discrete Choice Experiment in Poland","IZA Discussion Paper 15251","https://docs.iza.org/dp15251.pdf"
-70,"2021","The Short-Term Effect of the COVID-19 Crisis on Employment Probabilities of Labour-Market Entrants in the Netherlands","IZA Discussion Paper 15242","https://docs.iza.org/dp15242.pdf"
-71,"2021","Pandemic-Era Uncertainty","IZA Discussion Paper 15229","https://docs.iza.org/dp15229.pdf"
-72,"2021","What COVID-19 May Leave Behind: Technology-Related Job Postings in Canada","IZA Discussion Paper 15209","https://docs.iza.org/dp15209.pdf"
-73,"2021","China's Labor Market Demand in the Shadow of COVID-19: Evidence from an Online Job Board","IZA Discussion Paper 15201","https://docs.iza.org/dp15201.pdf"
-74,"2021","Gendered Impact of COVID-19 Pandemic on Transitioning from University to Labor Market: Evidence from Turkey","IZA Discussion Paper 15169","https://docs.iza.org/dp15169.pdf"
-75,"2021","COVID-19 and the Swedish Labor Market – A Register Perspective","IZA Discussion Paper 15167","https://docs.iza.org/dp15167.pdf"
-76,"2021","The Unemployed with Jobs and without Jobs","IZA Discussion Paper 15136","https://docs.iza.org/dp15136.pdf"
-77,"2021","Facing Displacement and a Global Pandemic: Evidence from a Fragile State","IZA Discussion Paper 15134","https://docs.iza.org/dp15134.pdf"
-78,"2021","Who Is Doing the Chores and Childcare in Dual-Earner Couples during the COVID-19 Era of Working from Home?","IZA Discussion Paper 15118","https://docs.iza.org/dp15118.pdf"
-79,"2021","The COVID-19 Pandemic in Latin American and Caribbean Countries: The Labor Supply Impact by Gender","IZA Discussion Paper 15091","https://docs.iza.org/dp15091.pdf"
-80,"2021","Has the Willingness to Work Fallen during the COVID Pandemic?","IZA Discussion Paper 15086","https://docs.iza.org/dp15086.pdf"
-81,"2021","Personnel Adjustments during the COVID-19 Pandemic: Did Co-Determination Make a Difference?","IZA Discussion Paper 14873","https://docs.iza.org/dp14873.pdf"
-82,"2021","Did the Australian Jobkeeper Program Save Jobs by Subsidizing Temporary Layoffs?","IZA Discussion Paper 14859","https://docs.iza.org/dp14859.pdf"
-83,"2021","Unpacking the Post-lockdown Employment Recovery of Young Women in the Global South","IZA Discussion Paper 14829","https://docs.iza.org/dp14829.pdf"
-84,"2021","The Evolving Impacts of the COVID-19 Pandemic on Gender Inequality in the U.S. Labor Market: The COVID Motherhood Penalty","IZA Discussion Paper 14811","https://docs.iza.org/dp14811.pdf"
-85,"2021","The Value of Sick Pay","IZA Discussion Paper 14808","https://docs.iza.org/dp14808.pdf"
-86,"2021","Remote Working and Mental Health during the First Wave of COVID-19 Pandemic","IZA Discussion Paper 14773","https://docs.iza.org/dp14773.pdf"
-87,"2021","COVID-19 and the Employment Gender Gap","IZA Discussion Paper 14711","https://docs.iza.org/dp14711.pdf"
-88,"2021","The Early Effect of the COVID-19 Pandemic on the Labour Market Outcomes of Natives and Migrants in the UK","IZA Discussion Paper 14699","https://docs.iza.org/dp14699.pdf"
-89,"2021","The Labour Market Impact of COVID-19 Lockdowns: Evidence from Ghana","IZA Discussion Paper 14692","https://docs.iza.org/dp14692.pdf"
-90,"2021","Minimum Quality Regulations and the Demand for Child Care Labor","IZA Discussion Paper 14684","https://docs.iza.org/dp14684.pdf"
-91,"2020","UI Generosity and Job Acceptance: Effects of the 2020 CARES Act","IZA Discussion Paper 14454","https://docs.iza.org/dp14454.pdf"
-92,"2020","Did COVID-19 Affect the Division of Labor within the Household? Evidence from Two Waves of the Pandemic in Italy","IZA Discussion Paper 14453","https://docs.iza.org/dp14453.pdf"
-93,"2020","Sharing the Caring? The Gender Division of Care Work during the COVID-19 Pandemic in Germany","IZA Discussion Paper 14457","https://docs.iza.org/dp14457.pdf"
-94,"2020","Cracking under Pressure? Gender Role Attitudes toward Maternal Employment in Times of a Pandemic","IZA Discussion Paper 14471","https://docs.iza.org/dp14471.pdf"
-95,"2020","The Labour Market Impact of COVID-19: Early Evidence for a Sample of Enterprises from Southern Europe","IZA Discussion Paper 14269","https://docs.iza.org/dp14269.pdf"
-96,"2020","From Mancession to Shecession: Women's Employment in Regular and Pandemic Recessions","IZA Discussion Paper 14223","https://docs.iza.org/dp14223.pdf"
-97,"2020","Testing the Differential Impact of COVID-19 on Self-Employed Women and Men in the United Kingdom","IZA Discussion Paper 14216","https://docs.iza.org/dp14216.pdf"
-98,"2021","From Epidemic to Pandemic: Effects of the COVID-19 Outbreak on High School Program Choices in Sweden","IZA Discussion Paper 15107","https://docs.iza.org/dp15107.pdf"
-99,"2021","State-Level Economic Policy Uncertainty","IZA Discussion Paper 15156","https://docs.iza.org/dp15156.pdf"
-100,"2021","Artificial Intelligence and Reduced SMEs' Business Risks during the COVID-19 Pandemic","IZA Discussion Paper 15065","https://docs.iza.org/dp15065.pdf"`;
+// Read CSV data from file
+const csvPath = path.join(__dirname, "research-papers.csv");
+const csvData = fs.readFileSync(csvPath, "utf-8");
 
 async function insertAllResearchPapers() {
   console.log("🚀 Starting research papers insertion...\n");
