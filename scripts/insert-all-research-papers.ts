@@ -91,47 +91,62 @@ async function insertAllResearchPapers() {
 
   for (const paper of papers) {
     try {
-      // Insert into therapy_research table
-      const result = await client.execute({
-        sql: `INSERT INTO therapy_research (
-          goal_id, therapeutic_goal_type, title, authors, year, journal, 
-          url, key_findings, therapeutic_techniques, relevance_score, 
-          extracted_by, extraction_confidence
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        RETURNING id`,
-        args: [
-          0, // goal_id = 0 for general research
-          "post-covid-labor-market",
-          paper!.title,
-          JSON.stringify(["Various"]),
-          paper!.year,
-          paper!.venue,
-          paper!.url,
-          JSON.stringify([
-            `Rank ${paper!.rank} in post-COVID job market research`,
-          ]),
-          JSON.stringify([
-            "remote work",
-            "labor market",
-            "post-COVID",
-            "employment",
-          ]),
-          101 - paper!.rank, // Higher rank = higher score
-          "csv-import",
-          90,
-        ],
+      // Check if paper already exists by URL to prevent duplicates
+      const existingPaper = await client.execute({
+        sql: `SELECT id FROM therapy_research WHERE url = ?`,
+        args: [paper!.url],
       });
 
-      const researchId = result.rows[0].id as number;
+      let researchId: number;
+
+      if (existingPaper.rows.length > 0) {
+        // Paper already exists, use existing ID
+        researchId = existingPaper.rows[0].id as number;
+        console.log(`⏭️  Skipping duplicate: ${paper!.title.substring(0, 50)}...`);
+      } else {
+        // Insert new paper into therapy_research table
+        const result = await client.execute({
+          sql: `INSERT INTO therapy_research (
+            goal_id, therapeutic_goal_type, title, authors, year, journal, 
+            url, key_findings, therapeutic_techniques, relevance_score, 
+            extracted_by, extraction_confidence
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          RETURNING id`,
+          args: [
+            0, // goal_id = 0 for general research
+            "post-covid-labor-market",
+            paper!.title,
+            JSON.stringify(["Various"]),
+            paper!.year,
+            paper!.venue,
+            paper!.url,
+            JSON.stringify([
+              `Rank ${paper!.rank} in post-COVID job market research`,
+            ]),
+            JSON.stringify([
+              "remote work",
+              "labor market",
+              "post-COVID",
+              "employment",
+            ]),
+            101 - paper!.rank, // Higher rank = higher score
+            "csv-import",
+            90,
+          ],
+        });
+
+        researchId = result.rows[0].id as number;
+        insertedCount++;
+      }
+
       researchIds.push(researchId);
 
-      // Link to note
+      // Link to note (INSERT OR IGNORE prevents duplicate links)
       await client.execute({
         sql: `INSERT OR IGNORE INTO notes_research (note_id, research_id) VALUES (?, ?)`,
         args: [noteId, researchId],
       });
 
-      insertedCount++;
       if (insertedCount % 10 === 0 || insertedCount === papers.length) {
         console.log(
           `✅ Progress: ${insertedCount}/${papers.length} papers inserted`,
