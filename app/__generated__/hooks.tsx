@@ -714,7 +714,7 @@ export type GetNoteQueryVariables = Exact<{
 }>;
 
 
-export type GetNoteQuery = { __typename?: 'Query', note?: { __typename?: 'Note', id: number, entityId: number, entityType: string, userId: string, noteType?: string | null, slug?: string | null, title?: string | null, content: string, createdBy?: string | null, tags?: Array<string> | null, createdAt: string, updatedAt: string, goal?: { __typename?: 'Goal', id: number, title: string, description?: string | null, status: string, priority: string, targetDate?: string | null, createdAt: string } | null, linkedResearch?: Array<{ __typename?: 'Research', id: number, title: string, authors: Array<string>, year?: number | null, journal?: string | null, url?: string | null, therapeuticGoalType: string, relevanceScore: number }> | null } | null };
+export type GetNoteQuery = { __typename?: 'Query', note?: { __typename?: 'Note', id: number, entityId: number, entityType: string, userId: string, noteType?: string | null, slug?: string | null, title?: string | null, content: string, createdBy?: string | null, tags?: Array<string> | null, createdAt: string, updatedAt: string, goal?: { __typename?: 'Goal', id: number, title: string, description?: string | null, status: string, priority: string, targetDate?: string | null, createdAt: string } | null, linkedResearch?: Array<{ __typename?: 'Research', id: number, title: string, authors: Array<string>, year?: number | null, journal?: string | null, url?: string | null, therapeuticGoalType: string, relevanceScore: number }> | null, claimCards?: Array<{ __typename?: 'ClaimCard', id: string, claim: string, verdict: ClaimVerdict, confidence: number, queries: Array<string>, createdAt: string, updatedAt: string, notes?: string | null, scope?: { __typename?: 'ClaimScope', population?: string | null, intervention?: string | null, comparator?: string | null, outcome?: string | null, timeframe?: string | null, setting?: string | null } | null, evidence: Array<{ __typename?: 'EvidenceItem', polarity: EvidencePolarity, score?: number | null, excerpt?: string | null, rationale?: string | null, locator?: { __typename?: 'EvidenceLocator', page?: number | null, section?: string | null, url?: string | null } | null, paper: { __typename?: 'PaperCandidate', title: string, year?: number | null, doi?: string | null, url?: string | null, oaUrl?: string | null, source: string, authors?: Array<string> | null, abstract?: string | null, journal?: string | null } }>, provenance: { __typename?: 'ClaimProvenance', generatedBy: string, model?: string | null, sourceTools: Array<string> } }> | null } | null };
 
 export type GetNotesQueryVariables = Exact<{
   entityId: Scalars['Int']['input'];
@@ -1520,6 +1520,51 @@ export const GetNoteDocument = gql`
       url
       therapeuticGoalType
       relevanceScore
+    }
+    claimCards {
+      id
+      claim
+      verdict
+      confidence
+      scope {
+        population
+        intervention
+        comparator
+        outcome
+        timeframe
+        setting
+      }
+      evidence {
+        polarity
+        score
+        excerpt
+        rationale
+        locator {
+          page
+          section
+          url
+        }
+        paper {
+          title
+          year
+          doi
+          url
+          oaUrl
+          source
+          authors
+          abstract
+          journal
+        }
+      }
+      queries
+      createdAt
+      updatedAt
+      provenance {
+        generatedBy
+        model
+        sourceTools
+      }
+      notes
     }
     createdAt
     updatedAt

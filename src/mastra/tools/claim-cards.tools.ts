@@ -399,8 +399,8 @@ const url =
 const authToken = process.env.TURSO_AUTH_TOKEN;
 
 const turso = createClient({
-  url,
-  authToken,
+  url: url!,
+  authToken: authToken!,
 });
 
 export async function saveClaimCard(

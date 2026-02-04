@@ -25,6 +25,7 @@ import type {
   EvidenceItem,
   ClaimScope,
 } from "../tools/generic-claim-cards.tools";
+import { toGqlClaimCards } from "@/schema/resolvers/utils/normalize-claim-card";
 
 export function createTursoStorageAdapter(): StorageAdapter {
   return {
@@ -125,7 +126,10 @@ export function createTursoStorageAdapter(): StorageAdapter {
         .innerJoin(claimCards, eq(notesClaims.claimId, claimCards.id))
         .where(eq(notesClaims.noteId, noteId));
 
-      return rows.map((r: any) => deserializeClaimCard(r.card));
+      const rawCards = rows.map((r: any) => deserializeClaimCard(r.card));
+      
+      // Normalize to ensure consistent GraphQL output
+      return toGqlClaimCards(rawCards) as any;
     },
 
     async deleteCard(cardId: string): Promise<void> {

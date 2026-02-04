@@ -29,6 +29,51 @@ query GetNote($id: Int, $slug: String, $userId: String!) {
       therapeuticGoalType
       relevanceScore
     }
+    claimCards {
+      id
+      claim
+      verdict
+      confidence
+      scope {
+        population
+        intervention
+        comparator
+        outcome
+        timeframe
+        setting
+      }
+      evidence {
+        polarity
+        score
+        excerpt
+        rationale
+        locator {
+          page
+          section
+          url
+        }
+        paper {
+          title
+          year
+          doi
+          url
+          oaUrl
+          source
+          authors
+          abstract
+          journal
+        }
+      }
+      queries
+      createdAt
+      updatedAt
+      provenance {
+        generatedBy
+        model
+        sourceTools
+      }
+      notes
+    }
     createdAt
     updatedAt
   }

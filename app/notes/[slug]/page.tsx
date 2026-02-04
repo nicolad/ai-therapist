@@ -44,7 +44,7 @@ function getRelativeTime(dateString: string): string {
   if (diffMins < 60) return `${diffMins}m ago`;
   if (diffHours < 24) return `${diffHours}h ago`;
   if (diffDays < 7) return `${diffDays}d ago`;
-  
+
   return date.toLocaleDateString("en-GB", {
     day: "numeric",
     month: "short",
@@ -167,9 +167,10 @@ function NotePageContent() {
 
   const shouldTruncateDescription =
     note.goal?.description && note.goal.description.length > 180;
-  const displayDescription = shouldTruncateDescription && !showFullDescription
-    ? note.goal?.description?.slice(0, 180) + "..."
-    : note.goal?.description;
+  const displayDescription =
+    shouldTruncateDescription && !showFullDescription
+      ? note.goal?.description?.slice(0, 180) + "..."
+      : note.goal?.description;
 
   return (
     <Grid
@@ -265,6 +266,292 @@ function NotePageContent() {
         )}
       </Flex>
 
+      {/* Claim Cards Section */}
+      {note.claimCards && note.claimCards.length > 0 && (
+        <Card>
+          <Flex direction="column" gap="3">
+            <Heading size="4">
+              Claim Cards ({note.claimCards.length})
+            </Heading>
+            <Accordion.Root type="multiple" style={{ width: "100%" }}>
+              {note.claimCards.map((card, idx) => {
+                const verdictColor = {
+                  SUPPORTED: "green",
+                  CONTRADICTED: "red",
+                  MIXED: "orange",
+                  INSUFFICIENT: "gray",
+                  UNVERIFIED: "gray",
+                }[card.verdict] as any;
+
+                const supportingEvidence = card.evidence.filter(
+                  (e) => e.polarity === "SUPPORTS"
+                );
+                const contradictingEvidence = card.evidence.filter(
+                  (e) => e.polarity === "CONTRADICTS"
+                );
+                const mixedEvidence = card.evidence.filter(
+                  (e) => e.polarity === "MIXED" || e.polarity === "IRRELEVANT"
+                );
+
+                return (
+                  <Accordion.Item
+                    key={card.id}
+                    value={`claim-${idx}`}
+                    style={{
+                      borderBottom: "1px solid var(--gray-6)",
+                      paddingBottom: "12px",
+                      marginBottom: "12px",
+                    }}
+                  >
+                    <Accordion.Header style={{ all: "unset" }}>
+                      <Accordion.Trigger
+                        className="AccordionTrigger"
+                        style={{
+                          all: "unset",
+                          display: "flex",
+                          alignItems: "flex-start",
+                          justifyContent: "space-between",
+                          width: "100%",
+                          padding: "12px 0",
+                          cursor: "pointer",
+                          gap: "12px",
+                        }}
+                      >
+                        <Flex direction="column" gap="2" style={{ flex: 1 }}>
+                          <Text size="3" weight="medium">
+                            {card.claim}
+                          </Text>
+                          <Flex gap="2" align="center" wrap="wrap">
+                            <Badge color={verdictColor} variant="soft">
+                              {card.verdict}
+                            </Badge>
+                            <Tooltip.Provider>
+                              <Tooltip.Root>
+                                <Tooltip.Trigger asChild>
+                                  <Badge variant="outline">
+                                    {Math.round(card.confidence * 100)}%
+                                  </Badge>
+                                </Tooltip.Trigger>
+                                <Tooltip.Portal>
+                                  <Tooltip.Content
+                                    className="TooltipContent"
+                                    sideOffset={5}
+                                    style={{
+                                      backgroundColor: "var(--gray-12)",
+                                      color: "var(--gray-1)",
+                                      padding: "8px 12px",
+                                      borderRadius: "6px",
+                                      fontSize: "13px",
+                                      maxWidth: "200px",
+                                    }}
+                                  >
+                                    Confidence score
+                                    <Tooltip.Arrow
+                                      style={{
+                                        fill: "var(--gray-12)",
+                                      }}
+                                    />
+                                  </Tooltip.Content>
+                                </Tooltip.Portal>
+                              </Tooltip.Root>
+                            </Tooltip.Provider>
+                            <Badge variant="surface" size="1">
+                              {card.evidence.length}{" "}
+                              {card.evidence.length === 1 ? "source" : "sources"}
+                            </Badge>
+                          </Flex>
+                        </Flex>
+                        <ChevronDownIcon
+                          className="AccordionChevron"
+                          style={{
+                            transition: "transform 300ms",
+                            marginTop: "4px",
+                          }}
+                          aria-hidden
+                        />
+                      </Accordion.Trigger>
+                    </Accordion.Header>
+                    <Accordion.Content className="AccordionContent">
+                      <div className="AccordionContentText">
+                        <Flex direction="column" gap="3">
+                          {/* Scope (if available) */}
+                          {card.scope && (
+                            <Flex
+                              direction="column"
+                              gap="2"
+                              p="3"
+                              style={{
+                                backgroundColor: "var(--gray-3)",
+                                borderRadius: "6px",
+                              }}
+                            >
+                              <Text size="2" weight="bold" color="gray">
+                                Scope
+                              </Text>
+                              {card.scope.population && (
+                                <Text size="1">
+                                  <strong>Population:</strong>{" "}
+                                  {card.scope.population}
+                                </Text>
+                              )}
+                              {card.scope.intervention && (
+                                <Text size="1">
+                                  <strong>Intervention:</strong>{" "}
+                                  {card.scope.intervention}
+                                </Text>
+                              )}
+                              {card.scope.outcome && (
+                                <Text size="1">
+                                  <strong>Outcome:</strong> {card.scope.outcome}
+                                </Text>
+                              )}
+                            </Flex>
+                          )}
+
+                          {/* Supporting Evidence */}
+                          {supportingEvidence.length > 0 && (
+                            <Flex direction="column" gap="2">
+                              <Text size="2" weight="bold" color="green">
+                                ✓ Supporting Evidence ({supportingEvidence.length})
+                              </Text>
+                              {supportingEvidence.map((evidence, evidx) => (
+                                <Flex
+                                  key={evidx}
+                                  direction="column"
+                                  gap="1"
+                                  p="2"
+                                  style={{
+                                    backgroundColor: "var(--green-2)",
+                                    borderLeft: "3px solid var(--green-9)",
+                                    borderRadius: "4px",
+                                  }}
+                                >
+                                  <Flex justify="between" align="start">
+                                    <Text size="2" weight="medium">
+                                      {evidence.paper.title}
+                                    </Text>
+                                    {evidence.score !== null && evidence.score !== undefined && (
+                                      <Badge size="1" variant="soft">
+                                        {(evidence.score * 100).toFixed(0)}%
+                                      </Badge>
+                                    )}
+                                  </Flex>
+                                  {evidence.paper.authors &&
+                                    evidence.paper.authors.length > 0 && (
+                                      <Text size="1" color="gray">
+                                        {evidence.paper.authors.slice(0, 2).join(", ")}
+                                        {evidence.paper.authors.length > 2 && " et al."}
+                                        {evidence.paper.year && ` (${evidence.paper.year})`}
+                                      </Text>
+                                    )}
+                                  {evidence.excerpt && (
+                                    <Text
+                                      size="1"
+                                      style={{
+                                        fontStyle: "italic",
+                                        color: "var(--gray-11)",
+                                      }}
+                                    >
+                                      "{evidence.excerpt}"
+                                    </Text>
+                                  )}
+                                  {evidence.locator?.url && (
+                                    <Link
+                                      href={evidence.locator.url}
+                                      target="_blank"
+                                      size="1"
+                                    >
+                                      View source →
+                                    </Link>
+                                  )}
+                                </Flex>
+                              ))}
+                            </Flex>
+                          )}
+
+                          {/* Contradicting Evidence */}
+                          {contradictingEvidence.length > 0 && (
+                            <Flex direction="column" gap="2">
+                              <Text size="2" weight="bold" color="red">
+                                ✗ Contradicting Evidence ({contradictingEvidence.length})
+                              </Text>
+                              {contradictingEvidence.map((evidence, evidx) => (
+                                <Flex
+                                  key={evidx}
+                                  direction="column"
+                                  gap="1"
+                                  p="2"
+                                  style={{
+                                    backgroundColor: "var(--red-2)",
+                                    borderLeft: "3px solid var(--red-9)",
+                                    borderRadius: "4px",
+                                  }}
+                                >
+                                  <Flex justify="between" align="start">
+                                    <Text size="2" weight="medium">
+                                      {evidence.paper.title}
+                                    </Text>
+                                    {evidence.score !== null && evidence.score !== undefined && (
+                                      <Badge size="1" variant="soft">
+                                        {(evidence.score * 100).toFixed(0)}%
+                                      </Badge>
+                                    )}
+                                  </Flex>
+                                  {evidence.paper.authors &&
+                                    evidence.paper.authors.length > 0 && (
+                                      <Text size="1" color="gray">
+                                        {evidence.paper.authors.slice(0, 2).join(", ")}
+                                        {evidence.paper.authors.length > 2 && " et al."}
+                                        {evidence.paper.year && ` (${evidence.paper.year})`}
+                                      </Text>
+                                    )}
+                                  {evidence.excerpt && (
+                                    <Text
+                                      size="1"
+                                      style={{
+                                        fontStyle: "italic",
+                                        color: "var(--gray-11)",
+                                      }}
+                                    >
+                                      "{evidence.excerpt}"
+                                    </Text>
+                                  )}
+                                  {evidence.locator?.url && (
+                                    <Link
+                                      href={evidence.locator.url}
+                                      target="_blank"
+                                      size="1"
+                                    >
+                                      View source →
+                                    </Link>
+                                  )}
+                                </Flex>
+                              ))}
+                            </Flex>
+                          )}
+
+                          {/* Mixed/Irrelevant Evidence (collapsed by default) */}
+                          {mixedEvidence.length > 0 && (
+                            <Flex direction="column" gap="2">
+                              <Text size="2" weight="bold" color="gray">
+                                Other Evidence ({mixedEvidence.length})
+                              </Text>
+                              <Text size="1" color="gray">
+                                Mixed or inconclusive findings
+                              </Text>
+                            </Flex>
+                          )}
+                        </Flex>
+                      </div>
+                    </Accordion.Content>
+                  </Accordion.Item>
+                );
+              })}
+            </Accordion.Root>
+          </Flex>
+        </Card>
+      )}
+
       {/* Sidebar */}
       <Flex direction="column" gap="4">
         {/* Related Goal Card */}
@@ -359,7 +646,7 @@ function NotePageContent() {
                 margin: "0",
               }}
             />
-            
+
             {/* Type */}
             <Flex direction="column" gap="1">
               <Text size="1" color="gray" weight="medium">
@@ -397,9 +684,7 @@ function NotePageContent() {
                         dateStyle: "full",
                         timeStyle: "short",
                       })}
-                      <Tooltip.Arrow
-                        style={{ fill: "var(--gray-12)" }}
-                      />
+                      <Tooltip.Arrow style={{ fill: "var(--gray-12)" }} />
                     </Tooltip.Content>
                   </Tooltip.Portal>
                 </Tooltip.Root>
@@ -434,9 +719,7 @@ function NotePageContent() {
                           dateStyle: "full",
                           timeStyle: "short",
                         })}
-                        <Tooltip.Arrow
-                          style={{ fill: "var(--gray-12)" }}
-                        />
+                        <Tooltip.Arrow style={{ fill: "var(--gray-12)" }} />
                       </Tooltip.Content>
                     </Tooltip.Portal>
                   </Tooltip.Root>

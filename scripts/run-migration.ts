@@ -31,9 +31,7 @@ async function runMigration() {
   for (let i = 0; i < statements.length; i++) {
     const stmt = statements[i];
     const preview =
-      stmt.length > 60
-        ? `${stmt.substring(0, 60)}...`
-        : stmt.substring(0, 60);
+      stmt.length > 60 ? `${stmt.substring(0, 60)}...` : stmt.substring(0, 60);
     console.log(`  [${i + 1}/${statements.length}] ${preview}`);
     try {
       await client.execute(stmt);

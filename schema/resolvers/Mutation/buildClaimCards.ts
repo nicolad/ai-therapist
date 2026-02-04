@@ -4,6 +4,7 @@ import { sourceTools } from "../../../src/mastra/tools/sources.tools";
 import { createDeepSeek } from "@ai-sdk/deepseek";
 import { generateObject } from "ai";
 import { z } from "zod";
+import { toGqlClaimCards } from "../utils/normalize-claim-card";
 
 // Suppress AI SDK warnings
 if (typeof globalThis !== "undefined") {
@@ -213,5 +214,8 @@ Extract 5-12 high-quality claims that summarize the research findings.`,
 
   console.log(`\n✅ Successfully built ${cards.length} claim cards\n`);
 
-  return { cards } as any;
+  // Normalize output to ensure consistent GraphQL types for UI rendering
+  const normalizedCards = toGqlClaimCards(cards);
+
+  return { cards: normalizedCards } as any;
 };
