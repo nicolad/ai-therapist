@@ -474,6 +474,7 @@ export async function getGenerationJob(id: string) {
 }
 
 export const tursoTools = {
+  turso, // Expose turso client for direct access
   getGoal,
   listGoals,
   upsertTherapyResearch,

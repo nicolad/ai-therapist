@@ -44,6 +44,7 @@ type Mutation {
 
   # Claim Cards
   buildClaimCards(input: BuildClaimCardsInput!): BuildClaimCardsResult!
+  checkNoteClaims(input: CheckNoteClaimsInput!): CheckNoteClaimsResult!
   refreshClaimCard(id: ID!): ClaimCard!
   deleteClaimCard(id: ID!): Boolean!
 }
@@ -143,6 +144,7 @@ type Note {
   createdBy: String
   tags: [String!]
   linkedResearch: [Research!]
+  claimCards: [ClaimCard!]
   createdAt: String!
   updatedAt: String!
 }
@@ -401,6 +403,15 @@ input BuildClaimCardsInput {
   sources: [ResearchSource!]
 }
 
+input CheckNoteClaimsInput {
+  noteId: Int!
+  maxClaims: Int
+  maxSourcesToResolve: Int
+  evidenceTopK: Int
+  useJudge: Boolean
+  sources: [ResearchSource!]
+}
+
 enum ResearchSource {
   CROSSREF
   PUBMED
@@ -413,4 +424,11 @@ enum ResearchSource {
 
 type BuildClaimCardsResult {
   cards: [ClaimCard!]!
+}
+
+type CheckNoteClaimsResult {
+  success: Boolean!
+  message: String
+  cards: [ClaimCard!]!
+  noteId: Int!
 }

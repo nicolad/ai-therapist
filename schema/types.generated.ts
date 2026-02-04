@@ -60,6 +60,23 @@ export type BuildClaimCardsResult = {
   cards: Array<ClaimCard>;
 };
 
+export type CheckNoteClaimsInput = {
+  evidenceTopK?: InputMaybe<Scalars['Int']['input']>;
+  maxClaims?: InputMaybe<Scalars['Int']['input']>;
+  maxSourcesToResolve?: InputMaybe<Scalars['Int']['input']>;
+  noteId: Scalars['Int']['input'];
+  sources?: InputMaybe<Array<ResearchSource>>;
+  useJudge?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+export type CheckNoteClaimsResult = {
+  __typename?: 'CheckNoteClaimsResult';
+  cards: Array<ClaimCard>;
+  message?: Maybe<Scalars['String']['output']>;
+  noteId: Scalars['Int']['output'];
+  success: Scalars['Boolean']['output'];
+};
+
 export type ClaimCard = {
   __typename?: 'ClaimCard';
   claim: Scalars['String']['output'];
@@ -285,6 +302,7 @@ export type JobType =
 export type Mutation = {
   __typename?: 'Mutation';
   buildClaimCards: BuildClaimCardsResult;
+  checkNoteClaims: CheckNoteClaimsResult;
   createGoal: Goal;
   createNote: Note;
   deleteClaimCard: Scalars['Boolean']['output'];
@@ -304,6 +322,11 @@ export type Mutation = {
 
 export type MutationbuildClaimCardsArgs = {
   input: BuildClaimCardsInput;
+};
+
+
+export type MutationcheckNoteClaimsArgs = {
+  input: CheckNoteClaimsInput;
 };
 
 
@@ -386,6 +409,7 @@ export type MutationupdateNoteArgs = {
 
 export type Note = {
   __typename?: 'Note';
+  claimCards?: Maybe<Array<ClaimCard>>;
   content: Scalars['String']['output'];
   createdAt: Scalars['String']['output'];
   createdBy?: Maybe<Scalars['String']['output']>;
@@ -656,6 +680,8 @@ export type ResolversTypes = {
   BuildClaimCardsInput: BuildClaimCardsInput;
   Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>;
   BuildClaimCardsResult: ResolverTypeWrapper<Omit<BuildClaimCardsResult, 'cards'> & { cards: Array<ResolversTypes['ClaimCard']> }>;
+  CheckNoteClaimsInput: CheckNoteClaimsInput;
+  CheckNoteClaimsResult: ResolverTypeWrapper<Omit<CheckNoteClaimsResult, 'cards'> & { cards: Array<ResolversTypes['ClaimCard']> }>;
   ClaimCard: ResolverTypeWrapper<Omit<ClaimCard, 'evidence' | 'verdict'> & { evidence: Array<ResolversTypes['EvidenceItem']>, verdict: ResolversTypes['ClaimVerdict'] }>;
   ID: ResolverTypeWrapper<Scalars['ID']['output']>;
   ClaimProvenance: ResolverTypeWrapper<ClaimProvenance>;
@@ -675,17 +701,17 @@ export type ResolversTypes = {
   GenerateQuestionsResult: ResolverTypeWrapper<GenerateQuestionsResult>;
   GenerateResearchResult: ResolverTypeWrapper<GenerateResearchResult>;
   GenerationJob: ResolverTypeWrapper<Omit<GenerationJob, 'status' | 'type'> & { status: ResolversTypes['JobStatus'], type: ResolversTypes['JobType'] }>;
-  Goal: ResolverTypeWrapper<Goal>;
+  Goal: ResolverTypeWrapper<Omit<Goal, 'notes' | 'research'> & { notes: Array<ResolversTypes['Note']>, research: Array<ResolversTypes['Research']> }>;
   GoalStory: ResolverTypeWrapper<GoalStory>;
   JobError: ResolverTypeWrapper<JobError>;
   JobResult: ResolverTypeWrapper<JobResult>;
   JobStatus: ResolverTypeWrapper<'RUNNING' | 'SUCCEEDED' | 'FAILED'>;
   JobType: ResolverTypeWrapper<'AUDIO' | 'RESEARCH' | 'QUESTIONS' | 'LONGFORM'>;
   Mutation: ResolverTypeWrapper<Record<PropertyKey, never>>;
-  Note: ResolverTypeWrapper<Note>;
+  Note: ResolverTypeWrapper<Omit<Note, 'claimCards' | 'linkedResearch'> & { claimCards?: Maybe<Array<ResolversTypes['ClaimCard']>>, linkedResearch?: Maybe<Array<ResolversTypes['Research']>> }>;
   PaperCandidate: ResolverTypeWrapper<PaperCandidate>;
   Query: ResolverTypeWrapper<Record<PropertyKey, never>>;
-  Research: ResolverTypeWrapper<Research>;
+  Research: ResolverTypeWrapper<Omit<Research, 'goal'> & { goal?: Maybe<ResolversTypes['Goal']> }>;
   ResearchSource: ResolverTypeWrapper<'ARXIV' | 'CROSSREF' | 'DATACITE' | 'EUROPEPMC' | 'OPENALEX' | 'PUBMED' | 'SEMANTIC_SCHOLAR'>;
   Subscription: ResolverTypeWrapper<Record<PropertyKey, never>>;
   TextSegment: ResolverTypeWrapper<TextSegment>;
@@ -705,6 +731,8 @@ export type ResolversParentTypes = {
   BuildClaimCardsInput: BuildClaimCardsInput;
   Boolean: Scalars['Boolean']['output'];
   BuildClaimCardsResult: Omit<BuildClaimCardsResult, 'cards'> & { cards: Array<ResolversParentTypes['ClaimCard']> };
+  CheckNoteClaimsInput: CheckNoteClaimsInput;
+  CheckNoteClaimsResult: Omit<CheckNoteClaimsResult, 'cards'> & { cards: Array<ResolversParentTypes['ClaimCard']> };
   ClaimCard: Omit<ClaimCard, 'evidence'> & { evidence: Array<ResolversParentTypes['EvidenceItem']> };
   ID: Scalars['ID']['output'];
   ClaimProvenance: ClaimProvenance;
@@ -722,15 +750,15 @@ export type ResolversParentTypes = {
   GenerateQuestionsResult: GenerateQuestionsResult;
   GenerateResearchResult: GenerateResearchResult;
   GenerationJob: GenerationJob;
-  Goal: Goal;
+  Goal: Omit<Goal, 'notes' | 'research'> & { notes: Array<ResolversParentTypes['Note']>, research: Array<ResolversParentTypes['Research']> };
   GoalStory: GoalStory;
   JobError: JobError;
   JobResult: JobResult;
   Mutation: Record<PropertyKey, never>;
-  Note: Note;
+  Note: Omit<Note, 'claimCards' | 'linkedResearch'> & { claimCards?: Maybe<Array<ResolversParentTypes['ClaimCard']>>, linkedResearch?: Maybe<Array<ResolversParentTypes['Research']>> };
   PaperCandidate: PaperCandidate;
   Query: Record<PropertyKey, never>;
-  Research: Research;
+  Research: Omit<Research, 'goal'> & { goal?: Maybe<ResolversParentTypes['Goal']> };
   Subscription: Record<PropertyKey, never>;
   TextSegment: TextSegment;
   TherapeuticQuestion: TherapeuticQuestion;
@@ -764,6 +792,13 @@ export type AudioSegmentInfoResolvers<ContextType = GraphQLContext, ParentType e
 
 export type BuildClaimCardsResultResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['BuildClaimCardsResult'] = ResolversParentTypes['BuildClaimCardsResult']> = {
   cards?: Resolver<Array<ResolversTypes['ClaimCard']>, ParentType, ContextType>;
+};
+
+export type CheckNoteClaimsResultResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['CheckNoteClaimsResult'] = ResolversParentTypes['CheckNoteClaimsResult']> = {
+  cards?: Resolver<Array<ResolversTypes['ClaimCard']>, ParentType, ContextType>;
+  message?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  noteId?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  success?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
 };
 
 export type ClaimCardResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['ClaimCard'] = ResolversParentTypes['ClaimCard']> = {
@@ -936,6 +971,7 @@ export type JobTypeResolvers = EnumResolverSignature<{ AUDIO?: any, LONGFORM?: a
 
 export type MutationResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
   buildClaimCards?: Resolver<ResolversTypes['BuildClaimCardsResult'], ParentType, ContextType, RequireFields<MutationbuildClaimCardsArgs, 'input'>>;
+  checkNoteClaims?: Resolver<ResolversTypes['CheckNoteClaimsResult'], ParentType, ContextType, RequireFields<MutationcheckNoteClaimsArgs, 'input'>>;
   createGoal?: Resolver<ResolversTypes['Goal'], ParentType, ContextType, RequireFields<MutationcreateGoalArgs, 'input'>>;
   createNote?: Resolver<ResolversTypes['Note'], ParentType, ContextType, RequireFields<MutationcreateNoteArgs, 'input'>>;
   deleteClaimCard?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationdeleteClaimCardArgs, 'id'>>;
@@ -953,6 +989,7 @@ export type MutationResolvers<ContextType = GraphQLContext, ParentType extends R
 };
 
 export type NoteResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Note'] = ResolversParentTypes['Note']> = {
+  claimCards?: Resolver<Maybe<Array<ResolversTypes['ClaimCard']>>, ParentType, ContextType>;
   content?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   createdAt?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   createdBy?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
@@ -1048,6 +1085,7 @@ export type Resolvers<ContextType = GraphQLContext> = {
   AudioManifest?: AudioManifestResolvers<ContextType>;
   AudioSegmentInfo?: AudioSegmentInfoResolvers<ContextType>;
   BuildClaimCardsResult?: BuildClaimCardsResultResolvers<ContextType>;
+  CheckNoteClaimsResult?: CheckNoteClaimsResultResolvers<ContextType>;
   ClaimCard?: ClaimCardResolvers<ContextType>;
   ClaimProvenance?: ClaimProvenanceResolvers<ContextType>;
   ClaimScope?: ClaimScopeResolvers<ContextType>;

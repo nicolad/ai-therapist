@@ -11,6 +11,7 @@ import    { notes as Query_notes } from './resolvers/Query/notes';
 import    { research as Query_research } from './resolvers/Query/research';
 import    { therapeuticQuestions as Query_therapeuticQuestions } from './resolvers/Query/therapeuticQuestions';
 import    { buildClaimCards as Mutation_buildClaimCards } from './resolvers/Mutation/buildClaimCards';
+import    { checkNoteClaims as Mutation_checkNoteClaims } from './resolvers/Mutation/checkNoteClaims';
 import    { createGoal as Mutation_createGoal } from './resolvers/Mutation/createGoal';
 import    { createNote as Mutation_createNote } from './resolvers/Mutation/createNote';
 import    { deleteClaimCard as Mutation_deleteClaimCard } from './resolvers/Mutation/deleteClaimCard';
@@ -31,6 +32,7 @@ import    { AudioAsset } from './resolvers/AudioAsset';
 import    { AudioManifest } from './resolvers/AudioManifest';
 import    { AudioSegmentInfo } from './resolvers/AudioSegmentInfo';
 import    { BuildClaimCardsResult } from './resolvers/BuildClaimCardsResult';
+import    { CheckNoteClaimsResult } from './resolvers/CheckNoteClaimsResult';
 import    { ClaimCard } from './resolvers/ClaimCard';
 import    { ClaimProvenance } from './resolvers/ClaimProvenance';
 import    { ClaimScope } from './resolvers/ClaimScope';
@@ -56,12 +58,13 @@ import    { TextSegment } from './resolvers/TextSegment';
 import    { TherapeuticQuestion } from './resolvers/TherapeuticQuestion';
     export const resolvers: Resolvers = {
       Query: { claimCard: Query_claimCard,claimCardsForNote: Query_claimCardsForNote,generationJob: Query_generationJob,generationJobs: Query_generationJobs,goal: Query_goal,goals: Query_goals,note: Query_note,notes: Query_notes,research: Query_research,therapeuticQuestions: Query_therapeuticQuestions },
-      Mutation: { buildClaimCards: Mutation_buildClaimCards,createGoal: Mutation_createGoal,createNote: Mutation_createNote,deleteClaimCard: Mutation_deleteClaimCard,deleteGoal: Mutation_deleteGoal,deleteNote: Mutation_deleteNote,deleteResearch: Mutation_deleteResearch,deleteTherapeuticQuestions: Mutation_deleteTherapeuticQuestions,generateAudio: Mutation_generateAudio,generateLongFormText: Mutation_generateLongFormText,generateResearch: Mutation_generateResearch,generateTherapeuticQuestions: Mutation_generateTherapeuticQuestions,refreshClaimCard: Mutation_refreshClaimCard,updateGoal: Mutation_updateGoal,updateNote: Mutation_updateNote },
+      Mutation: { buildClaimCards: Mutation_buildClaimCards,checkNoteClaims: Mutation_checkNoteClaims,createGoal: Mutation_createGoal,createNote: Mutation_createNote,deleteClaimCard: Mutation_deleteClaimCard,deleteGoal: Mutation_deleteGoal,deleteNote: Mutation_deleteNote,deleteResearch: Mutation_deleteResearch,deleteTherapeuticQuestions: Mutation_deleteTherapeuticQuestions,generateAudio: Mutation_generateAudio,generateLongFormText: Mutation_generateLongFormText,generateResearch: Mutation_generateResearch,generateTherapeuticQuestions: Mutation_generateTherapeuticQuestions,refreshClaimCard: Mutation_refreshClaimCard,updateGoal: Mutation_updateGoal,updateNote: Mutation_updateNote },
       Subscription: { audioJobStatus: Subscription_audioJobStatus,researchJobStatus: Subscription_researchJobStatus },
       AudioAsset: AudioAsset,
 AudioManifest: AudioManifest,
 AudioSegmentInfo: AudioSegmentInfo,
 BuildClaimCardsResult: BuildClaimCardsResult,
+CheckNoteClaimsResult: CheckNoteClaimsResult,
 ClaimCard: ClaimCard,
 ClaimProvenance: ClaimProvenance,
 ClaimScope: ClaimScope,

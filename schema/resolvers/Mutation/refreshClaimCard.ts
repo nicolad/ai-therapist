@@ -1,9 +1,7 @@
 import type { MutationResolvers } from "../../types.generated";
 import { claimCardsTools } from "../../../src/mastra/tools/claim-cards.tools";
 
-export const refreshClaimCard: NonNullable<
-  MutationResolvers["refreshClaimCard"]
-> = async (_parent, { id }) => {
+export const refreshClaimCard: NonNullable<MutationResolvers['refreshClaimCard']> = async (_parent, { id }) => {
   const existing = await claimCardsTools.getClaimCard(id);
   if (!existing) {
     throw new Error(`Claim card ${id} not found`);

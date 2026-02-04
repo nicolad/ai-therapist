@@ -58,6 +58,23 @@ export type BuildClaimCardsResult = {
   cards: Array<ClaimCard>;
 };
 
+export type CheckNoteClaimsInput = {
+  evidenceTopK?: InputMaybe<Scalars['Int']['input']>;
+  maxClaims?: InputMaybe<Scalars['Int']['input']>;
+  maxSourcesToResolve?: InputMaybe<Scalars['Int']['input']>;
+  noteId: Scalars['Int']['input'];
+  sources?: InputMaybe<Array<ResearchSource>>;
+  useJudge?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+export type CheckNoteClaimsResult = {
+  __typename?: 'CheckNoteClaimsResult';
+  cards: Array<ClaimCard>;
+  message?: Maybe<Scalars['String']['output']>;
+  noteId: Scalars['Int']['output'];
+  success: Scalars['Boolean']['output'];
+};
+
 export type ClaimCard = {
   __typename?: 'ClaimCard';
   claim: Scalars['String']['output'];
@@ -287,6 +304,7 @@ export enum JobType {
 export type Mutation = {
   __typename?: 'Mutation';
   buildClaimCards: BuildClaimCardsResult;
+  checkNoteClaims: CheckNoteClaimsResult;
   createGoal: Goal;
   createNote: Note;
   deleteClaimCard: Scalars['Boolean']['output'];
@@ -306,6 +324,11 @@ export type Mutation = {
 
 export type MutationBuildClaimCardsArgs = {
   input: BuildClaimCardsInput;
+};
+
+
+export type MutationCheckNoteClaimsArgs = {
+  input: CheckNoteClaimsInput;
 };
 
 
@@ -388,6 +411,7 @@ export type MutationUpdateNoteArgs = {
 
 export type Note = {
   __typename?: 'Note';
+  claimCards?: Maybe<Array<ClaimCard>>;
   content: Scalars['String']['output'];
   createdAt: Scalars['String']['output'];
   createdBy?: Maybe<Scalars['String']['output']>;
@@ -577,6 +601,13 @@ export type UpdateNoteInput = {
   tags?: InputMaybe<Array<Scalars['String']['input']>>;
 };
 
+export type CheckNoteClaimsMutationVariables = Exact<{
+  input: CheckNoteClaimsInput;
+}>;
+
+
+export type CheckNoteClaimsMutation = { __typename?: 'Mutation', checkNoteClaims: { __typename?: 'CheckNoteClaimsResult', success: boolean, message?: string | null, noteId: number, cards: Array<{ __typename?: 'ClaimCard', id: string, claim: string, verdict: ClaimVerdict, confidence: number, queries: Array<string>, createdAt: string, updatedAt: string, notes?: string | null, scope?: { __typename?: 'ClaimScope', population?: string | null, intervention?: string | null, comparator?: string | null, outcome?: string | null, timeframe?: string | null, setting?: string | null } | null, evidence: Array<{ __typename?: 'EvidenceItem', polarity: EvidencePolarity, excerpt?: string | null, rationale?: string | null, score?: number | null, paper: { __typename?: 'PaperCandidate', title: string, doi?: string | null, url?: string | null, year?: number | null, source: string, authors?: Array<string> | null, abstract?: string | null, journal?: string | null }, locator?: { __typename?: 'EvidenceLocator', section?: string | null, page?: number | null, url?: string | null } | null }>, provenance: { __typename?: 'ClaimProvenance', generatedBy: string, model?: string | null, sourceTools: Array<string> } }> } };
+
 export type BuildClaimCardsFromTextMutationVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -691,6 +722,85 @@ export type UpdateNoteMutationVariables = Exact<{
 export type UpdateNoteMutation = { __typename?: 'Mutation', updateNote: { __typename?: 'Note', id: number, entityId: number, entityType: string, userId: string, noteType?: string | null, content: string, createdBy?: string | null, tags?: Array<string> | null, createdAt: string, updatedAt: string } };
 
 
+export const CheckNoteClaimsDocument = gql`
+    mutation CheckNoteClaims($input: CheckNoteClaimsInput!) {
+  checkNoteClaims(input: $input) {
+    success
+    message
+    noteId
+    cards {
+      id
+      claim
+      scope {
+        population
+        intervention
+        comparator
+        outcome
+        timeframe
+        setting
+      }
+      verdict
+      confidence
+      evidence {
+        paper {
+          title
+          doi
+          url
+          year
+          source
+          authors
+          abstract
+          journal
+        }
+        polarity
+        excerpt
+        rationale
+        score
+        locator {
+          section
+          page
+          url
+        }
+      }
+      queries
+      createdAt
+      updatedAt
+      provenance {
+        generatedBy
+        model
+        sourceTools
+      }
+      notes
+    }
+  }
+}
+    `;
+export type CheckNoteClaimsMutationFn = Apollo.MutationFunction<CheckNoteClaimsMutation, CheckNoteClaimsMutationVariables>;
+
+/**
+ * __useCheckNoteClaimsMutation__
+ *
+ * To run a mutation, you first call `useCheckNoteClaimsMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCheckNoteClaimsMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [checkNoteClaimsMutation, { data, loading, error }] = useCheckNoteClaimsMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useCheckNoteClaimsMutation(baseOptions?: Apollo.MutationHookOptions<CheckNoteClaimsMutation, CheckNoteClaimsMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CheckNoteClaimsMutation, CheckNoteClaimsMutationVariables>(CheckNoteClaimsDocument, options);
+      }
+export type CheckNoteClaimsMutationHookResult = ReturnType<typeof useCheckNoteClaimsMutation>;
+export type CheckNoteClaimsMutationResult = Apollo.MutationResult<CheckNoteClaimsMutation>;
+export type CheckNoteClaimsMutationOptions = Apollo.BaseMutationOptions<CheckNoteClaimsMutation, CheckNoteClaimsMutationVariables>;
 export const BuildClaimCardsFromTextDocument = gql`
     mutation BuildClaimCardsFromText {
   buildClaimCards(

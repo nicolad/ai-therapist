@@ -35,6 +35,22 @@ type BuildClaimCardsResult {
   cards: [ClaimCard!]!
 }
 
+input CheckNoteClaimsInput {
+  evidenceTopK: Int
+  maxClaims: Int
+  maxSourcesToResolve: Int
+  noteId: Int!
+  sources: [ResearchSource!]
+  useJudge: Boolean
+}
+
+type CheckNoteClaimsResult {
+  cards: [ClaimCard!]!
+  message: String
+  noteId: Int!
+  success: Boolean!
+}
+
 type ClaimCard {
   claim: String!
   confidence: Float!
@@ -245,6 +261,7 @@ enum JobType {
 
 type Mutation {
   buildClaimCards(input: BuildClaimCardsInput!): BuildClaimCardsResult!
+  checkNoteClaims(input: CheckNoteClaimsInput!): CheckNoteClaimsResult!
   createGoal(input: CreateGoalInput!): Goal!
   createNote(input: CreateNoteInput!): Note!
   deleteClaimCard(id: ID!): Boolean!
@@ -262,6 +279,7 @@ type Mutation {
 }
 
 type Note {
+  claimCards: [ClaimCard!]
   content: String!
   createdAt: String!
   createdBy: String

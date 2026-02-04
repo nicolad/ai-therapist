@@ -1,7 +1,7 @@
 import type { QueryResolvers } from "../../types.generated";
 import { claimCardsTools } from "../../../src/mastra/tools/claim-cards.tools";
 
-export const claimCard: NonNullable<QueryResolvers["claimCard"]> = async (
+export const claimCard: NonNullable<QueryResolvers['claimCard']> = async (
   _parent,
   { id },
 ) => {
