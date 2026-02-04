@@ -445,6 +445,7 @@ export type PaperCandidate = {
 
 export type Query = {
   __typename?: 'Query';
+  allNotes: Array<Note>;
   claimCard?: Maybe<ClaimCard>;
   claimCardsForNote: Array<ClaimCard>;
   generationJob?: Maybe<GenerationJob>;
@@ -455,6 +456,11 @@ export type Query = {
   notes: Array<Note>;
   research: Array<Research>;
   therapeuticQuestions: Array<TherapeuticQuestion>;
+};
+
+
+export type QueryAllNotesArgs = {
+  userId: Scalars['String']['input'];
 };
 
 
@@ -689,6 +695,13 @@ export type GenerateLongFormTextRomanianMutationVariables = Exact<{
 
 
 export type GenerateLongFormTextRomanianMutation = { __typename?: 'Mutation', generateLongFormText: { __typename?: 'GenerateLongFormTextResult', success: boolean, message?: string | null, text?: string | null, audioUrl?: string | null, manifestUrl?: string | null, segmentUrls?: Array<string> | null } };
+
+export type GetAllNotesQueryVariables = Exact<{
+  userId: Scalars['String']['input'];
+}>;
+
+
+export type GetAllNotesQuery = { __typename?: 'Query', allNotes: Array<{ __typename?: 'Note', id: number, entityId: number, entityType: string, userId: string, noteType?: string | null, slug?: string | null, title?: string | null, content: string, createdBy?: string | null, tags?: Array<string> | null, createdAt: string, updatedAt: string, goal?: { __typename?: 'Goal', id: number, title: string, description?: string | null, status: string, priority: string, targetDate?: string | null } | null }> };
 
 export type GetGoalQueryVariables = Exact<{
   id: Scalars['Int']['input'];
@@ -1355,6 +1368,68 @@ export function useGenerateLongFormTextRomanianMutation(baseOptions?: Apollo.Mut
 export type GenerateLongFormTextRomanianMutationHookResult = ReturnType<typeof useGenerateLongFormTextRomanianMutation>;
 export type GenerateLongFormTextRomanianMutationResult = Apollo.MutationResult<GenerateLongFormTextRomanianMutation>;
 export type GenerateLongFormTextRomanianMutationOptions = Apollo.BaseMutationOptions<GenerateLongFormTextRomanianMutation, GenerateLongFormTextRomanianMutationVariables>;
+export const GetAllNotesDocument = gql`
+    query GetAllNotes($userId: String!) {
+  allNotes(userId: $userId) {
+    id
+    entityId
+    entityType
+    userId
+    noteType
+    slug
+    title
+    content
+    createdBy
+    tags
+    goal {
+      id
+      title
+      description
+      status
+      priority
+      targetDate
+    }
+    createdAt
+    updatedAt
+  }
+}
+    `;
+
+/**
+ * __useGetAllNotesQuery__
+ *
+ * To run a query within a React component, call `useGetAllNotesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetAllNotesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetAllNotesQuery({
+ *   variables: {
+ *      userId: // value for 'userId'
+ *   },
+ * });
+ */
+export function useGetAllNotesQuery(baseOptions: Apollo.QueryHookOptions<GetAllNotesQuery, GetAllNotesQueryVariables> & ({ variables: GetAllNotesQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetAllNotesQuery, GetAllNotesQueryVariables>(GetAllNotesDocument, options);
+      }
+export function useGetAllNotesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetAllNotesQuery, GetAllNotesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetAllNotesQuery, GetAllNotesQueryVariables>(GetAllNotesDocument, options);
+        }
+// @ts-ignore
+export function useGetAllNotesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetAllNotesQuery, GetAllNotesQueryVariables>): Apollo.UseSuspenseQueryResult<GetAllNotesQuery, GetAllNotesQueryVariables>;
+export function useGetAllNotesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetAllNotesQuery, GetAllNotesQueryVariables>): Apollo.UseSuspenseQueryResult<GetAllNotesQuery | undefined, GetAllNotesQueryVariables>;
+export function useGetAllNotesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetAllNotesQuery, GetAllNotesQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetAllNotesQuery, GetAllNotesQueryVariables>(GetAllNotesDocument, options);
+        }
+export type GetAllNotesQueryHookResult = ReturnType<typeof useGetAllNotesQuery>;
+export type GetAllNotesLazyQueryHookResult = ReturnType<typeof useGetAllNotesLazyQuery>;
+export type GetAllNotesSuspenseQueryHookResult = ReturnType<typeof useGetAllNotesSuspenseQuery>;
+export type GetAllNotesQueryResult = Apollo.QueryResult<GetAllNotesQuery, GetAllNotesQueryVariables>;
 export const GetGoalDocument = gql`
     query GetGoal($id: Int!, $userId: String!) {
   goal(id: $id, userId: $userId) {

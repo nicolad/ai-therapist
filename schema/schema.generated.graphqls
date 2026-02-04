@@ -311,6 +311,7 @@ type PaperCandidate {
 }
 
 type Query {
+  allNotes(userId: String!): [Note!]!
   claimCard(id: ID!): ClaimCard
   claimCardsForNote(noteId: Int!): [ClaimCard!]!
   generationJob(id: String!): GenerationJob

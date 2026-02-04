@@ -1,0 +1,24 @@
+query GetAllNotes($userId: String!) {
+  allNotes(userId: $userId) {
+    id
+    entityId
+    entityType
+    userId
+    noteType
+    slug
+    title
+    content
+    createdBy
+    tags
+    goal {
+      id
+      title
+      description
+      status
+      priority
+      targetDate
+    }
+    createdAt
+    updatedAt
+  }
+}

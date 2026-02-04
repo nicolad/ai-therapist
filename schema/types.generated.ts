@@ -443,6 +443,7 @@ export type PaperCandidate = {
 
 export type Query = {
   __typename?: 'Query';
+  allNotes: Array<Note>;
   claimCard?: Maybe<ClaimCard>;
   claimCardsForNote: Array<ClaimCard>;
   generationJob?: Maybe<GenerationJob>;
@@ -453,6 +454,11 @@ export type Query = {
   notes: Array<Note>;
   research: Array<Research>;
   therapeuticQuestions: Array<TherapeuticQuestion>;
+};
+
+
+export type QueryallNotesArgs = {
+  userId: Scalars['String']['input'];
 };
 
 
@@ -1024,6 +1030,7 @@ export type PaperCandidateResolvers<ContextType = GraphQLContext, ParentType ext
 };
 
 export type QueryResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
+  allNotes?: Resolver<Array<ResolversTypes['Note']>, ParentType, ContextType, RequireFields<QueryallNotesArgs, 'userId'>>;
   claimCard?: Resolver<Maybe<ResolversTypes['ClaimCard']>, ParentType, ContextType, RequireFields<QueryclaimCardArgs, 'id'>>;
   claimCardsForNote?: Resolver<Array<ResolversTypes['ClaimCard']>, ParentType, ContextType, RequireFields<QueryclaimCardsForNoteArgs, 'noteId'>>;
   generationJob?: Resolver<Maybe<ResolversTypes['GenerationJob']>, ParentType, ContextType, RequireFields<QuerygenerationJobArgs, 'id'>>;

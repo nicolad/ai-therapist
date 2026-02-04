@@ -24,9 +24,7 @@ const deepseek = createDeepSeek({
  * 3. This ensures claims are evidence-based and verifiable against real research
  * 4. Falls back to text-only extraction if no papers are found
  */
-export const buildClaimCards: NonNullable<
-  MutationResolvers["buildClaimCards"]
-> = async (_parent, { input }) => {
+export const buildClaimCards: NonNullable<MutationResolvers['buildClaimCards']> = async (_parent, { input }) => {
   const { text, claims, perSourceLimit, topK, useLlmJudge, sources } = input;
 
   // Map GraphQL enums to lowercase source names

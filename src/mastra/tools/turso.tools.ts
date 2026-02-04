@@ -402,6 +402,28 @@ export async function getNoteBySlug(slug: string, userId: string) {
   };
 }
 
+export async function getAllNotesForUser(userId: string) {
+  const result = await turso.execute({
+    sql: `SELECT * FROM notes WHERE user_id = ? ORDER BY created_at DESC`,
+    args: [userId],
+  });
+
+  return result.rows.map((row) => ({
+    id: row.id as number,
+    entityId: row.entity_id as number,
+    entityType: row.entity_type as string,
+    userId: row.user_id as string,
+    noteType: (row.note_type as string) || null,
+    slug: (row.slug as string) || null,
+    title: (row.title as string) || null,
+    content: row.content as string,
+    createdBy: (row.created_by as string) || null,
+    tags: row.tags ? JSON.parse(row.tags as string) : [],
+    createdAt: row.created_at as string,
+    updatedAt: row.updated_at as string,
+  }));
+}
+
 export async function listNotesForEntity(
   entityId: number,
   entityType: string,
@@ -634,6 +656,7 @@ export const tursoTools = {
   getResearchForNote,
   getNoteById,
   getNoteBySlug,
+  getAllNotesForUser,
   listNotesForEntity,
   createNote,
   updateNote,

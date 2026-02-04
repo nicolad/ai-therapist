@@ -1,6 +1,7 @@
 /* This file was automatically generated. DO NOT UPDATE MANUALLY. */
     import type   { Resolvers } from './types.generated';
-    import    { claimCard as Query_claimCard } from './resolvers/Query/claimCard';
+    import    { allNotes as Query_allNotes } from './resolvers/Query/allNotes';
+import    { claimCard as Query_claimCard } from './resolvers/Query/claimCard';
 import    { claimCardsForNote as Query_claimCardsForNote } from './resolvers/Query/claimCardsForNote';
 import    { generationJob as Query_generationJob } from './resolvers/Query/generationJob';
 import    { generationJobs as Query_generationJobs } from './resolvers/Query/generationJobs';
@@ -57,7 +58,7 @@ import    { Research } from './resolvers/Research';
 import    { TextSegment } from './resolvers/TextSegment';
 import    { TherapeuticQuestion } from './resolvers/TherapeuticQuestion';
     export const resolvers: Resolvers = {
-      Query: { claimCard: Query_claimCard,claimCardsForNote: Query_claimCardsForNote,generationJob: Query_generationJob,generationJobs: Query_generationJobs,goal: Query_goal,goals: Query_goals,note: Query_note,notes: Query_notes,research: Query_research,therapeuticQuestions: Query_therapeuticQuestions },
+      Query: { allNotes: Query_allNotes,claimCard: Query_claimCard,claimCardsForNote: Query_claimCardsForNote,generationJob: Query_generationJob,generationJobs: Query_generationJobs,goal: Query_goal,goals: Query_goals,note: Query_note,notes: Query_notes,research: Query_research,therapeuticQuestions: Query_therapeuticQuestions },
       Mutation: { buildClaimCards: Mutation_buildClaimCards,checkNoteClaims: Mutation_checkNoteClaims,createGoal: Mutation_createGoal,createNote: Mutation_createNote,deleteClaimCard: Mutation_deleteClaimCard,deleteGoal: Mutation_deleteGoal,deleteNote: Mutation_deleteNote,deleteResearch: Mutation_deleteResearch,deleteTherapeuticQuestions: Mutation_deleteTherapeuticQuestions,generateAudio: Mutation_generateAudio,generateLongFormText: Mutation_generateLongFormText,generateResearch: Mutation_generateResearch,generateTherapeuticQuestions: Mutation_generateTherapeuticQuestions,refreshClaimCard: Mutation_refreshClaimCard,updateGoal: Mutation_updateGoal,updateNote: Mutation_updateNote },
       Subscription: { audioJobStatus: Subscription_audioJobStatus,researchJobStatus: Subscription_researchJobStatus },
       AudioAsset: AudioAsset,
