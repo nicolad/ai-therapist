@@ -1,6 +1,8 @@
 import "@radix-ui/themes/styles.css";
 import type { Metadata } from "next";
+import { Container, Theme } from "@radix-ui/themes";
 import { ApolloProvider } from "./providers/ApolloProvider";
+import { Header } from "./components/Header";
 
 export const metadata: Metadata = {
   title: "ResearchThera.com",
@@ -15,7 +17,20 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body>
-        <ApolloProvider>{children}</ApolloProvider>
+        <Theme
+          appearance="dark"
+          accentColor="indigo"
+          grayColor="slate"
+          radius="medium"
+          scaling="100%"
+        >
+          <ApolloProvider>
+            <Container size="3" style={{ padding: "2rem" }}>
+              <Header />
+              {children}
+            </Container>
+          </ApolloProvider>
+        </Theme>
       </body>
     </html>
   );

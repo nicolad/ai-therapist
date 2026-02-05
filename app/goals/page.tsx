@@ -2,8 +2,6 @@
 
 import { useState } from "react";
 import {
-  Theme,
-  Container,
   Flex,
   Heading,
   Text,
@@ -17,7 +15,6 @@ import { PlusIcon } from "@radix-ui/react-icons";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { useGetGoalsQuery } from "@/app/__generated__/hooks";
-import { Header } from "../components/Header";
 
 function GoalsListContent() {
   const router = useRouter();
@@ -196,20 +193,9 @@ const DynamicGoalsListContent = dynamic(
 
 export default function GoalsPage() {
   return (
-    <Theme
-      appearance="dark"
-      accentColor="indigo"
-      grayColor="slate"
-      radius="medium"
-      scaling="100%"
-    >
-      <Container size="3" style={{ padding: "2rem" }}>
-        <Flex direction="column" gap="6">
-          <Header />
-          <Heading size="8">Goals</Heading>
-          <DynamicGoalsListContent />
-        </Flex>
-      </Container>
-    </Theme>
+    <Flex direction="column" gap="6">
+      <Heading size="8">Goals</Heading>
+      <DynamicGoalsListContent />
+    </Flex>
   );
 }

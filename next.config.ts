@@ -16,7 +16,7 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
-  output: "standalone",
+  // output: "standalone", // Only use for production builds, not dev
 };
 
 export default nextConfig;

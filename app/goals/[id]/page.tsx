@@ -4,8 +4,6 @@ import { useState } from "react";
 import * as Accordion from "@radix-ui/react-accordion";
 import { ChevronDownIcon } from "@radix-ui/react-icons";
 import {
-  Theme,
-  Container,
   Flex,
   Heading,
   Text,
@@ -316,30 +314,20 @@ export default function GoalPage() {
   const router = useRouter();
 
   return (
-    <Theme
-      appearance="dark"
-      accentColor="indigo"
-      grayColor="slate"
-      radius="medium"
-      scaling="100%"
-    >
-      <Container size="3" style={{ padding: "2rem" }}>
-        <Flex direction="column" gap="6">
-          <Flex align="center" gap="3">
-            <Button
-              variant="ghost"
-              onClick={() => router.push("/goals")}
-              style={{ cursor: "pointer" }}
-            >
-              <ArrowLeftIcon width="18" height="18" />
-              Back to Goals
-            </Button>
-            <Heading size="8">Goal Details</Heading>
-          </Flex>
+    <Flex direction="column" gap="6">
+      <Flex align="center" gap="3">
+        <Button
+          variant="ghost"
+          onClick={() => router.push("/goals")}
+          style={{ cursor: "pointer" }}
+        >
+          <ArrowLeftIcon width="18" height="18" />
+          Back to Goals
+        </Button>
+        <Heading size="8">Goal Details</Heading>
+      </Flex>
 
-          <DynamicGoalPageContent />
-        </Flex>
-      </Container>
-    </Theme>
+      <DynamicGoalPageContent />
+    </Flex>
   );
 }

@@ -11,8 +11,6 @@ import {
   MagnifyingGlassIcon,
 } from "@radix-ui/react-icons";
 import {
-  Theme,
-  Container,
   Flex,
   Heading,
   Text,
@@ -741,41 +739,35 @@ export default function NotePage() {
   const note = data?.note;
 
   return (
-    <Theme
-      appearance="dark"
-      accentColor="indigo"
-      grayColor="slate"
-      radius="medium"
-      scaling="100%"
+    <Flex
+      direction="column"
+      gap="5"
+      style={{ maxWidth: "1200px", margin: "0 auto" }}
     >
-      <Container size="4" style={{ padding: "2rem" }}>
-        <Flex direction="column" gap="5">
-          {/* Header */}
-          <Flex direction="column" gap="1">
-            <Button
-              variant="ghost"
-              onClick={() => router.push("/notes")}
-              style={{ alignSelf: "flex-start", padding: "0" }}
-            >
-              <ArrowLeftIcon width="14" height="14" />
-              <Text size="2" color="gray">
-                Back to Notes
-              </Text>
-            </Button>
-            {note?.title ? (
-              <>
-                <Heading size="7">{note.title}</Heading>
-              </>
-            ) : (
-              <Heading size="6" style={{ marginTop: "8px" }}>
-                Note details
-              </Heading>
-            )}
-          </Flex>
+      {/* Header */}
+      <Flex direction="column" gap="1">
+        <Button
+          variant="ghost"
+          onClick={() => router.push("/notes")}
+          style={{ alignSelf: "flex-start", padding: "0" }}
+        >
+          <ArrowLeftIcon width="14" height="14" />
+          <Text size="2" color="gray">
+            Back to Notes
+          </Text>
+        </Button>
+        {note?.title ? (
+          <>
+            <Heading size="7">{note.title}</Heading>
+          </>
+        ) : (
+          <Heading size="6" style={{ marginTop: "8px" }}>
+            Note details
+          </Heading>
+        )}
+      </Flex>
 
-          <DynamicNotePageContent />
-        </Flex>
-      </Container>
-    </Theme>
+      <DynamicNotePageContent />
+    </Flex>
   );
 }
