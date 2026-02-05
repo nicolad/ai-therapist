@@ -23,7 +23,7 @@ function GoalsListContent() {
   const router = useRouter();
   const userId = "demo-user";
   const [statusFilter, setStatusFilter] = useState<string | undefined>(
-    undefined
+    undefined,
   );
 
   const { data, loading, error, refetch } = useGetGoalsQuery({
@@ -191,7 +191,7 @@ function GoalsListContent() {
 
 const DynamicGoalsListContent = dynamic(
   () => Promise.resolve(GoalsListContent),
-  { ssr: false }
+  { ssr: false },
 );
 
 export default function GoalsPage() {
