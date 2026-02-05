@@ -27,8 +27,7 @@ export default function Home() {
           <Flex direction="column" gap="2">
             <Heading size="8">AI Therapist</Heading>
             <Text size="4" color="gray">
-              Evidence-based therapeutic goal management and audio content
-              generation
+              Research-backed therapy
             </Text>
           </Flex>
 

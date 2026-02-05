@@ -17,8 +17,8 @@ if (!process.env.TURSO_DATABASE_URL) {
 // Agent-level storage for conversation history
 const agentStorage = new LibSQLStore({
   id: "agent-memory-storage",
-  url: process.env.TURSO_DATABASE_URL,
-  authToken: process.env.TURSO_AUTH_TOKEN,
+  url: process.env.TURSO_DATABASE_URL.trim(),
+  authToken: process.env.TURSO_AUTH_TOKEN?.trim(),
 });
 
 const storyInstructions = `
