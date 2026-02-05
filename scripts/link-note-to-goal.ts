@@ -1,6 +1,6 @@
 /**
  * Script to create a goal and link an existing note to it
- * 
+ *
  * Usage:
  *   tsx scripts/link-note-to-goal.ts --noteSlug=<slug> --goalTitle="Goal Title"
  *   OR
@@ -11,7 +11,7 @@ import { tursoTools, getTurso } from "@/src/mastra/tools/turso.tools";
 
 async function main() {
   const args = process.argv.slice(2);
-  
+
   // Parse command line arguments
   let noteSlug: string | undefined;
   let noteId: number | undefined;
@@ -50,7 +50,7 @@ async function main() {
     // If no note specified, list all notes to help the user
     console.log("❌ No note specified. Use --noteSlug or --noteId");
     console.log("\nListing all existing notes:\n");
-    
+
     const turso = getTurso();
     const result = await turso.execute({
       sql: `SELECT id, slug, entity_type, entity_id, content, tags, created_at FROM notes WHERE user_id = ? ORDER BY created_at DESC LIMIT 20`,
@@ -114,7 +114,9 @@ async function main() {
 
   const updatedNote = await tursoTools.getNoteById(note.id, userId);
   console.log(`✅ Updated note successfully!`);
-  console.log(`   New entity: ${updatedNote?.entityType}/${updatedNote?.entityId}\n`);
+  console.log(
+    `   New entity: ${updatedNote?.entityType}/${updatedNote?.entityId}\n`,
+  );
 
   console.log("🎉 Done! The note is now linked to the goal.");
   console.log(`\nSummary:`);

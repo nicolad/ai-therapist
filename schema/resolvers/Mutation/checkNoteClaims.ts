@@ -6,7 +6,9 @@ import { createResearchSourceResolver } from "@/src/mastra/adapters/research-res
 import { createTursoStorageAdapter } from "@/src/mastra/adapters/turso-storage.adapter";
 import type { LinkedSourceRef } from "@/src/mastra/tools/generic-claim-cards.tools";
 
-export const checkNoteClaims: NonNullable<MutationResolvers['checkNoteClaims']> = async (_parent, { input }, _ctx) => {
+export const checkNoteClaims: NonNullable<
+  MutationResolvers["checkNoteClaims"]
+> = async (_parent, { input }, _ctx) => {
   const {
     noteId,
     maxClaims = 12,
