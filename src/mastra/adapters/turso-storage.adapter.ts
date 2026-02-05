@@ -10,8 +10,8 @@ import { createClient } from "@libsql/client";
 
 // Create Turso client following official Next.js pattern
 const client = createClient({
-  url: process.env.TURSO_DATABASE_URL!,
-  authToken: process.env.TURSO_AUTH_TOKEN,
+  url: process.env.TURSO_DATABASE_URL!.trim(),
+  authToken: process.env.TURSO_AUTH_TOKEN?.trim(),
 });
 
 const db = drizzle(client);
