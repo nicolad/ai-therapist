@@ -2,6 +2,11 @@
   "name": "ai-therapist",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://researchthera.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/researchthera/ai-therapist"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
