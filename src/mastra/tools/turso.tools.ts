@@ -1,34 +1,11 @@
 import { createClient } from "@libsql/client";
 import { z } from "zod";
-import path from "path";
 
-let tursoClient: ReturnType<typeof createClient> | null = null;
-
-function getTurso() {
-  if (tursoClient) {
-    return tursoClient;
-  }
-
-  if (!process.env.TURSO_DATABASE_URL) {
-    throw new Error("TURSO_DATABASE_URL environment variable is required");
-  }
-
-  const url = process.env.TURSO_DATABASE_URL.trim();
-  const authToken = process.env.TURSO_AUTH_TOKEN?.trim();
-
-  tursoClient = createClient({
-    url,
-    authToken,
-  });
-
-  return tursoClient;
-}
-
-const turso = new Proxy({} as ReturnType<typeof createClient>, {
-  get(target, prop) {
-    const instance = getTurso();
-    return (instance as any)[prop];
-  },
+// Create Turso client following official Next.js pattern
+// https://docs.turso.tech/sdk/ts/guides/nextjs
+const turso = createClient({
+  url: process.env.TURSO_DATABASE_URL!,
+  authToken: process.env.TURSO_AUTH_TOKEN,
 });
 
 /**
@@ -686,6 +663,5 @@ export const tursoTools = {
   getGenerationJob,
 };
 
-// Export getTurso for internal use only (scripts, direct DB access)
-// DO NOT export turso proxy directly to avoid serialization issues
-export { getTurso };
+// Export turso client for direct database access in scripts
+export { turso };
