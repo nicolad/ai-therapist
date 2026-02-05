@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 import * as Accordion from "@radix-ui/react-accordion";
+import * as SeparatorPrimitive from "@radix-ui/react-separator";
 import { ChevronDownIcon } from "@radix-ui/react-icons";
 import {
+  Box,
   Flex,
   Heading,
   Text,
@@ -12,6 +14,7 @@ import {
   Badge,
   Spinner,
   Link,
+  Separator,
 } from "@radix-ui/themes";
 import { ArrowLeftIcon } from "@radix-ui/react-icons";
 import { useRouter, useParams } from "next/navigation";
@@ -312,22 +315,71 @@ const DynamicGoalPageContent = dynamic(() => Promise.resolve(GoalPageContent), {
 
 export default function GoalPage() {
   const router = useRouter();
+  const params = useParams();
+  const goalId = parseInt(params.id as string);
+  const userId = "demo-user";
+
+  const { data } = useGetGoalQuery({
+    variables: { id: goalId, userId },
+    skip: !goalId,
+  });
+
+  const goal = data?.goal;
 
   return (
-    <Flex direction="column" gap="6">
-      <Flex align="center" gap="3">
-        <Button
-          variant="ghost"
-          onClick={() => router.push("/goals")}
-          style={{ cursor: "pointer" }}
+    <Flex direction="column" gap="5">
+      {/* Sticky Header */}
+      <Box
+        position="sticky"
+        top="0"
+        style={{
+          zIndex: 20,
+          background: "var(--color-panel)",
+          borderBottom: "1px solid var(--gray-a6)",
+          backdropFilter: "blur(10px)",
+          marginLeft: "calc(-1 * var(--space-5))",
+          marginRight: "calc(-1 * var(--space-5))",
+          paddingLeft: "var(--space-5)",
+          paddingRight: "var(--space-5)",
+        }}
+      >
+        <Flex
+          py="4"
+          align="center"
+          gap="4"
+          style={{ maxWidth: "1200px", margin: "0 auto", width: "100%" }}
         >
-          <ArrowLeftIcon width="18" height="18" />
-          Back to Goals
-        </Button>
-        <Heading size="8">Goal Details</Heading>
-      </Flex>
+          <Link href="/goals" underline="none">
+            <Button
+              variant="soft"
+              size="2"
+              radius="full"
+              color="gray"
+              onClick={(e) => {
+                e.preventDefault();
+                router.push("/goals");
+              }}
+            >
+              <ArrowLeftIcon />
+              <Text as="span" size="2" weight="medium">
+                Goals
+              </Text>
+            </Button>
+          </Link>
 
-      <DynamicGoalPageContent />
+          <Separator orientation="vertical" />
+
+          <Box minWidth="0" style={{ flex: 1 }}>
+            <Heading size="8" weight="bold" truncate>
+              {goal?.title || "Goal Details"}
+            </Heading>
+          </Box>
+        </Flex>
+      </Box>
+
+      <Box style={{ maxWidth: "1200px", margin: "0 auto", width: "100%" }}>
+        <DynamicGoalPageContent />
+      </Box>
     </Flex>
   );
 }

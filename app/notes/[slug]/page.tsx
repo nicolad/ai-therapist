@@ -739,35 +739,59 @@ export default function NotePage() {
   const note = data?.note;
 
   return (
-    <Flex
-      direction="column"
-      gap="5"
-      style={{ maxWidth: "1200px", margin: "0 auto" }}
-    >
-      {/* Header */}
-      <Flex direction="column" gap="1">
-        <Button
-          variant="ghost"
-          onClick={() => router.push("/notes")}
-          style={{ alignSelf: "flex-start", padding: "0" }}
+    <Flex direction="column" gap="5">
+      {/* Sticky Header */}
+      <Box
+        position="sticky"
+        top="0"
+        style={{
+          zIndex: 20,
+          background: "var(--color-panel)",
+          borderBottom: "1px solid var(--gray-a6)",
+          backdropFilter: "blur(10px)",
+          marginLeft: "calc(-1 * var(--space-5))",
+          marginRight: "calc(-1 * var(--space-5))",
+          paddingLeft: "var(--space-5)",
+          paddingRight: "var(--space-5)",
+        }}
+      >
+        <Flex
+          py="4"
+          align="center"
+          gap="4"
+          style={{ maxWidth: "1200px", margin: "0 auto", width: "100%" }}
         >
-          <ArrowLeftIcon width="14" height="14" />
-          <Text size="2" color="gray">
-            Back to Notes
-          </Text>
-        </Button>
-        {note?.title ? (
-          <>
-            <Heading size="7">{note.title}</Heading>
-          </>
-        ) : (
-          <Heading size="6" style={{ marginTop: "8px" }}>
-            Note details
-          </Heading>
-        )}
-      </Flex>
+          <Link href="/notes" underline="none">
+            <Button
+              variant="soft"
+              size="2"
+              radius="full"
+              color="gray"
+              onClick={(e) => {
+                e.preventDefault();
+                router.push("/notes");
+              }}
+            >
+              <ArrowLeftIcon />
+              <Text as="span" size="2" weight="medium">
+                Notes
+              </Text>
+            </Button>
+          </Link>
 
-      <DynamicNotePageContent />
+          <Separator.Root orientation="vertical" />
+
+          <Box minWidth="0" style={{ flex: 1 }}>
+            <Heading size="8" weight="bold" truncate>
+              {note?.title || "Note Details"}
+            </Heading>
+          </Box>
+        </Flex>
+      </Box>
+
+      <Box style={{ maxWidth: "1200px", margin: "0 auto", width: "100%" }}>
+        <DynamicNotePageContent />
+      </Box>
     </Flex>
   );
 }
