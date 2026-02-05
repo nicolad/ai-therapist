@@ -50,7 +50,7 @@ async function main() {
     // If no note specified, list all notes to help the user
     console.log("❌ No note specified. Use --noteSlug or --noteId");
     console.log("\nListing all existing notes:\n");
-    
+
     const result = await turso.execute({
       sql: `SELECT id, slug, entity_type, entity_id, content, tags, created_at FROM notes WHERE user_id = ? ORDER BY created_at DESC LIMIT 20`,
       args: [userId],
