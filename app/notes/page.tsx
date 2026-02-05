@@ -14,6 +14,7 @@ import {
 import { ArrowLeftIcon } from "@radix-ui/react-icons";
 import { useRouter } from "next/navigation";
 import { useGetAllNotesQuery } from "../__generated__/hooks";
+import { Header } from "../components/Header";
 
 export default function NotesPage() {
   const router = useRouter();
@@ -35,6 +36,7 @@ export default function NotesPage() {
     >
       <Container size="3" style={{ padding: "2rem" }}>
         <Flex direction="column" gap="6">
+          <Header />
           <Flex align="end" gap="3">
             <Button
               variant="ghost"

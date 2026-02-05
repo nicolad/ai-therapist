@@ -10,6 +10,7 @@ import {
   Button,
 } from "@radix-ui/themes";
 import { useRouter } from "next/navigation";
+import { Header } from "./components/Header";
 
 export default function Home() {
   const router = useRouter();
@@ -24,12 +25,7 @@ export default function Home() {
     >
       <Container size="3" style={{ padding: "2rem" }}>
         <Flex direction="column" gap="6">
-          <Flex direction="column" gap="2">
-            <Heading size="8">ResearchThera</Heading>
-            <Text size="4" color="gray">
-              Research-backed therapy notes and reflections powered by AI
-            </Text>
-          </Flex>
+          <Header />
 
           <Flex gap="4" wrap="wrap">
             <Card style={{ flex: "1", minWidth: "300px" }}>
