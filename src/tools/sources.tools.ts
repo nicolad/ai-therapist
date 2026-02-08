@@ -42,6 +42,7 @@ export interface PaperCandidate {
   authors?: string[];
   abstract?: string;
   journal?: string;
+  publicationType?: string; // e.g., "journal-article", "book-chapter", "proceedings-article"
 }
 
 export interface PaperDetails extends PaperCandidate {
@@ -207,7 +208,7 @@ export async function searchCrossref(
     url.searchParams.set("rows", limit.toString());
     url.searchParams.set(
       "select",
-      "DOI,title,author,published,container-title,abstract,URL",
+      "DOI,title,author,published,container-title,abstract,URL,type",
     );
 
     const response = await fetch(url.toString(), {
@@ -239,6 +240,7 @@ export async function searchCrossref(
       journal: Array.isArray(item["container-title"])
         ? item["container-title"][0]
         : item["container-title"],
+      publicationType: item.type,
     }));
   } catch (error) {
     console.error("Error searching Crossref:", error);
@@ -875,6 +877,91 @@ export function dedupeCandidates(
 }
 
 /**
+ * Filter out book chapters and other non-journal publications
+ * Crossref type values: https://api.crossref.org/types
+ */
+export function filterBookChapters(
+  candidates: PaperCandidate[],
+): PaperCandidate[] {
+  const excludedTypes = new Set([
+    "book-chapter",
+    "book-section",
+    "book-part",
+    "reference-entry", // encyclopedia entries
+    "book",
+    "monograph",
+    "edited-book",
+    "reference-book",
+  ]);
+
+  return candidates.filter((c) => {
+    // If no type available, allow through (benefit of doubt for other sources)
+    if (!c.publicationType) return true;
+    
+    // Exclude known book-related types
+    if (excludedTypes.has(c.publicationType)) {
+      console.log(`🚫 Filtered book chapter: "${c.title}" (type: ${c.publicationType})`);
+      return false;
+    }
+    
+    return true;
+  });
+}
+
+/**
+ * Hard exclusion: filter out titles with forensic/child/legal keywords
+ */
+export function filterIrrelevantTitles(
+  candidates: PaperCandidate[],
+): PaperCandidate[] {
+  const exclusionRegex = /\b(child|forensic|witness|court|legal|police|criminal|abuse|victim|testimony|investigative interview|law enforcement)\b/i;
+  
+  return candidates.filter((c) => {
+    if (exclusionRegex.test(c.title)) {
+      console.log(`🚫 Filtered irrelevant title: "${c.title}"`);
+      return false;
+    }
+    return true;
+  });
+}
+
+/**
+ * Filter candidates with insufficient abstracts
+ */
+export function filterShortAbstracts(
+  candidates: PaperCandidate[],
+  minLength: number = 200,
+): PaperCandidate[] {
+  return candidates.filter((c) => {
+    if (!c.abstract || c.abstract.length < minLength) {
+      console.log(`🚫 Filtered short/missing abstract: "${c.title}" (${c.abstract?.length || 0} chars)`);
+      return false;
+    }
+    return true;
+  });
+}
+
+/**
+ * Apply all quality filters in pipeline
+ */
+export function applyQualityFilters(
+  candidates: PaperCandidate[],
+  opts?: { minAbstractLength?: number; skipAbstractCheck?: boolean },
+): PaperCandidate[] {
+  const minAbstract = opts?.minAbstractLength ?? 200;
+  
+  let filtered = filterBookChapters(candidates);
+  filtered = filterIrrelevantTitles(filtered);
+  
+  if (!opts?.skipAbstractCheck) {
+    filtered = filterShortAbstracts(filtered, minAbstract);
+  }
+  
+  console.log(`📊 Quality filter: ${candidates.length} → ${filtered.length} candidates`);
+  return filtered;
+}
+
+/**
  * Resolve paper metadata by title (optionally with year)
  * This is the main function for your 182-paper backfill use case
  */
@@ -980,6 +1067,12 @@ export const sourceTools = {
   dedupeCandidates,
   resolvePaperByTitle,
   pickBestCandidate,
+
+  // Quality filters
+  filterBookChapters,
+  filterIrrelevantTitles,
+  filterShortAbstracts,
+  applyQualityFilters,
 
   // Utilities
   mapLimit,

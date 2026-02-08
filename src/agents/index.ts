@@ -4,11 +4,20 @@ import { Agent } from "@mastra/core/agent";
 import { CompositeVoice } from "@mastra/core/voice";
 import { Memory } from "@mastra/memory";
 import { LibSQLStore } from "@mastra/libsql";
+import { buildTracingOptions } from "@mastra/observability";
+import { withLangfusePrompt } from "@mastra/langfuse";
+import { Langfuse } from "langfuse";
 
 import { createElevenLabsVoice } from "../voice";
 
 const deepseek = createDeepSeek({
   apiKey: process.env.DEEPSEEK_API_KEY,
+});
+
+// Initialize Langfuse for prompt management and observability
+const langfuse = new Langfuse({
+  publicKey: process.env.LANGFUSE_PUBLIC_KEY!,
+  secretKey: process.env.LANGFUSE_SECRET_KEY!,
 });
 
 if (!process.env.TURSO_DATABASE_URL) {
@@ -104,6 +113,34 @@ export const storyTellerAgent = new Agent({
   }),
 });
 
+/**
+ * Create a story teller agent with Langfuse prompt management
+ * This allows dynamic prompt updates through Langfuse without code changes
+ * @param promptName - The name of the prompt in Langfuse (e.g., "story-teller-agent")
+ */
+export async function createStoryTellerAgentWithLangfuse(
+  promptName: string = "story-teller-agent",
+) {
+  const prompt = await langfuse.getPrompt(promptName);
+  const tracingOptions = buildTracingOptions(withLangfusePrompt(prompt));
+
+  const agent = new Agent({
+    id: "story-teller-agent-langfuse",
+    name: "Story Teller Agent (Langfuse)",
+    instructions: prompt.prompt,
+    model: deepseek("deepseek-chat"),
+    voice: createElevenLabsVoice("george"),
+    memory: new Memory({
+      storage: agentStorage,
+    }),
+  });
+
+  // Store tracing options for use during generation
+  (agent as any)._langfuseTracingOptions = tracingOptions;
+
+  return agent;
+}
+
 // Therapeutic Agent Instructions
 const therapeuticInstructions = `
 ## Overview
@@ -178,3 +215,34 @@ export const therapeuticAgent = new Agent({
     storage: agentStorage,
   }),
 });
+
+/**
+ * Create a therapeutic agent with Langfuse prompt management
+ * This allows dynamic prompt updates through Langfuse without code changes
+ * @param promptName - The name of the prompt in Langfuse (e.g., "therapeutic-agent")
+ */
+export async function createTherapeuticAgentWithLangfuse(
+  promptName: string = "therapeutic-agent",
+) {
+  const prompt = await langfuse.getPrompt(promptName);
+  const tracingOptions = buildTracingOptions(withLangfusePrompt(prompt));
+
+  const agent = new Agent({
+    id: "therapeutic-agent-langfuse",
+    name: "Therapeutic Audio Agent (Langfuse)",
+    instructions: prompt.prompt,
+    model: deepseek("deepseek-chat"),
+    voice: createElevenLabsVoice("george"),
+    memory: new Memory({
+      storage: agentStorage,
+    }),
+  });
+
+  // Store tracing options for use during generation
+  (agent as any)._langfuseTracingOptions = tracingOptions;
+
+  return agent;
+}
+
+// Export Langfuse instance for use in other parts of the application
+export { langfuse };
