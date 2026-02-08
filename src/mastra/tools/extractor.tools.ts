@@ -78,16 +78,20 @@ Journal: ${paper.journal || "Unknown"}
 DOI: ${paper.doi || "None"}
 Abstract: ${paper.abstract}
 
+CRITICAL: This should be THERAPEUTIC/PSYCHOLOGICAL research for clinical/counseling applications.
+
 Extract:
 1. Key findings (3-5) that are DIRECTLY relevant to the therapeutic goal
-2. Specific therapeutic techniques mentioned
+2. Specific therapeutic techniques mentioned (e.g., CBT, exposure therapy, mindfulness)
 3. Evidence level (meta-analysis > RCT > cohort > case-study > review)
-4. Relevance score (0-1) based on how well it addresses the goal
+4. Relevance score (0-1) based on how well it addresses the THERAPEUTIC goal
 
-IMPORTANT:
+STRICT FILTERING:
+- Score 0.1 or lower if paper is about: forensic interviews, legal proceedings, police work, medical diagnostics
+- Score 0.1 or lower if NOT about psychological therapy or counseling
+- Score 0.8+ only if directly about therapeutic interventions for the goal type
 - Only extract findings EXPLICITLY stated in the abstract
 - Do not infer or extrapolate beyond what is written
-- Be strict about relevance - irrelevant papers get low scores
 - Rate your extraction confidence honestly`,
   });
 
@@ -153,19 +157,32 @@ export async function planResearchQuery(params: {
       inclusion: z.array(z.string()).describe("Inclusion criteria"),
       exclusion: z.array(z.string()).describe("Exclusion criteria"),
     }),
-    prompt: `Plan a research query for this therapeutic goal.
+    prompt: `Plan a research query for this THERAPEUTIC/PSYCHOLOGICAL goal.
 
 Goal: ${title}
 Description: ${description}
 Notes: ${notes.join("\n- ")}
 
-Generate:
-1. Therapeutic goal type classification
-2. Search keywords for academic databases
-3. Inclusion criteria (what papers to keep)
-4. Exclusion criteria (what to filter out)
+Generate search keywords and criteria for finding CLINICAL/THERAPEUTIC research papers.
 
-Be specific and evidence-based focused.`,
+CRITICAL CONTEXT GUIDELINES:
+- This is about MENTAL HEALTH, THERAPY, or PERSONAL DEVELOPMENT
+- Focus on psychological, counseling, or behavioral research
+- Add context words like: therapy, psychological, mental health, counseling, behavioral, clinical
+- For workplace/career topics: add "workplace psychology", "occupational therapy", "career counseling"
+- For social topics: add "social anxiety", "interpersonal therapy", "communication skills therapy"
+
+EXCLUSION EXAMPLES:
+- If goal mentions "interviews": EXCLUDE forensic, legal, police, child, medical interviews
+- If goal mentions "relationships": EXCLUDE studies on animals, non-human subjects
+- If goal mentions technical topics: focus on the PSYCHOLOGICAL aspects only
+
+1. Therapeutic goal type: Classify as specific therapy type (e.g., "social anxiety therapy", "workplace confidence counseling")
+2. Search keywords: Include therapeutic context + specific topic (e.g., "job interview anxiety CBT", "workplace assertiveness therapy")
+3. Inclusion criteria: Must be about therapeutic/psychological interventions for humans
+4. Exclusion criteria: Filter out forensic, legal, medical, non-therapeutic contexts
+
+Be specific and ALWAYS include therapeutic/psychological context in keywords.`,
   });
 
   return object;

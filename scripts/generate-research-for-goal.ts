@@ -7,8 +7,12 @@
  */
 
 import "dotenv/config";
+
+// Suppress AI SDK warnings
+(globalThis as any).AI_SDK_LOG_WARNINGS = false;
+
 import { tursoTools } from "@/src/db";
-import { generateTherapyResearchWorkflow } from "@/src/mastra/workflows/generateTherapyResearch.workflow";
+import { generateTherapyResearchWorkflow } from "@/src/workflows/generateTherapyResearch.workflow";
 
 async function main() {
   const userId = "demo-user";

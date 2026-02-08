@@ -1,4 +1,4 @@
-import type { GoalStoryResolvers } from './../types.generated';
+import type { GoalStoryResolvers } from "./../types.generated";
 import { tursoTools } from "@/src/db";
 
 export const GoalStory: GoalStoryResolvers = {

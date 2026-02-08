@@ -3,7 +3,12 @@ import { Mastra } from "@mastra/core/mastra";
 import { LibSQLStore, LibSQLVector } from "@mastra/libsql";
 
 import { storyTellerAgent, therapeuticAgent } from "./agents";
-import { generateTherapyResearchWorkflow } from "./workflows";
+import { generateTherapyResearchWorkflow } from "@/src/workflows";
+
+// Suppress AI SDK warnings (DeepSeek JSON schema compatibility mode)
+if (typeof globalThis !== "undefined") {
+  (globalThis as any).AI_SDK_LOG_WARNINGS = false;
+}
 
 if (!process.env.TURSO_DATABASE_URL) {
   throw new Error("TURSO_DATABASE_URL environment variable is required");

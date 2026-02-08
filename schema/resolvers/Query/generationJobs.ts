@@ -1,7 +1,9 @@
 import type { QueryResolvers } from "./../../types.generated";
 import { turso } from "@/src/db";
 
-export const generationJobs: NonNullable<QueryResolvers['generationJobs']> = async (_parent, args, _ctx) => {
+export const generationJobs: NonNullable<
+  QueryResolvers["generationJobs"]
+> = async (_parent, args, _ctx) => {
   let sql = `SELECT * FROM generation_jobs`;
   const queryArgs: any[] = [];
   const conditions: string[] = [];
@@ -17,7 +19,7 @@ export const generationJobs: NonNullable<QueryResolvers['generationJobs']> = asy
   }
 
   if (conditions.length > 0) {
-    sql += ` WHERE ${conditions.join(' AND ')}`;
+    sql += ` WHERE ${conditions.join(" AND ")}`;
   }
 
   sql += ` ORDER BY created_at DESC`;

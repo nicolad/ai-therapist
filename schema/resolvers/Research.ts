@@ -24,8 +24,10 @@ export const Research: ResearchResolvers = {
       status: row.status as string,
       priority: row.priority as string,
       therapeuticText: (row.therapeutic_text as string) || null,
-      therapeuticTextLanguage: (row.therapeutic_text_language as string) || null,
-      therapeuticTextGeneratedAt: (row.therapeutic_text_generated_at as string) || null,
+      therapeuticTextLanguage:
+        (row.therapeutic_text_language as string) || null,
+      therapeuticTextGeneratedAt:
+        (row.therapeutic_text_generated_at as string) || null,
       createdAt: row.created_at as string,
       updatedAt: row.updated_at as string,
       notes: [],
@@ -35,4 +37,3 @@ export const Research: ResearchResolvers = {
     } as any;
   },
 };
-
