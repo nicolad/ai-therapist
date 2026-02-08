@@ -1,6 +1,6 @@
 import type { MutationResolvers } from "../../types.generated";
-import { claimCardsTools } from "../../../src/mastra/tools/claim-cards.tools";
-import { sourceTools } from "../../../src/mastra/tools/sources.tools";
+import { claimCardsTools } from "../../../src/tools/claim-cards.tools";
+import { sourceTools } from "../../../src/tools/sources.tools";
 import { createDeepSeek } from "@ai-sdk/deepseek";
 import { generateObject } from "ai";
 import { z } from "zod";

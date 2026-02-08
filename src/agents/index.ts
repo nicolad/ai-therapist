@@ -5,7 +5,7 @@ import { CompositeVoice } from "@mastra/core/voice";
 import { Memory } from "@mastra/memory";
 import { LibSQLStore } from "@mastra/libsql";
 
-import { createElevenLabsVoice } from "../../voice";
+import { createElevenLabsVoice } from "../voice";
 
 const deepseek = createDeepSeek({
   apiKey: process.env.DEEPSEEK_API_KEY,

@@ -1,7 +1,7 @@
 import { createWorkflow, createStep } from "@mastra/core/workflows";
 import { z } from "zod";
 import { createDeepSeek } from "@ai-sdk/deepseek";
-import { createResearchGroundingScorer } from "@/src/mastra/scorers";
+import { createResearchGroundingScorer } from "@/src/scorers";
 import {
   createFaithfulnessScorer,
   createHallucinationScorer,
@@ -9,9 +9,9 @@ import {
   createContextRelevanceScorerLLM,
 } from "@mastra/evals/scorers/prebuilt";
 import { tursoTools } from "@/src/db";
-import { ragTools } from "@/src/mastra/tools/rag.tools";
-import { sourceTools } from "@/src/mastra/tools/sources.tools";
-import { extractorTools } from "@/src/mastra/tools/extractor.tools";
+import { ragTools } from "@/src/tools/rag.tools";
+import { sourceTools } from "@/src/tools/sources.tools";
+import { extractorTools } from "@/src/tools/extractor.tools";
 
 const deepseek = createDeepSeek({
   apiKey: process.env.DEEPSEEK_API_KEY,

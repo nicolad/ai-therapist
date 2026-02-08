@@ -1,6 +1,6 @@
 import type { NoteResolvers } from "./../types.generated";
 import { tursoTools } from "@/src/db";
-import { createTursoStorageAdapter } from "@/src/mastra/adapters/turso-storage.adapter";
+import { createTursoStorageAdapter } from "@/src/adapters/turso-storage.adapter";
 
 export const Note: NoteResolvers = {
   linkedResearch: async (parent, _args, _ctx) => {

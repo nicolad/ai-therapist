@@ -18,13 +18,13 @@ if (typeof globalThis !== "undefined") {
   (globalThis as any).AI_SDK_LOG_WARNINGS = false;
 }
 
-import { claimCardsTools } from "../src/mastra/tools/claim-cards.tools";
+import { claimCardsTools } from "../src/tools/claim-cards.tools";
 import { createClient } from "@libsql/client";
-import { sourceTools } from "../src/mastra/tools/sources.tools";
+import { sourceTools } from "../src/tools/sources.tools";
 import { createDeepSeek } from "@ai-sdk/deepseek";
 import { generateObject } from "ai";
 import { z } from "zod";
-import type { PaperDetails } from "../src/mastra/tools/sources.tools";
+import type { PaperDetails } from "../src/tools/sources.tools";
 
 // Create turso client directly
 const turso = createClient({

@@ -28,8 +28,8 @@ import * as dotenv from "dotenv";
 import { createDeepSeek } from "@ai-sdk/deepseek";
 import { generateObject } from "ai";
 import { z } from "zod";
-import { claimCardsTools } from "../src/mastra/tools/claim-cards.tools";
-import type { PaperDetails } from "../src/mastra/tools/sources.tools";
+import { claimCardsTools } from "../src/tools/claim-cards.tools";
+import type { PaperDetails } from "../src/tools/sources.tools";
 import { createHash } from "node:crypto";
 import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { existsSync } from "node:fs";
@@ -53,7 +53,8 @@ const CFG = {
   CACHE_DIR: "cache/http",
   NOTE_ID: 1, // ← Configure this
   NOTE_SLUG: "state-of-remote-work",
-  TOPIC: "State of remote work research and trends in the post-COVID labor market",
+  TOPIC:
+    "State of remote work research and trends in the post-COVID labor market",
 };
 
 const USER_AGENT = `ai-therapist/1.0 (${CFG.CONTACT_EMAIL ? `mailto:${CFG.CONTACT_EMAIL}` : "research@example.com"})`;
@@ -125,7 +126,10 @@ function normalizeDoi(doiOrUrl: string): string {
 // HTTP CACHING
 // ============================================================================
 
-async function cachedGet(url: string, headers: Record<string, string>): Promise<string> {
+async function cachedGet(
+  url: string,
+  headers: Record<string, string>,
+): Promise<string> {
   await ensureDir(CFG.CACHE_DIR);
   const cacheKey = sha1(url);
   const cachePath = `${CFG.CACHE_DIR}/${cacheKey}.txt`;
@@ -157,15 +161,21 @@ async function cachedGet(url: string, headers: Record<string, string>): Promise<
       return body;
     } catch (e: any) {
       lastErr = e;
-      const backoff = 400 * Math.pow(2, attempt) + Math.floor(Math.random() * 200);
+      const backoff =
+        400 * Math.pow(2, attempt) + Math.floor(Math.random() * 200);
       await sleep(backoff);
     }
   }
 
-  throw new Error(`Failed after retries: ${String(lastErr?.message || lastErr)}`);
+  throw new Error(
+    `Failed after retries: ${String(lastErr?.message || lastErr)}`,
+  );
 }
 
-async function fetchJson<T>(url: string, headers: Record<string, string>): Promise<T> {
+async function fetchJson<T>(
+  url: string,
+  headers: Record<string, string>,
+): Promise<T> {
   const text = await cachedGet(url, { ...headers, Accept: "application/json" });
   return JSON.parse(text) as T;
 }
@@ -175,7 +185,9 @@ async function fetchJson<T>(url: string, headers: Record<string, string>): Promi
 // ============================================================================
 
 async function crossrefByDoi(doi: string): Promise<any | null> {
-  const url = new URL(`https://api.crossref.org/works/${encodeURIComponent(doi)}`);
+  const url = new URL(
+    `https://api.crossref.org/works/${encodeURIComponent(doi)}`,
+  );
   if (CFG.CONTACT_EMAIL) url.searchParams.set("mailto", CFG.CONTACT_EMAIL);
 
   try {
@@ -186,18 +198,26 @@ async function crossrefByDoi(doi: string): Promise<any | null> {
   }
 }
 
-async function crossrefSearchByTitle(title: string, year: number | null): Promise<any[]> {
+async function crossrefSearchByTitle(
+  title: string,
+  year: number | null,
+): Promise<any[]> {
   const url = new URL("https://api.crossref.org/works");
   url.searchParams.set("query.bibliographic", title);
   url.searchParams.set("rows", "5");
   if (year) {
-    url.searchParams.set("filter", `from-pub-date:${year - 1}-01-01,until-pub-date:${year + 1}-12-31`);
+    url.searchParams.set(
+      "filter",
+      `from-pub-date:${year - 1}-01-01,until-pub-date:${year + 1}-12-31`,
+    );
   }
   if (CFG.CONTACT_EMAIL) url.searchParams.set("mailto", CFG.CONTACT_EMAIL);
 
   try {
     await sleep(600);
-    const json = await fetchJson<any>(url.toString(), { "User-Agent": USER_AGENT });
+    const json = await fetchJson<any>(url.toString(), {
+      "User-Agent": USER_AGENT,
+    });
     return json?.message?.items || [];
   } catch {
     return [];
@@ -220,7 +240,12 @@ function crossrefToAuthors(msg: any): string[] | null {
 function crossrefToAbstract(msg: any): string | null {
   const abs = msg?.abstract;
   if (typeof abs !== "string") return null;
-  return abs.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim() || null;
+  return (
+    abs
+      .replace(/<[^>]+>/g, " ")
+      .replace(/\s+/g, " ")
+      .trim() || null
+  );
 }
 
 // ============================================================================
@@ -232,7 +257,8 @@ function openAlexHeaders(): Record<string, string> {
     "User-Agent": USER_AGENT,
     Accept: "application/json",
   };
-  if (CFG.OPENALEX_API_KEY) h["Authorization"] = `Bearer ${CFG.OPENALEX_API_KEY}`;
+  if (CFG.OPENALEX_API_KEY)
+    h["Authorization"] = `Bearer ${CFG.OPENALEX_API_KEY}`;
   if (CFG.CONTACT_EMAIL) h["X-Contact"] = CFG.CONTACT_EMAIL;
   return h;
 }
@@ -248,7 +274,10 @@ async function openalexByDoi(doi: string): Promise<any | null> {
   }
 }
 
-async function openalexSearch(title: string, year: number | null): Promise<any[]> {
+async function openalexSearch(
+  title: string,
+  year: number | null,
+): Promise<any[]> {
   const url = new URL("https://api.openalex.org/works");
   url.searchParams.set("search", title);
   url.searchParams.set("per-page", "5");
@@ -263,7 +292,9 @@ async function openalexSearch(title: string, year: number | null): Promise<any[]
   }
 }
 
-function openalexAbstractToText(inv: Record<string, number[]> | null | undefined): string | null {
+function openalexAbstractToText(
+  inv: Record<string, number[]> | null | undefined,
+): string | null {
   if (!inv) return null;
   const pairs: Array<{ pos: number; word: string }> = [];
   for (const [word, positions] of Object.entries(inv)) {
@@ -271,12 +302,18 @@ function openalexAbstractToText(inv: Record<string, number[]> | null | undefined
   }
   if (pairs.length === 0) return null;
   pairs.sort((a, b) => a.pos - b.pos);
-  return pairs.map((p) => p.word).join(" ").replace(/\s+/g, " ").trim();
+  return pairs
+    .map((p) => p.word)
+    .join(" ")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 function openalexToAuthors(work: any): string[] | null {
   if (!Array.isArray(work?.authorships)) return null;
-  const names = work.authorships.map((a: any) => a?.author?.display_name).filter((x: any): x is string => Boolean(x));
+  const names = work.authorships
+    .map((a: any) => a?.author?.display_name)
+    .filter((x: any): x is string => Boolean(x));
   return names.length ? names : null;
 }
 
@@ -322,7 +359,9 @@ async function s2Search(title: string, year: number | null): Promise<any[]> {
 
 function s2ToAuthors(paper: any): string[] | null {
   if (!Array.isArray(paper?.authors)) return null;
-  const names = paper.authors.map((a: any) => a?.name).filter((x: any): x is string => Boolean(x));
+  const names = paper.authors
+    .map((a: any) => a?.name)
+    .filter((x: any): x is string => Boolean(x));
   return names.length ? names : null;
 }
 
@@ -354,8 +393,14 @@ function pickBestByTitle<T extends { title?: string; display_name?: string }>(
     if (!candTitle) continue;
 
     const titleScore = titleSimilarity(String(candTitle), targetTitle);
-    const candYear = (c as any).year || (c as any).publication_year || (c as any).issued?.["date-parts"]?.[0]?.[0];
-    const yearPenalty = targetYear && candYear ? Math.min(0.15, Math.abs(targetYear - candYear) * 0.05) : 0;
+    const candYear =
+      (c as any).year ||
+      (c as any).publication_year ||
+      (c as any).issued?.["date-parts"]?.[0]?.[0];
+    const yearPenalty =
+      targetYear && candYear
+        ? Math.min(0.15, Math.abs(targetYear - candYear) * 0.05)
+        : 0;
     const finalScore = titleScore - yearPenalty;
 
     if (!best || finalScore > best.score) {
@@ -385,7 +430,10 @@ async function enrichPaper(
   existingAbstract?: string,
 ): Promise<EnrichmentResult> {
   let doi = existingDoi || null;
-  let abstract = existingAbstract && existingAbstract !== "Abstract not available" ? existingAbstract : null;
+  let abstract =
+    existingAbstract && existingAbstract !== "Abstract not available"
+      ? existingAbstract
+      : null;
   let authors: string[] | null = null;
   let source = "none";
 
@@ -450,7 +498,9 @@ async function enrichPaper(
     const oaBest = pickBestByTitle(oaResults, title, year);
     if (oaBest) {
       if (!doi && (oaBest as any).doi) {
-        const candidateDoi = normalizeDoi(String((oaBest as any).doi).replace(/^https?:\/\/doi\.org\//i, ""));
+        const candidateDoi = normalizeDoi(
+          String((oaBest as any).doi).replace(/^https?:\/\/doi\.org\//i, ""),
+        );
         const validated = await validateDoi(candidateDoi);
         if (validated) {
           doi = validated;
@@ -458,7 +508,9 @@ async function enrichPaper(
         }
       }
       if (!abstract) {
-        const oaAbs = openalexAbstractToText((oaBest as any).abstract_inverted_index);
+        const oaAbs = openalexAbstractToText(
+          (oaBest as any).abstract_inverted_index,
+        );
         if (oaAbs) {
           abstract = oaAbs;
           source = "openalex";
@@ -475,7 +527,11 @@ async function enrichPaper(
     if (doi) {
       const s2 = await s2ByDoi(doi);
       if (s2) {
-        if (!abstract && typeof s2.abstract === "string" && s2.abstract.trim()) {
+        if (
+          !abstract &&
+          typeof s2.abstract === "string" &&
+          s2.abstract.trim()
+        ) {
           abstract = s2.abstract.trim();
           source = "semanticscholar";
         }
@@ -539,10 +595,19 @@ async function extractClaimsFromPapersBatched(
 ): Promise<string[]> {
   const batchSize = Math.max(8, Math.min(16, opts?.batchSize ?? 12));
   const maxClaimsTotal = Math.max(8, Math.min(60, opts?.maxClaimsTotal ?? 20));
-  const minClaimsPerBatch = Math.max(4, Math.min(10, opts?.minClaimsPerBatch ?? 6));
-  const maxClaimsPerBatch = Math.max(minClaimsPerBatch, Math.min(14, opts?.maxClaimsPerBatch ?? 10));
+  const minClaimsPerBatch = Math.max(
+    4,
+    Math.min(10, opts?.minClaimsPerBatch ?? 6),
+  );
+  const maxClaimsPerBatch = Math.max(
+    minClaimsPerBatch,
+    Math.min(14, opts?.maxClaimsPerBatch ?? 10),
+  );
   const maxBatches = Math.max(1, Math.min(12, opts?.maxBatches ?? 6));
-  const abstractCharLimit = Math.max(300, Math.min(1400, opts?.abstractCharLimit ?? 900));
+  const abstractCharLimit = Math.max(
+    300,
+    Math.min(1400, opts?.abstractCharLimit ?? 900),
+  );
 
   const normalizeKey = (s: string) =>
     s
@@ -559,10 +624,17 @@ async function extractClaimsFromPapersBatched(
   };
 
   const withAbstracts = papers
-    .filter((p) => p.abstract && p.abstract !== "Abstract not available" && p.abstract.length > 80)
+    .filter(
+      (p) =>
+        p.abstract &&
+        p.abstract !== "Abstract not available" &&
+        p.abstract.length > 80,
+    )
     .sort((a, b) => (b.year ?? 0) - (a.year ?? 0));
 
-  console.log(`🧾 Papers with usable abstracts: ${withAbstracts.length}/${papers.length}`);
+  console.log(
+    `🧾 Papers with usable abstracts: ${withAbstracts.length}/${papers.length}`,
+  );
 
   if (withAbstracts.length === 0) {
     console.warn(`   ⚠️  No papers have abstracts - cannot extract claims`);
@@ -570,11 +642,17 @@ async function extractClaimsFromPapersBatched(
   }
 
   const batches: PaperDetails[][] = [];
-  for (let i = 0; i < withAbstracts.length && batches.length < maxBatches; i += batchSize) {
+  for (
+    let i = 0;
+    i < withAbstracts.length && batches.length < maxBatches;
+    i += batchSize
+  ) {
     batches.push(withAbstracts.slice(i, i + batchSize));
   }
 
-  console.log(`🧩 Claim extraction batches: ${batches.length} (batchSize=${batchSize})`);
+  console.log(
+    `🧩 Claim extraction batches: ${batches.length} (batchSize=${batchSize})`,
+  );
 
   const claimsSchema = z.object({
     claims: z.array(z.string()).min(minClaimsPerBatch).max(maxClaimsPerBatch),
@@ -670,14 +748,18 @@ async function mapLimit<T, R>(
 async function main() {
   if (!CFG.CONTACT_EMAIL) {
     console.error("❌ Error: CONTACT_EMAIL environment variable is required");
-    console.error("Usage: CONTACT_EMAIL=research@example.com pnpm tsx scripts/build-claims-with-enrichment.ts");
+    console.error(
+      "Usage: CONTACT_EMAIL=research@example.com pnpm tsx scripts/build-claims-with-enrichment.ts",
+    );
     process.exit(1);
   }
 
   console.log(`🚀 Unified Claim Building Pipeline with Advanced Enrichment\n`);
   console.log(`📝 Note: ${CFG.NOTE_SLUG} (ID: ${CFG.NOTE_ID})`);
   console.log(`🎯 Topic: ${CFG.TOPIC}`);
-  console.log(`🔧 APIs: Crossref, OpenAlex${CFG.OPENALEX_API_KEY ? " (with key)" : ""}, ${CFG.S2_API_KEY ? "Semantic Scholar (with key)" : "Semantic Scholar (no key)"}`);
+  console.log(
+    `🔧 APIs: Crossref, OpenAlex${CFG.OPENALEX_API_KEY ? " (with key)" : ""}, ${CFG.S2_API_KEY ? "Semantic Scholar (with key)" : "Semantic Scholar (no key)"}`,
+  );
   console.log(`💾 Cache: ${CFG.CACHE_DIR}\n`);
 
   try {
@@ -716,67 +798,100 @@ async function main() {
 
     if (dbPapers.length === 0) {
       console.error(`❌ No linked research found for note ${CFG.NOTE_ID}`);
-      console.error(`   Please link research papers first using insert-all-research-papers.ts`);
+      console.error(
+        `   Please link research papers first using insert-all-research-papers.ts`,
+      );
       process.exit(1);
     }
 
     // Step 2: Enrich papers with advanced multi-API enrichment
     console.log(`🔬 Enriching papers with multi-API metadata...`);
-    
+
     const needEnrichment = dbPapers.filter(
-      (p) => !p.abstract || p.abstract === "Abstract not available" || p.abstract.length < 80
+      (p) =>
+        !p.abstract ||
+        p.abstract === "Abstract not available" ||
+        p.abstract.length < 80,
     );
 
-    console.log(`   Papers needing enrichment: ${needEnrichment.length}/${dbPapers.length}`);
+    console.log(
+      `   Papers needing enrichment: ${needEnrichment.length}/${dbPapers.length}`,
+    );
 
     let enrichedCount = 0;
-    const enrichedPapers: PaperDetails[] = await mapLimit(dbPapers, 3, async (paper, idx) => {
-      const needsEnrich = !paper.abstract || paper.abstract === "Abstract not available" || paper.abstract.length < 80;
+    const enrichedPapers: PaperDetails[] = await mapLimit(
+      dbPapers,
+      3,
+      async (paper, idx) => {
+        const needsEnrich =
+          !paper.abstract ||
+          paper.abstract === "Abstract not available" ||
+          paper.abstract.length < 80;
 
-      if (needsEnrich) {
-        const result = await enrichPaper(paper.title, paper.year || null, paper.doi, paper.abstract);
-        enrichedCount++;
+        if (needsEnrich) {
+          const result = await enrichPaper(
+            paper.title,
+            paper.year || null,
+            paper.doi,
+            paper.abstract,
+          );
+          enrichedCount++;
 
-        if (enrichedCount <= 5 || enrichedCount % 20 === 0) {
-          console.log(`   [${enrichedCount}/${needEnrichment.length}] ${paper.title.substring(0, 60)}... (${result.source}, confidence: ${(result.confidence * 100).toFixed(0)}%)`);
+          if (enrichedCount <= 5 || enrichedCount % 20 === 0) {
+            console.log(
+              `   [${enrichedCount}/${needEnrichment.length}] ${paper.title.substring(0, 60)}... (${result.source}, confidence: ${(result.confidence * 100).toFixed(0)}%)`,
+            );
+          }
+
+          return {
+            ...paper,
+            doi: result.doi || paper.doi,
+            abstract:
+              result.abstract || paper.abstract || "Abstract not available",
+            authors: result.authors || paper.authors,
+            source: "linked" as const,
+          } as PaperDetails;
+        } else {
+          return {
+            ...paper,
+            source: "linked" as const,
+          } as PaperDetails;
         }
-
-        return {
-          ...paper,
-          doi: result.doi || paper.doi,
-          abstract: result.abstract || paper.abstract || "Abstract not available",
-          authors: result.authors || paper.authors,
-          source: "linked" as const,
-        } as PaperDetails;
-      } else {
-        return {
-          ...paper,
-          source: "linked" as const,
-        } as PaperDetails;
-      }
-    });
+      },
+    );
 
     console.log(`   ✓ Enrichment complete\n`);
 
     // Summary of enrichment results
     const withGoodAbstracts = enrichedPapers.filter(
-      (p) => p.abstract && p.abstract !== "Abstract not available" && p.abstract.length > 80
+      (p) =>
+        p.abstract &&
+        p.abstract !== "Abstract not available" &&
+        p.abstract.length > 80,
     );
-    console.log(`📊 Abstract coverage: ${withGoodAbstracts.length}/${enrichedPapers.length} (${((withGoodAbstracts.length / enrichedPapers.length) * 100).toFixed(1)}%)\n`);
+    console.log(
+      `📊 Abstract coverage: ${withGoodAbstracts.length}/${enrichedPapers.length} (${((withGoodAbstracts.length / enrichedPapers.length) * 100).toFixed(1)}%)\n`,
+    );
 
     // Step 3: Extract claims from enriched abstracts
     console.log(`🤖 Extracting claims from enriched corpus...`);
-    const extractedClaims = await extractClaimsFromPapersBatched(CFG.TOPIC, enrichedPapers, {
-      batchSize: 12,
-      maxClaimsTotal: 20,
-      minClaimsPerBatch: 6,
-      maxClaimsPerBatch: 10,
-      maxBatches: 6,
-      abstractCharLimit: 900,
-    });
+    const extractedClaims = await extractClaimsFromPapersBatched(
+      CFG.TOPIC,
+      enrichedPapers,
+      {
+        batchSize: 12,
+        maxClaimsTotal: 20,
+        minClaimsPerBatch: 6,
+        maxClaimsPerBatch: 10,
+        maxBatches: 6,
+        abstractCharLimit: 900,
+      },
+    );
 
     if (extractedClaims.length === 0) {
-      console.error(`❌ Failed to extract any claims. Check abstract coverage.`);
+      console.error(
+        `❌ Failed to extract any claims. Check abstract coverage.`,
+      );
       process.exit(1);
     }
 
@@ -784,22 +899,25 @@ async function main() {
 
     // Step 4: Build claim cards
     console.log(`🔨 Building claim cards...`);
-    const cards = await claimCardsTools.buildClaimCardsFromClaims(extractedClaims, {
-      topK: 12,
-      useLlmJudge: true,
-      paperPool: enrichedPapers.map((p) => ({
-        title: p.title,
-        year: p.year,
-        doi: p.doi,
-        url: p.url,
-        source: p.source,
-        abstract: p.abstract,
-        authors: p.authors,
-        journal: p.journal,
-      })),
-      enrichPool: false, // Already enriched
-      poolConcurrency: 3,
-    });
+    const cards = await claimCardsTools.buildClaimCardsFromClaims(
+      extractedClaims,
+      {
+        topK: 12,
+        useLlmJudge: true,
+        paperPool: enrichedPapers.map((p) => ({
+          title: p.title,
+          year: p.year,
+          doi: p.doi,
+          url: p.url,
+          source: p.source,
+          abstract: p.abstract,
+          authors: p.authors,
+          journal: p.journal,
+        })),
+        enrichPool: false, // Already enriched
+        poolConcurrency: 3,
+      },
+    );
 
     console.log(`   ✓ Built ${cards.length} claim cards\n`);
 
@@ -807,7 +925,9 @@ async function main() {
     console.log(`💾 Saving claim cards to database...`);
     for (let i = 0; i < cards.length; i++) {
       const card = cards[i];
-      console.log(`   [${i + 1}/${cards.length}] Saving: ${card.claim.substring(0, 80)}...`);
+      console.log(
+        `   [${i + 1}/${cards.length}] Saving: ${card.claim.substring(0, 80)}...`,
+      );
       await claimCardsTools.saveClaimCard(card, CFG.NOTE_ID);
     }
     console.log(`   ✓ All cards saved\n`);
@@ -817,7 +937,9 @@ async function main() {
     console.log(`✅ PIPELINE COMPLETE`);
     console.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
     console.log(`📚 Papers processed: ${enrichedPapers.length}`);
-    console.log(`📊 Abstract enrichment: ${needEnrichment.length} papers improved`);
+    console.log(
+      `📊 Abstract enrichment: ${needEnrichment.length} papers improved`,
+    );
     console.log(`💡 Claims extracted: ${extractedClaims.length}`);
     console.log(`🎯 Claim cards built: ${cards.length}`);
     console.log(`💾 Saved to note: ${CFG.NOTE_SLUG} (ID: ${CFG.NOTE_ID})`);
@@ -827,10 +949,11 @@ async function main() {
     console.log(`\n📋 Sample Claims:\n`);
     cards.slice(0, 3).forEach((card: any, idx: number) => {
       console.log(`${idx + 1}. ${card.claim}`);
-      console.log(`   Verdict: ${card.verdict} (${Math.round(card.confidence * 100)}% confidence)`);
+      console.log(
+        `   Verdict: ${card.verdict} (${Math.round(card.confidence * 100)}% confidence)`,
+      );
       console.log(`   Evidence: ${card.evidence.length} sources\n`);
     });
-
   } catch (error) {
     console.error("❌ Error:", error);
     if (error instanceof Error) {

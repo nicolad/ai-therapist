@@ -1,12 +1,12 @@
 import type { MutationResolvers } from "../../types.generated";
-import { claimCardsTools } from "../../../src/mastra/tools/claim-cards.tools";
-import { sourceTools, PaperCandidate } from "../../../src/mastra/tools/sources.tools";
+import { claimCardsTools } from "../../../src/tools/claim-cards.tools";
+import { sourceTools, PaperCandidate } from "../../../src/tools/sources.tools";
 import { createDeepSeek } from "@ai-sdk/deepseek";
 import { generateObject } from "ai";
 import { z } from "zod";
 import { toGqlClaimCards } from "../utils/normalize-claim-card";
 import { turso } from "../../../src/db/turso";
-import type { PaperDetails } from "../../../src/mastra/tools/sources.tools";
+import type { PaperDetails } from "../../../src/tools/sources.tools";
 
 // Suppress AI SDK warnings
 if (typeof globalThis !== "undefined") {
@@ -136,7 +136,9 @@ Return only the claims array.`,
  * 3. Maps evidence ONLY from the linked corpus (no external searches)
  * 4. Falls back to external search if useLinkedResearch=false
  */
-export const buildClaimCards: NonNullable<MutationResolvers['buildClaimCards']> = async (_parent, { input }) => {
+export const buildClaimCards: NonNullable<
+  MutationResolvers["buildClaimCards"]
+> = async (_parent, { input }) => {
   const {
     text,
     claims,

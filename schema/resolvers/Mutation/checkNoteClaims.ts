@@ -1,10 +1,10 @@
 import type { MutationResolvers } from "../../types.generated";
 import { tursoTools, turso } from "@/src/db";
-import { buildClaimCardsFromItem } from "@/src/mastra/tools/generic-claim-cards.tools";
-import { createDeepSeekAdapters } from "@/src/mastra/adapters/deepseek.adapter";
-import { createResearchSourceResolver } from "@/src/mastra/adapters/research-resolver.adapter";
-import { createTursoStorageAdapter } from "@/src/mastra/adapters/turso-storage.adapter";
-import type { LinkedSourceRef } from "@/src/mastra/tools/generic-claim-cards.tools";
+import { buildClaimCardsFromItem } from "@/src/tools/generic-claim-cards.tools";
+import { createDeepSeekAdapters } from "@/src/adapters/deepseek.adapter";
+import { createResearchSourceResolver } from "@/src/adapters/research-resolver.adapter";
+import { createTursoStorageAdapter } from "@/src/adapters/turso-storage.adapter";
+import type { LinkedSourceRef } from "@/src/tools/generic-claim-cards.tools";
 
 export const checkNoteClaims: NonNullable<
   MutationResolvers["checkNoteClaims"]
