@@ -13,8 +13,8 @@ import { generateTherapyResearchWorkflow } from "@/src/workflows/generateTherapy
 // Suppress AI SDK warnings
 (globalThis as any).AI_SDK_LOG_WARNINGS = false;
 
-const DEMO_USER_ID = "demo-user";
 const DEFAULT_GOAL_SLUG = "advocating-for-yourself-in-interviews";
+const USER_EMAIL = process.env.USER_EMAIL || "nicolai.vadim@gmail.com";
 
 async function main() {
   console.log(
@@ -25,7 +25,7 @@ async function main() {
     // Fetch the goal
     const goal = await tursoTools.getGoalBySlug(
       DEFAULT_GOAL_SLUG,
-      DEMO_USER_ID,
+      USER_EMAIL,
     );
     if (!goal) {
       throw new Error(`Goal not found: ${DEFAULT_GOAL_SLUG}`);
@@ -48,7 +48,7 @@ async function main() {
     const run = await generateTherapyResearchWorkflow.createRun();
     const result = await run.start({
       inputData: {
-        userId: DEMO_USER_ID,
+        userId: USER_EMAIL,
         goalId: goal.id,
       },
     });

@@ -6,7 +6,10 @@ export const deleteGoal: NonNullable<MutationResolvers['deleteGoal']> = async (
   args,
   ctx,
 ) => {
-  const userId = ctx.userId || "demo-user";
+  const userEmail = ctx.userEmail;
+  if (!userEmail) {
+    throw new Error("Authentication required");
+  }
 
   // Delete all associated data
   // 1. Delete claim cards linked to notes for this goal
@@ -24,7 +27,7 @@ export const deleteGoal: NonNullable<MutationResolvers['deleteGoal']> = async (
   // 3. Delete notes
   await turso.execute({
     sql: `DELETE FROM notes WHERE entity_id = ? AND entity_type = 'Goal' AND user_id = ?`,
-    args: [args.id, userId],
+    args: [args.id, userEmail],
   });
 
   // 4. Delete therapeutic questions
@@ -66,7 +69,7 @@ export const deleteGoal: NonNullable<MutationResolvers['deleteGoal']> = async (
   // 10. Finally, delete the goal itself
   await turso.execute({
     sql: `DELETE FROM goals WHERE id = ? AND user_id = ?`,
-    args: [args.id, userId],
+    args: [args.id, userEmail],
   });
 
   return {

@@ -6,7 +6,10 @@ export const deleteNote: NonNullable<MutationResolvers['deleteNote']> = async (
   args,
   ctx,
 ) => {
-  const userId = ctx.userId || "demo-user";
+  const userEmail = ctx.userEmail;
+  if (!userEmail) {
+    throw new Error("Authentication required");
+  }
 
   // Delete associated claim card links first
   await turso.execute({
@@ -23,7 +26,7 @@ export const deleteNote: NonNullable<MutationResolvers['deleteNote']> = async (
   // Delete the note itself
   await turso.execute({
     sql: `DELETE FROM notes WHERE id = ? AND user_id = ?`,
-    args: [args.id, userId],
+    args: [args.id, userEmail],
   });
 
   return {

@@ -17,7 +17,7 @@ async function main() {
   let noteId: number | undefined;
   let goalTitle = "Strengthen Resilience in a Tough Job Search";
   let goalDescription: string | undefined;
-  let createdBy = "demo-user";
+  let createdBy = "";
   let familyMemberId = 1;
 
   for (const arg of args) {
@@ -37,6 +37,13 @@ async function main() {
   }
 
   console.log("🎯 Creating goal and linking note...\n");
+
+  // Validate required parameters
+  if (!createdBy) {
+    console.error("❌ Error: --userId or --createdBy parameter is required");
+    console.log("Usage: tsx scripts/link-note-to-goal.ts --noteSlug=<slug> --createdBy=<email>");
+    return;
+  }
 
   // Step 1: Find the note
   let note;
