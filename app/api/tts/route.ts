@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
 import { MDocument } from "@mastra/rag";
 import { uploadToR2, generateAudioKey } from "@/lib/r2-uploader";
+import { parseBuffer } from "music-metadata";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -81,6 +82,18 @@ export async function POST(request: NextRequest) {
         `Merged ${chunks.length} audio chunks into single file (${combined.length} bytes)`,
       );
 
+      // Calculate audio duration
+      let duration: number | null = null;
+      try {
+        const metadata = await parseBuffer(combined, {
+          mimeType: `audio/${format}`,
+        });
+        duration = metadata.format.duration || null;
+        console.log(`Audio duration: ${duration?.toFixed(2)}s`);
+      } catch (error) {
+        console.warn("Failed to parse audio duration:", error);
+      }
+
       // Upload to R2 and save to story if requested
       if (uploadToCloud) {
         const key = generateAudioKey("tts");
@@ -123,6 +136,7 @@ export async function POST(request: NextRequest) {
           sizeBytes: result.sizeBytes,
           chunks: chunks.length,
           merged: true,
+          duration,
         });
       }
 

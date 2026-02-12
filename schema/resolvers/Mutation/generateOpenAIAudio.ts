@@ -3,6 +3,7 @@ import OpenAI from "openai";
 import { uploadToR2, generateAudioKey } from "@/lib/r2-uploader";
 import { MDocument } from "@mastra/rag";
 import { turso } from "@/src/db/turso";
+import { parseBuffer } from "music-metadata";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -104,6 +105,18 @@ export const generateOpenAIAudio: NonNullable<
         `Merged ${chunks.length} audio chunks into single file (${combined.length} bytes)`,
       );
 
+      // Calculate audio duration
+      let audioDuration: number | null = null;
+      try {
+        const metadata = await parseBuffer(combined, {
+          mimeType: `audio/${format}`,
+        });
+        audioDuration = metadata.format.duration || null;
+        console.log(`Audio duration: ${audioDuration?.toFixed(2)}s`);
+      } catch (error) {
+        console.warn("Failed to parse audio duration:", error);
+      }
+
       // Upload to Cloudflare R2 if requested
       if (uploadToCloud) {
         const key = generateAudioKey("graphql-tts");
@@ -141,7 +154,7 @@ export const generateOpenAIAudio: NonNullable<
           audioUrl: result.publicUrl,
           key: result.key,
           sizeBytes: result.sizeBytes,
-          duration: null,
+          duration: audioDuration,
         };
       }
 
@@ -155,7 +168,7 @@ export const generateOpenAIAudio: NonNullable<
         audioUrl: null,
         key: null,
         sizeBytes: combined.length,
-        duration: null,
+        duration: audioDuration,
       };
     }
 
@@ -172,6 +185,18 @@ export const generateOpenAIAudio: NonNullable<
     // Convert response to buffer
     const arrayBuffer = await response.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
+
+    // Calculate audio duration
+    let audioDuration: number | null = null;
+    try {
+      const metadata = await parseBuffer(buffer, {
+        mimeType: `audio/${format}`,
+      });
+      audioDuration = metadata.format.duration || null;
+      console.log(`Audio duration: ${audioDuration?.toFixed(2)}s`);
+    } catch (error) {
+      console.warn("Failed to parse audio duration:", error);
+    }
 
     // Upload to Cloudflare R2 if requested
     if (uploadToCloud) {
@@ -209,7 +234,7 @@ export const generateOpenAIAudio: NonNullable<
         audioUrl: result.publicUrl,
         key: result.key,
         sizeBytes: result.sizeBytes,
-        duration: null,
+        duration: audioDuration,
       };
     }
 
@@ -223,7 +248,7 @@ export const generateOpenAIAudio: NonNullable<
       audioUrl: null,
       key: null,
       sizeBytes: buffer.length,
-      duration: null,
+      duration: audioDuration,
     };
   } catch (error) {
     console.error("OpenAI TTS Error:", error);

@@ -34,6 +34,12 @@ import {
 } from "@/app/__generated__/hooks";
 import { authClient } from "@/src/auth/client";
 
+function formatDuration(seconds: number): string {
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60);
+  return `${mins}:${String(secs).padStart(2, "0")}`;
+}
+
 function StoryPageContent() {
   const router = useRouter();
   const params = useParams();
@@ -43,6 +49,7 @@ function StoryPageContent() {
   const [editContent, setEditContent] = useState("");
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const [forceRegenerate, setForceRegenerate] = useState(false);
+  const [audioDuration, setAudioDuration] = useState<number | null>(null);
   const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(
     null,
   );
@@ -147,6 +154,13 @@ function StoryPageContent() {
           console.log("Audio loading started");
         };
 
+        audio.onloadedmetadata = () => {
+          console.log("Audio metadata loaded, duration:", audio.duration);
+          if (audio.duration && !isNaN(audio.duration)) {
+            setAudioDuration(audio.duration);
+          }
+        };
+
         audio.oncanplay = () => {
           console.log("Audio can play");
         };
@@ -202,6 +216,13 @@ function StoryPageContent() {
       // Refetch story to get updated audio fields
       await refetch();
 
+      // Capture audio duration from mutation result
+      const duration = result.data.generateOpenAIAudio.duration;
+      if (duration) {
+        setAudioDuration(duration);
+        console.log(`Audio duration captured: ${duration.toFixed(2)}s`);
+      }
+
       // Reset force regenerate flag
       setForceRegenerate(false);
 
@@ -220,6 +241,13 @@ function StoryPageContent() {
 
         audio.onloadstart = () => {
           console.log("Audio loading started");
+        };
+
+        audio.onloadedmetadata = () => {
+          console.log("Audio metadata loaded, duration:", audio.duration);
+          if (audio.duration && !isNaN(audio.duration)) {
+            setAudioDuration(audio.duration);
+          }
         };
 
         audio.oncanplay = () => {
@@ -429,6 +457,11 @@ function StoryPageContent() {
                           {new Date(
                             story.audioGeneratedAt,
                           ).toLocaleDateString()}
+                        </Badge>
+                      )}
+                      {audioDuration && (
+                        <Badge color="indigo" variant="soft" size="1">
+                          {formatDuration(audioDuration)}
                         </Badge>
                       )}
                     </Flex>
