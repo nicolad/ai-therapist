@@ -1,0 +1,14 @@
+mutation CreateGoal($input: CreateGoalInput!) {
+  createGoal(input: $input) {
+    id
+    slug
+    title
+    description
+    status
+    priority
+    targetDate
+    createdAt
+    updatedAt
+    familyMemberId
+  }
+}
