@@ -1,0 +1,15 @@
+query GetStory($id: Int!) {
+  story(id: $id) {
+    id
+    goalId
+    createdBy
+    content
+    createdAt
+    updatedAt
+    goal {
+      id
+      title
+      slug
+    }
+  }
+}

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import * as Accordion from "@radix-ui/react-accordion";
 import * as SeparatorPrimitive from "@radix-ui/react-separator";
+import * as Dialog from "@radix-ui/react-dialog";
 import { ChevronDownIcon } from "@radix-ui/react-icons";
 import {
   Box,
@@ -19,7 +20,10 @@ import {
 import { ArrowLeftIcon } from "@radix-ui/react-icons";
 import { useRouter, useParams } from "next/navigation";
 import dynamic from "next/dynamic";
-import { useGetGoalQuery } from "@/app/__generated__/hooks";
+import {
+  useGetGoalQuery,
+  useCreateStoryMutation,
+} from "@/app/__generated__/hooks";
 import { authClient } from "@/src/auth/client";
 import "./accordion.css";
 
@@ -28,6 +32,8 @@ function GoalPageContent() {
   const params = useParams();
   const paramValue = params.id as string;
   const { data: session } = authClient.useSession();
+  const [storyDialogOpen, setStoryDialogOpen] = useState(false);
+  const [storyContent, setStoryContent] = useState("");
 
   // Determine if paramValue is a number (ID) or string (slug)
   const isNumericId = /^\d+$/.test(paramValue);
@@ -40,6 +46,14 @@ function GoalPageContent() {
       slug: goalSlug,
     },
     skip: !goalId && !goalSlug,
+  });
+
+  const [createStory, { loading: creatingStory }] = useCreateStoryMutation({
+    refetchQueries: ["GetGoal"],
+    onCompleted: () => {
+      setStoryContent("");
+      setStoryDialogOpen(false);
+    },
   });
 
   const goal = data?.goal;
@@ -75,6 +89,19 @@ function GoalPageContent() {
       default:
         return "gray";
     }
+  };
+
+  const handleCreateStory = async () => {
+    if (!storyContent.trim() || !goal) return;
+
+    await createStory({
+      variables: {
+        input: {
+          goalId: goal.id,
+          content: storyContent,
+        },
+      },
+    });
   };
 
   return (
@@ -202,6 +229,135 @@ function GoalPageContent() {
           </Flex>
         </Card>
       )}
+
+      {/* User Stories */}
+      <Card>
+        <Flex direction="column" gap="3" p="4">
+          <Flex justify="between" align="center">
+            <Heading size="4">
+              Stories {goal.userStories ? `(${goal.userStories.length})` : ""}
+            </Heading>
+            <Dialog.Root
+              open={storyDialogOpen}
+              onOpenChange={setStoryDialogOpen}
+            >
+              <Dialog.Trigger asChild>
+                <Button size="2">Add Story</Button>
+              </Dialog.Trigger>
+              <Dialog.Portal>
+                <Dialog.Overlay
+                  style={{
+                    position: "fixed",
+                    inset: 0,
+                    backgroundColor: "rgba(0, 0, 0, 0.5)",
+                    zIndex: 50,
+                  }}
+                />
+                <Dialog.Content
+                  style={{
+                    position: "fixed",
+                    top: "50%",
+                    left: "50%",
+                    transform: "translate(-50%, -50%)",
+                    backgroundColor: "var(--color-panel)",
+                    padding: "24px",
+                    borderRadius: "8px",
+                    maxWidth: "600px",
+                    width: "90vw",
+                    zIndex: 51,
+                    boxShadow: "0 8px 32px rgba(0, 0, 0, 0.2)",
+                  }}
+                >
+                  <Flex direction="column" gap="4">
+                    <Dialog.Title asChild>
+                      <Heading size="5">Add New Story</Heading>
+                    </Dialog.Title>
+                    <Dialog.Description asChild>
+                      <Text size="2" color="gray">
+                        Share your thoughts, reflections, or experiences related
+                        to this goal.
+                      </Text>
+                    </Dialog.Description>
+                    <textarea
+                      value={storyContent}
+                      onChange={(e) => setStoryContent(e.target.value)}
+                      placeholder="Write your story here..."
+                      style={{
+                        width: "100%",
+                        minHeight: "200px",
+                        padding: "12px",
+                        borderRadius: "4px",
+                        border: "1px solid var(--gray-6)",
+                        backgroundColor: "var(--color-background)",
+                        color: "var(--gray-12)",
+                        fontSize: "14px",
+                        fontFamily: "inherit",
+                        resize: "vertical",
+                      }}
+                    />
+                    <Flex gap="2" justify="end">
+                      <Dialog.Close asChild>
+                        <Button variant="soft" color="gray">
+                          Cancel
+                        </Button>
+                      </Dialog.Close>
+                      <Button
+                        onClick={handleCreateStory}
+                        disabled={!storyContent.trim() || creatingStory}
+                      >
+                        {creatingStory ? "Creating..." : "Create Story"}
+                      </Button>
+                    </Flex>
+                  </Flex>
+                </Dialog.Content>
+              </Dialog.Portal>
+            </Dialog.Root>
+          </Flex>
+
+          {goal.userStories && goal.userStories.length > 0 ? (
+            <Flex direction="column" gap="2">
+              {goal.userStories.map((story) => (
+                <Card
+                  key={story.id}
+                  style={{
+                    backgroundColor: "var(--gray-2)",
+                    cursor: "pointer",
+                  }}
+                  onClick={() => router.push(`/stories/${story.id}`)}
+                >
+                  <Flex direction="column" gap="2" p="3">
+                    <Flex align="center" gap="2">
+                      <Text size="1" color="gray">
+                        {new Date(story.createdAt).toLocaleDateString()}
+                      </Text>
+                      <Text size="1" color="gray">
+                        by {story.createdBy}
+                      </Text>
+                    </Flex>
+                    <Text
+                      size="2"
+                      style={{
+                        whiteSpace: "pre-wrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        display: "-webkit-box",
+                        WebkitLineClamp: 3,
+                        WebkitBoxOrient: "vertical",
+                      }}
+                    >
+                      {story.content}
+                    </Text>
+                  </Flex>
+                </Card>
+              ))}
+            </Flex>
+          ) : (
+            <Text size="2" color="gray">
+              No stories yet. Click "Add Story" to create one.
+            </Text>
+          )}
+        </Flex>
+      </Card>
 
       {/* Linked Research */}
       {goal.research && goal.research.length > 0 && (

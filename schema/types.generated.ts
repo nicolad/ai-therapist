@@ -297,6 +297,7 @@ export type Goal = {
   therapeuticTextLanguage?: Maybe<Scalars['String']['output']>;
   title: Scalars['String']['output'];
   updatedAt: Scalars['String']['output'];
+  userStories: Array<Story>;
 };
 
 export type GoalStory = {
@@ -825,7 +826,7 @@ export type ResolversTypes = {
   GenerateQuestionsResult: ResolverTypeWrapper<GenerateQuestionsResult>;
   GenerateResearchResult: ResolverTypeWrapper<GenerateResearchResult>;
   GenerationJob: ResolverTypeWrapper<Omit<GenerationJob, 'status' | 'type'> & { status: ResolversTypes['JobStatus'], type: ResolversTypes['JobType'] }>;
-  Goal: ResolverTypeWrapper<Omit<Goal, 'notes' | 'research'> & { notes: Array<ResolversTypes['Note']>, research: Array<ResolversTypes['Research']> }>;
+  Goal: ResolverTypeWrapper<Omit<Goal, 'notes' | 'research' | 'userStories'> & { notes: Array<ResolversTypes['Note']>, research: Array<ResolversTypes['Research']>, userStories: Array<ResolversTypes['Story']> }>;
   GoalStory: ResolverTypeWrapper<GoalStory>;
   JobError: ResolverTypeWrapper<JobError>;
   JobResult: ResolverTypeWrapper<JobResult>;
@@ -884,7 +885,7 @@ export type ResolversParentTypes = {
   GenerateQuestionsResult: GenerateQuestionsResult;
   GenerateResearchResult: GenerateResearchResult;
   GenerationJob: GenerationJob;
-  Goal: Omit<Goal, 'notes' | 'research'> & { notes: Array<ResolversParentTypes['Note']>, research: Array<ResolversParentTypes['Research']> };
+  Goal: Omit<Goal, 'notes' | 'research' | 'userStories'> & { notes: Array<ResolversParentTypes['Note']>, research: Array<ResolversParentTypes['Research']>, userStories: Array<ResolversParentTypes['Story']> };
   GoalStory: GoalStory;
   JobError: JobError;
   JobResult: JobResult;
@@ -1091,6 +1092,7 @@ export type GoalResolvers<ContextType = GraphQLContext, ParentType extends Resol
   therapeuticTextLanguage?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   title?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   updatedAt?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  userStories?: Resolver<Array<ResolversTypes['Story']>, ParentType, ContextType>;
 };
 
 export type GoalStoryResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['GoalStory'] = ResolversParentTypes['GoalStory']> = {

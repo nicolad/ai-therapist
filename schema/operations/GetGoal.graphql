@@ -27,6 +27,14 @@ query GetGoal($id: Int, $slug: String) {
       journal
       url
     }
+    userStories {
+      id
+      goalId
+      createdBy
+      content
+      createdAt
+      updatedAt
+    }
     createdAt
     updatedAt
   }

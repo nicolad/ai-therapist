@@ -88,6 +88,7 @@ type Goal {
   research: [Research!]!
   questions: [TherapeuticQuestion!]!
   stories: [GoalStory!]!
+  userStories: [Story!]!
   notes: [Note!]!
   therapeuticText: String
   therapeuticTextLanguage: String

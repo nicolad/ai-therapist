@@ -255,6 +255,7 @@ type Goal {
   therapeuticTextLanguage: String
   title: String!
   updatedAt: String!
+  userStories: [Story!]!
 }
 
 type GoalStory {

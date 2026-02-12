@@ -82,6 +82,21 @@ export const notes = sqliteTable("notes", {
     .default(sql`CURRENT_TIMESTAMP`),
 });
 
+export const stories = sqliteTable("stories", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  goalId: integer("goal_id")
+    .notNull()
+    .references(() => goals.id, { onDelete: "cascade" }),
+  userId: text("user_id").notNull(),
+  content: text("content").notNull(),
+  createdAt: text("created_at")
+    .notNull()
+    .default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text("updated_at")
+    .notNull()
+    .default(sql`CURRENT_TIMESTAMP`),
+});
+
 export const goalStories = sqliteTable("goal_stories", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   goalId: integer("goal_id").notNull(),
