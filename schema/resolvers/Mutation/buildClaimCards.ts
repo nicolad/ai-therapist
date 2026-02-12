@@ -136,9 +136,7 @@ Return only the claims array.`,
  * 3. Maps evidence ONLY from the linked corpus (no external searches)
  * 4. Falls back to external search if useLinkedResearch=false
  */
-export const buildClaimCards: NonNullable<
-  MutationResolvers["buildClaimCards"]
-> = async (_parent, { input }) => {
+export const buildClaimCards: NonNullable<MutationResolvers['buildClaimCards']> = async (_parent, { input }) => {
   const {
     text,
     claims,

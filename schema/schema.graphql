@@ -12,6 +12,9 @@ type Query {
   # Claim Cards
   claimCard(id: ID!): ClaimCard
   claimCardsForNote(noteId: Int!): [ClaimCard!]!
+
+  # ElevenLabs TTS
+  availableVoices: [ElevenLabsVoice!]!
 }
 
 type Mutation {
@@ -48,6 +51,12 @@ type Mutation {
   checkNoteClaims(input: CheckNoteClaimsInput!): CheckNoteClaimsResult!
   refreshClaimCard(id: ID!): ClaimCard!
   deleteClaimCard(id: ID!): Boolean!
+
+  # ElevenLabs TTS
+  generateAudioFromText(
+    input: GenerateAudioFromTextInput!
+  ): GenerateAudioFromTextResult!
+  uploadAudioToR2(input: UploadAudioToR2Input!): UploadAudioToR2Result!
 }
 
 type Subscription {
@@ -437,4 +446,60 @@ type CheckNoteClaimsResult {
   message: String
   cards: [ClaimCard!]!
   noteId: Int!
+}
+
+# ============================================
+# ElevenLabs TTS Types
+# ============================================
+
+type ElevenLabsVoice {
+  id: String!
+  name: String!
+  description: String!
+}
+
+type GenerateAudioFromTextResult {
+  success: Boolean!
+  message: String
+  audioBuffer: String
+  fileName: String
+  sizeBytes: Int
+}
+
+type UploadAudioToR2Result {
+  success: Boolean!
+  message: String
+  objectKey: String!
+  url: String!
+  isPublic: Boolean!
+}
+
+input GenerateAudioFromTextInput {
+  text: String!
+  voiceId: String
+  modelId: String
+  outputFormat: String
+  stability: Float
+  similarityBoost: Float
+  useSpeakerBoost: Boolean
+  speed: Float
+}
+
+input UploadAudioToR2Input {
+  text: String!
+  voiceId: String
+  modelId: String
+  contextPrefix: String
+  filename: String
+  metadata: AudioMetadataInput
+  speed: Float
+  stability: Float
+}
+
+input AudioMetadataInput {
+  goalId: Int
+  noteId: Int
+  voice: String
+  model: String
+  generatedAt: String
 }

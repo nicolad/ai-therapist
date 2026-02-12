@@ -1,0 +1,29 @@
+mutation GenerateAudioFromText(
+  $text: String!
+  $voiceId: String
+  $modelId: String
+  $outputFormat: String
+  $stability: Float
+  $similarityBoost: Float
+  $useSpeakerBoost: Boolean
+  $speed: Float
+) {
+  generateAudioFromText(
+    input: {
+      text: $text
+      voiceId: $voiceId
+      modelId: $modelId
+      outputFormat: $outputFormat
+      stability: $stability
+      similarityBoost: $similarityBoost
+      useSpeakerBoost: $useSpeakerBoost
+      speed: $speed
+    }
+  ) {
+    success
+    message
+    audioBuffer
+    fileName
+    sizeBytes
+  }
+}

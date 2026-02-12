@@ -1,0 +1,29 @@
+mutation UploadAudioToR2(
+  $text: String!
+  $voiceId: String
+  $modelId: String
+  $contextPrefix: String
+  $filename: String
+  $metadata: AudioMetadataInput
+  $speed: Float
+  $stability: Float
+) {
+  uploadAudioToR2(
+    input: {
+      text: $text
+      voiceId: $voiceId
+      modelId: $modelId
+      contextPrefix: $contextPrefix
+      filename: $filename
+      metadata: $metadata
+      speed: $speed
+      stability: $stability
+    }
+  ) {
+    success
+    message
+    objectKey
+    url
+    isPublic
+  }
+}

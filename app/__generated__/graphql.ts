@@ -36,6 +36,14 @@ export type AudioManifest = {
   totalDuration?: Maybe<Scalars['Float']['output']>;
 };
 
+export type AudioMetadataInput = {
+  generatedAt?: InputMaybe<Scalars['String']['input']>;
+  goalId?: InputMaybe<Scalars['Int']['input']>;
+  model?: InputMaybe<Scalars['String']['input']>;
+  noteId?: InputMaybe<Scalars['Int']['input']>;
+  voice?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type AudioSegmentInfo = {
   __typename?: 'AudioSegmentInfo';
   duration?: Maybe<Scalars['Float']['output']>;
@@ -161,6 +169,13 @@ export type DeleteResearchResult = {
   success: Scalars['Boolean']['output'];
 };
 
+export type ElevenLabsVoice = {
+  __typename?: 'ElevenLabsVoice';
+  description: Scalars['String']['output'];
+  id: Scalars['String']['output'];
+  name: Scalars['String']['output'];
+};
+
 export type EvidenceItem = {
   __typename?: 'EvidenceItem';
   excerpt?: Maybe<Scalars['String']['output']>;
@@ -184,6 +199,26 @@ export enum EvidencePolarity {
   Mixed = 'MIXED',
   Supports = 'SUPPORTS'
 }
+
+export type GenerateAudioFromTextInput = {
+  modelId?: InputMaybe<Scalars['String']['input']>;
+  outputFormat?: InputMaybe<Scalars['String']['input']>;
+  similarityBoost?: InputMaybe<Scalars['Float']['input']>;
+  speed?: InputMaybe<Scalars['Float']['input']>;
+  stability?: InputMaybe<Scalars['Float']['input']>;
+  text: Scalars['String']['input'];
+  useSpeakerBoost?: InputMaybe<Scalars['Boolean']['input']>;
+  voiceId?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type GenerateAudioFromTextResult = {
+  __typename?: 'GenerateAudioFromTextResult';
+  audioBuffer?: Maybe<Scalars['String']['output']>;
+  fileName?: Maybe<Scalars['String']['output']>;
+  message?: Maybe<Scalars['String']['output']>;
+  sizeBytes?: Maybe<Scalars['Int']['output']>;
+  success: Scalars['Boolean']['output'];
+};
 
 export type GenerateAudioResult = {
   __typename?: 'GenerateAudioResult';
@@ -314,12 +349,14 @@ export type Mutation = {
   deleteResearch: DeleteResearchResult;
   deleteTherapeuticQuestions: DeleteQuestionsResult;
   generateAudio: GenerateAudioResult;
+  generateAudioFromText: GenerateAudioFromTextResult;
   generateLongFormText: GenerateLongFormTextResult;
   generateResearch: GenerateResearchResult;
   generateTherapeuticQuestions: GenerateQuestionsResult;
   refreshClaimCard: ClaimCard;
   updateGoal: Goal;
   updateNote: Note;
+  uploadAudioToR2: UploadAudioToR2Result;
 };
 
 
@@ -377,6 +414,11 @@ export type MutationGenerateAudioArgs = {
 };
 
 
+export type MutationGenerateAudioFromTextArgs = {
+  input: GenerateAudioFromTextInput;
+};
+
+
 export type MutationGenerateLongFormTextArgs = {
   goalId: Scalars['Int']['input'];
   language?: InputMaybe<Scalars['String']['input']>;
@@ -408,6 +450,11 @@ export type MutationUpdateGoalArgs = {
 export type MutationUpdateNoteArgs = {
   id: Scalars['Int']['input'];
   input: UpdateNoteInput;
+};
+
+
+export type MutationUploadAudioToR2Args = {
+  input: UploadAudioToR2Input;
 };
 
 export type Note = {
@@ -446,6 +493,7 @@ export type PaperCandidate = {
 export type Query = {
   __typename?: 'Query';
   allNotes: Array<Note>;
+  availableVoices: Array<ElevenLabsVoice>;
   claimCard?: Maybe<ClaimCard>;
   claimCardsForNote: Array<ClaimCard>;
   generationJob?: Maybe<GenerationJob>;
@@ -612,6 +660,59 @@ export type UpdateNoteInput = {
   title?: InputMaybe<Scalars['String']['input']>;
 };
 
+export type UploadAudioToR2Input = {
+  contextPrefix?: InputMaybe<Scalars['String']['input']>;
+  filename?: InputMaybe<Scalars['String']['input']>;
+  metadata?: InputMaybe<AudioMetadataInput>;
+  modelId?: InputMaybe<Scalars['String']['input']>;
+  speed?: InputMaybe<Scalars['Float']['input']>;
+  stability?: InputMaybe<Scalars['Float']['input']>;
+  text: Scalars['String']['input'];
+  voiceId?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type UploadAudioToR2Result = {
+  __typename?: 'UploadAudioToR2Result';
+  isPublic: Scalars['Boolean']['output'];
+  message?: Maybe<Scalars['String']['output']>;
+  objectKey: Scalars['String']['output'];
+  success: Scalars['Boolean']['output'];
+  url: Scalars['String']['output'];
+};
+
+export type GenerateAudioFromTextMutationVariables = Exact<{
+  text: Scalars['String']['input'];
+  voiceId?: InputMaybe<Scalars['String']['input']>;
+  modelId?: InputMaybe<Scalars['String']['input']>;
+  outputFormat?: InputMaybe<Scalars['String']['input']>;
+  stability?: InputMaybe<Scalars['Float']['input']>;
+  similarityBoost?: InputMaybe<Scalars['Float']['input']>;
+  useSpeakerBoost?: InputMaybe<Scalars['Boolean']['input']>;
+  speed?: InputMaybe<Scalars['Float']['input']>;
+}>;
+
+
+export type GenerateAudioFromTextMutation = { __typename?: 'Mutation', generateAudioFromText: { __typename?: 'GenerateAudioFromTextResult', success: boolean, message?: string | null, audioBuffer?: string | null, fileName?: string | null, sizeBytes?: number | null } };
+
+export type GetAvailableVoicesQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetAvailableVoicesQuery = { __typename?: 'Query', availableVoices: Array<{ __typename?: 'ElevenLabsVoice', id: string, name: string, description: string }> };
+
+export type UploadAudioToR2MutationVariables = Exact<{
+  text: Scalars['String']['input'];
+  voiceId?: InputMaybe<Scalars['String']['input']>;
+  modelId?: InputMaybe<Scalars['String']['input']>;
+  contextPrefix?: InputMaybe<Scalars['String']['input']>;
+  filename?: InputMaybe<Scalars['String']['input']>;
+  metadata?: InputMaybe<AudioMetadataInput>;
+  speed?: InputMaybe<Scalars['Float']['input']>;
+  stability?: InputMaybe<Scalars['Float']['input']>;
+}>;
+
+
+export type UploadAudioToR2Mutation = { __typename?: 'Mutation', uploadAudioToR2: { __typename?: 'UploadAudioToR2Result', success: boolean, message?: string | null, objectKey: string, url: string, isPublic: boolean } };
+
 export type CheckNoteClaimsMutationVariables = Exact<{
   input: CheckNoteClaimsInput;
 }>;
@@ -749,6 +850,9 @@ export type UpdateNoteMutationVariables = Exact<{
 export type UpdateNoteMutation = { __typename?: 'Mutation', updateNote: { __typename?: 'Note', id: number, entityId: number, entityType: string, userId: string, noteType?: string | null, content: string, createdBy?: string | null, tags?: Array<string> | null, createdAt: string, updatedAt: string } };
 
 
+export const GenerateAudioFromTextDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"GenerateAudioFromText"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"text"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"voiceId"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"modelId"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"outputFormat"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"stability"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Float"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"similarityBoost"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Float"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"useSpeakerBoost"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Boolean"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"speed"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Float"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"generateAudioFromText"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"text"},"value":{"kind":"Variable","name":{"kind":"Name","value":"text"}}},{"kind":"ObjectField","name":{"kind":"Name","value":"voiceId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"voiceId"}}},{"kind":"ObjectField","name":{"kind":"Name","value":"modelId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"modelId"}}},{"kind":"ObjectField","name":{"kind":"Name","value":"outputFormat"},"value":{"kind":"Variable","name":{"kind":"Name","value":"outputFormat"}}},{"kind":"ObjectField","name":{"kind":"Name","value":"stability"},"value":{"kind":"Variable","name":{"kind":"Name","value":"stability"}}},{"kind":"ObjectField","name":{"kind":"Name","value":"similarityBoost"},"value":{"kind":"Variable","name":{"kind":"Name","value":"similarityBoost"}}},{"kind":"ObjectField","name":{"kind":"Name","value":"useSpeakerBoost"},"value":{"kind":"Variable","name":{"kind":"Name","value":"useSpeakerBoost"}}},{"kind":"ObjectField","name":{"kind":"Name","value":"speed"},"value":{"kind":"Variable","name":{"kind":"Name","value":"speed"}}}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"success"}},{"kind":"Field","name":{"kind":"Name","value":"message"}},{"kind":"Field","name":{"kind":"Name","value":"audioBuffer"}},{"kind":"Field","name":{"kind":"Name","value":"fileName"}},{"kind":"Field","name":{"kind":"Name","value":"sizeBytes"}}]}}]}}]} as unknown as DocumentNode<GenerateAudioFromTextMutation, GenerateAudioFromTextMutationVariables>;
+export const GetAvailableVoicesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetAvailableVoices"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"availableVoices"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}}]}}]}}]} as unknown as DocumentNode<GetAvailableVoicesQuery, GetAvailableVoicesQueryVariables>;
+export const UploadAudioToR2Document = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UploadAudioToR2"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"text"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"voiceId"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"modelId"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"contextPrefix"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"filename"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"metadata"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"AudioMetadataInput"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"speed"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Float"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"stability"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Float"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"uploadAudioToR2"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"text"},"value":{"kind":"Variable","name":{"kind":"Name","value":"text"}}},{"kind":"ObjectField","name":{"kind":"Name","value":"voiceId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"voiceId"}}},{"kind":"ObjectField","name":{"kind":"Name","value":"modelId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"modelId"}}},{"kind":"ObjectField","name":{"kind":"Name","value":"contextPrefix"},"value":{"kind":"Variable","name":{"kind":"Name","value":"contextPrefix"}}},{"kind":"ObjectField","name":{"kind":"Name","value":"filename"},"value":{"kind":"Variable","name":{"kind":"Name","value":"filename"}}},{"kind":"ObjectField","name":{"kind":"Name","value":"metadata"},"value":{"kind":"Variable","name":{"kind":"Name","value":"metadata"}}},{"kind":"ObjectField","name":{"kind":"Name","value":"speed"},"value":{"kind":"Variable","name":{"kind":"Name","value":"speed"}}},{"kind":"ObjectField","name":{"kind":"Name","value":"stability"},"value":{"kind":"Variable","name":{"kind":"Name","value":"stability"}}}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"success"}},{"kind":"Field","name":{"kind":"Name","value":"message"}},{"kind":"Field","name":{"kind":"Name","value":"objectKey"}},{"kind":"Field","name":{"kind":"Name","value":"url"}},{"kind":"Field","name":{"kind":"Name","value":"isPublic"}}]}}]}}]} as unknown as DocumentNode<UploadAudioToR2Mutation, UploadAudioToR2MutationVariables>;
 export const CheckNoteClaimsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CheckNoteClaims"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"CheckNoteClaimsInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"checkNoteClaims"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"success"}},{"kind":"Field","name":{"kind":"Name","value":"message"}},{"kind":"Field","name":{"kind":"Name","value":"noteId"}},{"kind":"Field","name":{"kind":"Name","value":"cards"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"claim"}},{"kind":"Field","name":{"kind":"Name","value":"scope"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"population"}},{"kind":"Field","name":{"kind":"Name","value":"intervention"}},{"kind":"Field","name":{"kind":"Name","value":"comparator"}},{"kind":"Field","name":{"kind":"Name","value":"outcome"}},{"kind":"Field","name":{"kind":"Name","value":"timeframe"}},{"kind":"Field","name":{"kind":"Name","value":"setting"}}]}},{"kind":"Field","name":{"kind":"Name","value":"verdict"}},{"kind":"Field","name":{"kind":"Name","value":"confidence"}},{"kind":"Field","name":{"kind":"Name","value":"evidence"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"paper"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"doi"}},{"kind":"Field","name":{"kind":"Name","value":"url"}},{"kind":"Field","name":{"kind":"Name","value":"year"}},{"kind":"Field","name":{"kind":"Name","value":"source"}},{"kind":"Field","name":{"kind":"Name","value":"authors"}},{"kind":"Field","name":{"kind":"Name","value":"abstract"}},{"kind":"Field","name":{"kind":"Name","value":"journal"}}]}},{"kind":"Field","name":{"kind":"Name","value":"polarity"}},{"kind":"Field","name":{"kind":"Name","value":"excerpt"}},{"kind":"Field","name":{"kind":"Name","value":"rationale"}},{"kind":"Field","name":{"kind":"Name","value":"score"}},{"kind":"Field","name":{"kind":"Name","value":"locator"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"section"}},{"kind":"Field","name":{"kind":"Name","value":"page"}},{"kind":"Field","name":{"kind":"Name","value":"url"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"queries"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"provenance"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"generatedBy"}},{"kind":"Field","name":{"kind":"Name","value":"model"}},{"kind":"Field","name":{"kind":"Name","value":"sourceTools"}}]}},{"kind":"Field","name":{"kind":"Name","value":"notes"}}]}}]}}]}}]} as unknown as DocumentNode<CheckNoteClaimsMutation, CheckNoteClaimsMutationVariables>;
 export const BuildClaimCardsFromTextDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"BuildClaimCardsFromText"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"buildClaimCards"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"text"},"value":{"kind":"StringValue","value":"Cognitive Behavioral Therapy is effective for treating anxiety disorders.\nCBT reduces anxiety symptoms by 60-80% in most patients.\nThe effects of CBT persist for years after treatment ends.","block":true}},{"kind":"ObjectField","name":{"kind":"Name","value":"perSourceLimit"},"value":{"kind":"IntValue","value":"10"}},{"kind":"ObjectField","name":{"kind":"Name","value":"topK"},"value":{"kind":"IntValue","value":"5"}},{"kind":"ObjectField","name":{"kind":"Name","value":"useLlmJudge"},"value":{"kind":"BooleanValue","value":true}},{"kind":"ObjectField","name":{"kind":"Name","value":"sources"},"value":{"kind":"ListValue","values":[{"kind":"EnumValue","value":"CROSSREF"},{"kind":"EnumValue","value":"SEMANTIC_SCHOLAR"},{"kind":"EnumValue","value":"PUBMED"}]}}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"cards"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"claim"}},{"kind":"Field","name":{"kind":"Name","value":"verdict"}},{"kind":"Field","name":{"kind":"Name","value":"confidence"}},{"kind":"Field","name":{"kind":"Name","value":"evidence"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"paper"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"authors"}},{"kind":"Field","name":{"kind":"Name","value":"doi"}},{"kind":"Field","name":{"kind":"Name","value":"year"}},{"kind":"Field","name":{"kind":"Name","value":"journal"}},{"kind":"Field","name":{"kind":"Name","value":"oaUrl"}}]}},{"kind":"Field","name":{"kind":"Name","value":"polarity"}},{"kind":"Field","name":{"kind":"Name","value":"excerpt"}},{"kind":"Field","name":{"kind":"Name","value":"rationale"}},{"kind":"Field","name":{"kind":"Name","value":"score"}}]}},{"kind":"Field","name":{"kind":"Name","value":"queries"}},{"kind":"Field","name":{"kind":"Name","value":"provenance"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"generatedBy"}},{"kind":"Field","name":{"kind":"Name","value":"model"}},{"kind":"Field","name":{"kind":"Name","value":"sourceTools"}}]}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}}]}}]}}]}}]} as unknown as DocumentNode<BuildClaimCardsFromTextMutation, BuildClaimCardsFromTextMutationVariables>;
 export const BuildClaimCardsFromClaimsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"BuildClaimCardsFromClaims"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"buildClaimCards"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"claims"},"value":{"kind":"ListValue","values":[{"kind":"StringValue","value":"Mindfulness meditation reduces stress in adults with GAD","block":false},{"kind":"StringValue","value":"Exercise therapy improves mood in adults with major depressive disorder","block":false}]}},{"kind":"ObjectField","name":{"kind":"Name","value":"perSourceLimit"},"value":{"kind":"IntValue","value":"8"}},{"kind":"ObjectField","name":{"kind":"Name","value":"topK"},"value":{"kind":"IntValue","value":"4"}},{"kind":"ObjectField","name":{"kind":"Name","value":"useLlmJudge"},"value":{"kind":"BooleanValue","value":false}},{"kind":"ObjectField","name":{"kind":"Name","value":"sources"},"value":{"kind":"ListValue","values":[{"kind":"EnumValue","value":"SEMANTIC_SCHOLAR"},{"kind":"EnumValue","value":"OPENALEX"}]}}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"cards"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"claim"}},{"kind":"Field","name":{"kind":"Name","value":"verdict"}},{"kind":"Field","name":{"kind":"Name","value":"confidence"}},{"kind":"Field","name":{"kind":"Name","value":"evidence"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"paper"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"doi"}}]}},{"kind":"Field","name":{"kind":"Name","value":"polarity"}},{"kind":"Field","name":{"kind":"Name","value":"score"}}]}}]}}]}}]}}]} as unknown as DocumentNode<BuildClaimCardsFromClaimsMutation, BuildClaimCardsFromClaimsMutationVariables>;

@@ -1,9 +1,7 @@
 import type { QueryResolvers } from "./../../types.generated";
 import { tursoTools } from "@/src/db";
 
-export const generationJob: NonNullable<
-  QueryResolvers["generationJob"]
-> = async (_parent, args, _ctx) => {
+export const generationJob: NonNullable<QueryResolvers['generationJob']> = async (_parent, args, _ctx) => {
   const job = await tursoTools.getGenerationJob(args.id);
   if (!job) {
     throw new Error(`Generation job ${args.id} not found`);

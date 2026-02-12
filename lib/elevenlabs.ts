@@ -6,6 +6,13 @@ import { v4 as uuid } from "uuid";
  * ElevenLabs utility for direct API usage (alternative to Mastra voice)
  * Use this when you need more granular control over ElevenLabs features
  * Based on official ElevenLabs documentation
+ *
+ * NOTE: For a more complete implementation with Cloudflare R2/AWS S3 integration,
+ * see src/elevenlabs/ which includes:
+ * - Text-to-speech file and stream utilities
+ * - Cloudflare R2 / AWS S3 upload support
+ * - Presigned URL generation
+ * - Comprehensive examples and documentation
  */
 
 const ELEVENLABS_API_KEY = process.env.ELEVENLABS_API_KEY;

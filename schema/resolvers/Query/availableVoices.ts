@@ -1,0 +1,1 @@
+export { availableVoices } from "./../../elevenlabs/resolvers/availableVoices";

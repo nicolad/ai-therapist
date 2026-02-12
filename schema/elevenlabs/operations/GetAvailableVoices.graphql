@@ -1,0 +1,7 @@
+query GetAvailableVoices {
+  availableVoices {
+    id
+    name
+    description
+  }
+}

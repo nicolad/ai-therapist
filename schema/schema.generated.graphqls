@@ -16,6 +16,14 @@ type AudioManifest {
   totalDuration: Float
 }
 
+input AudioMetadataInput {
+  generatedAt: String
+  goalId: Int
+  model: String
+  noteId: Int
+  voice: String
+}
+
 type AudioSegmentInfo {
   duration: Float
   idx: Int!
@@ -131,6 +139,12 @@ type DeleteResearchResult {
   success: Boolean!
 }
 
+type ElevenLabsVoice {
+  description: String!
+  id: String!
+  name: String!
+}
+
 type EvidenceItem {
   excerpt: String
   locator: EvidenceLocator
@@ -151,6 +165,25 @@ enum EvidencePolarity {
   IRRELEVANT
   MIXED
   SUPPORTS
+}
+
+input GenerateAudioFromTextInput {
+  modelId: String
+  outputFormat: String
+  similarityBoost: Float
+  speed: Float
+  stability: Float
+  text: String!
+  useSpeakerBoost: Boolean
+  voiceId: String
+}
+
+type GenerateAudioFromTextResult {
+  audioBuffer: String
+  fileName: String
+  message: String
+  sizeBytes: Int
+  success: Boolean!
 }
 
 type GenerateAudioResult {
@@ -272,12 +305,14 @@ type Mutation {
   deleteResearch(goalId: Int!): DeleteResearchResult!
   deleteTherapeuticQuestions(goalId: Int!): DeleteQuestionsResult!
   generateAudio(goalId: Int!, language: String, storyId: Int, text: String, voice: String): GenerateAudioResult!
+  generateAudioFromText(input: GenerateAudioFromTextInput!): GenerateAudioFromTextResult!
   generateLongFormText(goalId: Int!, language: String, minutes: Int): GenerateLongFormTextResult!
   generateResearch(goalId: Int!): GenerateResearchResult!
   generateTherapeuticQuestions(goalId: Int!): GenerateQuestionsResult!
   refreshClaimCard(id: ID!): ClaimCard!
   updateGoal(id: Int!, input: UpdateGoalInput!): Goal!
   updateNote(id: Int!, input: UpdateNoteInput!): Note!
+  uploadAudioToR2(input: UploadAudioToR2Input!): UploadAudioToR2Result!
 }
 
 type Note {
@@ -313,6 +348,7 @@ type PaperCandidate {
 
 type Query {
   allNotes(userId: String!): [Note!]!
+  availableVoices: [ElevenLabsVoice!]!
   claimCard(id: ID!): ClaimCard
   claimCardsForNote(noteId: Int!): [ClaimCard!]!
   generationJob(id: String!): GenerationJob
@@ -398,4 +434,23 @@ input UpdateNoteInput {
   noteType: String
   tags: [String!]
   title: String
+}
+
+input UploadAudioToR2Input {
+  contextPrefix: String
+  filename: String
+  metadata: AudioMetadataInput
+  modelId: String
+  speed: Float
+  stability: Float
+  text: String!
+  voiceId: String
+}
+
+type UploadAudioToR2Result {
+  isPublic: Boolean!
+  message: String
+  objectKey: String!
+  success: Boolean!
+  url: String!
 }
