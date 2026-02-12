@@ -32,11 +32,30 @@ export type AudioAsset = {
   voice: Scalars['String']['output'];
 };
 
+export type AudioFromR2Result = {
+  __typename?: 'AudioFromR2Result';
+  audioUrl?: Maybe<Scalars['String']['output']>;
+  key?: Maybe<Scalars['String']['output']>;
+  message?: Maybe<Scalars['String']['output']>;
+  metadata?: Maybe<AudioMetadata>;
+  success: Scalars['Boolean']['output'];
+};
+
 export type AudioManifest = {
   __typename?: 'AudioManifest';
   segmentCount: Scalars['Int']['output'];
   segments: Array<AudioSegmentInfo>;
   totalDuration?: Maybe<Scalars['Float']['output']>;
+};
+
+export type AudioMetadata = {
+  __typename?: 'AudioMetadata';
+  chunks?: Maybe<Scalars['String']['output']>;
+  generatedBy?: Maybe<Scalars['String']['output']>;
+  instructions?: Maybe<Scalars['String']['output']>;
+  model?: Maybe<Scalars['String']['output']>;
+  textLength?: Maybe<Scalars['String']['output']>;
+  voice?: Maybe<Scalars['String']['output']>;
 };
 
 export type AudioSegmentInfo = {
@@ -214,9 +233,12 @@ export type GenerateLongFormTextResult = {
 };
 
 export type GenerateOpenAIAudioInput = {
+  instructions?: InputMaybe<Scalars['String']['input']>;
   model?: InputMaybe<OpenAITTSModel>;
   responseFormat?: InputMaybe<OpenAIAudioFormat>;
   speed?: InputMaybe<Scalars['Float']['input']>;
+  storyId?: InputMaybe<Scalars['Int']['input']>;
+  streamFormat?: InputMaybe<OpenAIStreamFormat>;
   text: Scalars['String']['input'];
   uploadToCloud?: InputMaybe<Scalars['Boolean']['input']>;
   voice?: InputMaybe<OpenAITTSVoice>;
@@ -486,6 +508,10 @@ export type OpenAIAudioFormat =
   | 'PCM'
   | 'WAV';
 
+export type OpenAIStreamFormat =
+  | 'AUDIO'
+  | 'SSE';
+
 export type OpenAITTSModel =
   | 'GPT_4O_MINI_TTS'
   | 'TTS_1'
@@ -495,13 +521,16 @@ export type OpenAITTSVoice =
   | 'ALLOY'
   | 'ASH'
   | 'BALLAD'
+  | 'CEDAR'
   | 'CORAL'
   | 'ECHO'
   | 'FABLE'
+  | 'MARIN'
   | 'NOVA'
   | 'ONYX'
   | 'SAGE'
-  | 'SHIMMER';
+  | 'SHIMMER'
+  | 'VERSE';
 
 export type PaperCandidate = {
   __typename?: 'PaperCandidate';
@@ -520,6 +549,7 @@ export type PaperCandidate = {
 export type Query = {
   __typename?: 'Query';
   allNotes: Array<Note>;
+  audioFromR2?: Maybe<AudioFromR2Result>;
   claimCard?: Maybe<ClaimCard>;
   claimCardsForNote: Array<ClaimCard>;
   generationJob?: Maybe<GenerationJob>;
@@ -532,6 +562,11 @@ export type Query = {
   stories: Array<Story>;
   story?: Maybe<Story>;
   therapeuticQuestions: Array<TherapeuticQuestion>;
+};
+
+
+export type QueryaudioFromR2Args = {
+  key: Scalars['String']['input'];
 };
 
 
@@ -633,6 +668,9 @@ export type ResearchSource =
 
 export type Story = {
   __typename?: 'Story';
+  audioGeneratedAt?: Maybe<Scalars['String']['output']>;
+  audioKey?: Maybe<Scalars['String']['output']>;
+  audioUrl?: Maybe<Scalars['String']['output']>;
   content: Scalars['String']['output'];
   createdAt: Scalars['String']['output'];
   createdBy: Scalars['String']['output'];
@@ -776,11 +814,13 @@ export type ResolversTypes = {
   AudioAsset: ResolverTypeWrapper<AudioAsset>;
   String: ResolverTypeWrapper<Scalars['String']['output']>;
   Int: ResolverTypeWrapper<Scalars['Int']['output']>;
+  AudioFromR2Result: ResolverTypeWrapper<AudioFromR2Result>;
+  Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>;
   AudioManifest: ResolverTypeWrapper<AudioManifest>;
   Float: ResolverTypeWrapper<Scalars['Float']['output']>;
+  AudioMetadata: ResolverTypeWrapper<AudioMetadata>;
   AudioSegmentInfo: ResolverTypeWrapper<AudioSegmentInfo>;
   BuildClaimCardsInput: BuildClaimCardsInput;
-  Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>;
   BuildClaimCardsResult: ResolverTypeWrapper<Omit<BuildClaimCardsResult, 'cards'> & { cards: Array<ResolversTypes['ClaimCard']> }>;
   CheckNoteClaimsInput: CheckNoteClaimsInput;
   CheckNoteClaimsResult: ResolverTypeWrapper<Omit<CheckNoteClaimsResult, 'cards'> & { cards: Array<ResolversTypes['ClaimCard']> }>;
@@ -816,8 +856,9 @@ export type ResolversTypes = {
   Mutation: ResolverTypeWrapper<Record<PropertyKey, never>>;
   Note: ResolverTypeWrapper<Omit<Note, 'claimCards' | 'goal' | 'linkedResearch'> & { claimCards?: Maybe<Array<ResolversTypes['ClaimCard']>>, goal?: Maybe<ResolversTypes['Goal']>, linkedResearch?: Maybe<Array<ResolversTypes['Research']>> }>;
   OpenAIAudioFormat: ResolverTypeWrapper<'MP3' | 'OPUS' | 'AAC' | 'FLAC' | 'WAV' | 'PCM'>;
+  OpenAIStreamFormat: ResolverTypeWrapper<'SSE' | 'AUDIO'>;
   OpenAITTSModel: ResolverTypeWrapper<'TTS_1' | 'TTS_1_HD' | 'GPT_4O_MINI_TTS'>;
-  OpenAITTSVoice: ResolverTypeWrapper<'ALLOY' | 'ASH' | 'BALLAD' | 'CORAL' | 'ECHO' | 'FABLE' | 'ONYX' | 'NOVA' | 'SAGE' | 'SHIMMER'>;
+  OpenAITTSVoice: ResolverTypeWrapper<'ALLOY' | 'ASH' | 'BALLAD' | 'CORAL' | 'ECHO' | 'FABLE' | 'ONYX' | 'NOVA' | 'SAGE' | 'SHIMMER' | 'VERSE' | 'MARIN' | 'CEDAR'>;
   PaperCandidate: ResolverTypeWrapper<PaperCandidate>;
   Query: ResolverTypeWrapper<Record<PropertyKey, never>>;
   Research: ResolverTypeWrapper<Omit<Research, 'goal'> & { goal?: Maybe<ResolversTypes['Goal']> }>;
@@ -836,11 +877,13 @@ export type ResolversParentTypes = {
   AudioAsset: AudioAsset;
   String: Scalars['String']['output'];
   Int: Scalars['Int']['output'];
+  AudioFromR2Result: AudioFromR2Result;
+  Boolean: Scalars['Boolean']['output'];
   AudioManifest: AudioManifest;
   Float: Scalars['Float']['output'];
+  AudioMetadata: AudioMetadata;
   AudioSegmentInfo: AudioSegmentInfo;
   BuildClaimCardsInput: BuildClaimCardsInput;
-  Boolean: Scalars['Boolean']['output'];
   BuildClaimCardsResult: Omit<BuildClaimCardsResult, 'cards'> & { cards: Array<ResolversParentTypes['ClaimCard']> };
   CheckNoteClaimsInput: CheckNoteClaimsInput;
   CheckNoteClaimsResult: Omit<CheckNoteClaimsResult, 'cards'> & { cards: Array<ResolversParentTypes['ClaimCard']> };
@@ -895,10 +938,27 @@ export type AudioAssetResolvers<ContextType = GraphQLContext, ParentType extends
   voice?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
 };
 
+export type AudioFromR2ResultResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['AudioFromR2Result'] = ResolversParentTypes['AudioFromR2Result']> = {
+  audioUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  key?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  message?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  metadata?: Resolver<Maybe<ResolversTypes['AudioMetadata']>, ParentType, ContextType>;
+  success?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+};
+
 export type AudioManifestResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['AudioManifest'] = ResolversParentTypes['AudioManifest']> = {
   segmentCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   segments?: Resolver<Array<ResolversTypes['AudioSegmentInfo']>, ParentType, ContextType>;
   totalDuration?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+};
+
+export type AudioMetadataResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['AudioMetadata'] = ResolversParentTypes['AudioMetadata']> = {
+  chunks?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  generatedBy?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  instructions?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  model?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  textLength?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  voice?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
 };
 
 export type AudioSegmentInfoResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['AudioSegmentInfo'] = ResolversParentTypes['AudioSegmentInfo']> = {
@@ -1143,9 +1203,11 @@ export type NoteResolvers<ContextType = GraphQLContext, ParentType extends Resol
 
 export type OpenAIAudioFormatResolvers = EnumResolverSignature<{ AAC?: any, FLAC?: any, MP3?: any, OPUS?: any, PCM?: any, WAV?: any }, ResolversTypes['OpenAIAudioFormat']>;
 
+export type OpenAIStreamFormatResolvers = EnumResolverSignature<{ AUDIO?: any, SSE?: any }, ResolversTypes['OpenAIStreamFormat']>;
+
 export type OpenAITTSModelResolvers = EnumResolverSignature<{ GPT_4O_MINI_TTS?: any, TTS_1?: any, TTS_1_HD?: any }, ResolversTypes['OpenAITTSModel']>;
 
-export type OpenAITTSVoiceResolvers = EnumResolverSignature<{ ALLOY?: any, ASH?: any, BALLAD?: any, CORAL?: any, ECHO?: any, FABLE?: any, NOVA?: any, ONYX?: any, SAGE?: any, SHIMMER?: any }, ResolversTypes['OpenAITTSVoice']>;
+export type OpenAITTSVoiceResolvers = EnumResolverSignature<{ ALLOY?: any, ASH?: any, BALLAD?: any, CEDAR?: any, CORAL?: any, ECHO?: any, FABLE?: any, MARIN?: any, NOVA?: any, ONYX?: any, SAGE?: any, SHIMMER?: any, VERSE?: any }, ResolversTypes['OpenAITTSVoice']>;
 
 export type PaperCandidateResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['PaperCandidate'] = ResolversParentTypes['PaperCandidate']> = {
   abstract?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
@@ -1162,6 +1224,7 @@ export type PaperCandidateResolvers<ContextType = GraphQLContext, ParentType ext
 
 export type QueryResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
   allNotes?: Resolver<Array<ResolversTypes['Note']>, ParentType, ContextType>;
+  audioFromR2?: Resolver<Maybe<ResolversTypes['AudioFromR2Result']>, ParentType, ContextType, RequireFields<QueryaudioFromR2Args, 'key'>>;
   claimCard?: Resolver<Maybe<ResolversTypes['ClaimCard']>, ParentType, ContextType, RequireFields<QueryclaimCardArgs, 'id'>>;
   claimCardsForNote?: Resolver<Array<ResolversTypes['ClaimCard']>, ParentType, ContextType, RequireFields<QueryclaimCardsForNoteArgs, 'noteId'>>;
   generationJob?: Resolver<Maybe<ResolversTypes['GenerationJob']>, ParentType, ContextType, RequireFields<QuerygenerationJobArgs, 'id'>>;
@@ -1201,6 +1264,9 @@ export type ResearchResolvers<ContextType = GraphQLContext, ParentType extends R
 export type ResearchSourceResolvers = EnumResolverSignature<{ ARXIV?: any, CROSSREF?: any, DATACITE?: any, EUROPEPMC?: any, OPENALEX?: any, PUBMED?: any, SEMANTIC_SCHOLAR?: any }, ResolversTypes['ResearchSource']>;
 
 export type StoryResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Story'] = ResolversParentTypes['Story']> = {
+  audioGeneratedAt?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  audioKey?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  audioUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   content?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   createdAt?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   createdBy?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -1238,7 +1304,9 @@ export type TherapeuticQuestionResolvers<ContextType = GraphQLContext, ParentTyp
 
 export type Resolvers<ContextType = GraphQLContext> = {
   AudioAsset?: AudioAssetResolvers<ContextType>;
+  AudioFromR2Result?: AudioFromR2ResultResolvers<ContextType>;
   AudioManifest?: AudioManifestResolvers<ContextType>;
+  AudioMetadata?: AudioMetadataResolvers<ContextType>;
   AudioSegmentInfo?: AudioSegmentInfoResolvers<ContextType>;
   BuildClaimCardsResult?: BuildClaimCardsResultResolvers<ContextType>;
   CheckNoteClaimsResult?: CheckNoteClaimsResultResolvers<ContextType>;
@@ -1269,6 +1337,7 @@ export type Resolvers<ContextType = GraphQLContext> = {
   Mutation?: MutationResolvers<ContextType>;
   Note?: NoteResolvers<ContextType>;
   OpenAIAudioFormat?: OpenAIAudioFormatResolvers;
+  OpenAIStreamFormat?: OpenAIStreamFormatResolvers;
   OpenAITTSModel?: OpenAITTSModelResolvers;
   OpenAITTSVoice?: OpenAITTSVoiceResolvers;
   PaperCandidate?: PaperCandidateResolvers<ContextType>;

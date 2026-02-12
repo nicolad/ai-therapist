@@ -4,6 +4,9 @@ query GetStory($id: Int!) {
     goalId
     createdBy
     content
+    audioKey
+    audioUrl
+    audioGeneratedAt
     createdAt
     updatedAt
     goal {

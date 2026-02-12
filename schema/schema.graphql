@@ -14,6 +14,9 @@ type Query {
   # Claim Cards
   claimCard(id: ID!): ClaimCard
   claimCardsForNote(noteId: Int!): [ClaimCard!]!
+
+  # R2 Audio
+  audioFromR2(key: String!): AudioFromR2Result
 }
 
 type Mutation {
@@ -96,6 +99,9 @@ type Story {
   goalId: Int!
   createdBy: String!
   content: String!
+  audioKey: String
+  audioUrl: String
+  audioGeneratedAt: String
   createdAt: String!
   updatedAt: String!
   goal: Goal
@@ -482,6 +488,9 @@ enum OpenAITTSVoice {
   NOVA
   SAGE
   SHIMMER
+  VERSE
+  MARIN
+  CEDAR
 }
 
 enum OpenAITTSModel {
@@ -499,13 +508,21 @@ enum OpenAIAudioFormat {
   PCM
 }
 
+enum OpenAIStreamFormat {
+  SSE
+  AUDIO
+}
+
 input GenerateOpenAIAudioInput {
   text: String!
+  storyId: Int
   voice: OpenAITTSVoice
   model: OpenAITTSModel
   speed: Float
   responseFormat: OpenAIAudioFormat
   uploadToCloud: Boolean
+  streamFormat: OpenAIStreamFormat
+  instructions: String
 }
 
 type GenerateOpenAIAudioResult {
@@ -516,4 +533,21 @@ type GenerateOpenAIAudioResult {
   key: String
   sizeBytes: Int
   duration: Float
+}
+
+type AudioFromR2Result {
+  success: Boolean!
+  message: String
+  audioUrl: String
+  key: String
+  metadata: AudioMetadata
+}
+
+type AudioMetadata {
+  voice: String
+  model: String
+  textLength: String
+  chunks: String
+  generatedBy: String
+  instructions: String
 }

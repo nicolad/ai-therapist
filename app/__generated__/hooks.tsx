@@ -30,11 +30,30 @@ export type AudioAsset = {
   voice: Scalars['String']['output'];
 };
 
+export type AudioFromR2Result = {
+  __typename?: 'AudioFromR2Result';
+  audioUrl?: Maybe<Scalars['String']['output']>;
+  key?: Maybe<Scalars['String']['output']>;
+  message?: Maybe<Scalars['String']['output']>;
+  metadata?: Maybe<AudioMetadata>;
+  success: Scalars['Boolean']['output'];
+};
+
 export type AudioManifest = {
   __typename?: 'AudioManifest';
   segmentCount: Scalars['Int']['output'];
   segments: Array<AudioSegmentInfo>;
   totalDuration?: Maybe<Scalars['Float']['output']>;
+};
+
+export type AudioMetadata = {
+  __typename?: 'AudioMetadata';
+  chunks?: Maybe<Scalars['String']['output']>;
+  generatedBy?: Maybe<Scalars['String']['output']>;
+  instructions?: Maybe<Scalars['String']['output']>;
+  model?: Maybe<Scalars['String']['output']>;
+  textLength?: Maybe<Scalars['String']['output']>;
+  voice?: Maybe<Scalars['String']['output']>;
 };
 
 export type AudioSegmentInfo = {
@@ -214,9 +233,12 @@ export type GenerateLongFormTextResult = {
 };
 
 export type GenerateOpenAiAudioInput = {
+  instructions?: InputMaybe<Scalars['String']['input']>;
   model?: InputMaybe<OpenAittsModel>;
   responseFormat?: InputMaybe<OpenAiAudioFormat>;
   speed?: InputMaybe<Scalars['Float']['input']>;
+  storyId?: InputMaybe<Scalars['Int']['input']>;
+  streamFormat?: InputMaybe<OpenAiStreamFormat>;
   text: Scalars['String']['input'];
   uploadToCloud?: InputMaybe<Scalars['Boolean']['input']>;
   voice?: InputMaybe<OpenAittsVoice>;
@@ -489,6 +511,11 @@ export enum OpenAiAudioFormat {
   Wav = 'WAV'
 }
 
+export enum OpenAiStreamFormat {
+  Audio = 'AUDIO',
+  Sse = 'SSE'
+}
+
 export enum OpenAittsModel {
   Gpt_4OMiniTts = 'GPT_4O_MINI_TTS',
   Tts_1 = 'TTS_1',
@@ -499,13 +526,16 @@ export enum OpenAittsVoice {
   Alloy = 'ALLOY',
   Ash = 'ASH',
   Ballad = 'BALLAD',
+  Cedar = 'CEDAR',
   Coral = 'CORAL',
   Echo = 'ECHO',
   Fable = 'FABLE',
+  Marin = 'MARIN',
   Nova = 'NOVA',
   Onyx = 'ONYX',
   Sage = 'SAGE',
-  Shimmer = 'SHIMMER'
+  Shimmer = 'SHIMMER',
+  Verse = 'VERSE'
 }
 
 export type PaperCandidate = {
@@ -525,6 +555,7 @@ export type PaperCandidate = {
 export type Query = {
   __typename?: 'Query';
   allNotes: Array<Note>;
+  audioFromR2?: Maybe<AudioFromR2Result>;
   claimCard?: Maybe<ClaimCard>;
   claimCardsForNote: Array<ClaimCard>;
   generationJob?: Maybe<GenerationJob>;
@@ -537,6 +568,11 @@ export type Query = {
   stories: Array<Story>;
   story?: Maybe<Story>;
   therapeuticQuestions: Array<TherapeuticQuestion>;
+};
+
+
+export type QueryAudioFromR2Args = {
+  key: Scalars['String']['input'];
 };
 
 
@@ -639,6 +675,9 @@ export enum ResearchSource {
 
 export type Story = {
   __typename?: 'Story';
+  audioGeneratedAt?: Maybe<Scalars['String']['output']>;
+  audioKey?: Maybe<Scalars['String']['output']>;
+  audioUrl?: Maybe<Scalars['String']['output']>;
   content: Scalars['String']['output'];
   createdAt: Scalars['String']['output'];
   createdBy: Scalars['String']['output'];
@@ -824,6 +863,13 @@ export type GetAllNotesQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type GetAllNotesQuery = { __typename?: 'Query', allNotes: Array<{ __typename?: 'Note', id: number, entityId: number, entityType: string, createdBy: string, noteType?: string | null, slug?: string | null, title?: string | null, content: string, tags?: Array<string> | null, createdAt: string, updatedAt: string, goal?: { __typename?: 'Goal', id: number, title: string, description?: string | null, status: string } | null }> };
 
+export type GetAudioFromR2QueryVariables = Exact<{
+  key: Scalars['String']['input'];
+}>;
+
+
+export type GetAudioFromR2Query = { __typename?: 'Query', audioFromR2?: { __typename?: 'AudioFromR2Result', success: boolean, message?: string | null, audioUrl?: string | null, key?: string | null, metadata?: { __typename?: 'AudioMetadata', voice?: string | null, model?: string | null, textLength?: string | null, chunks?: string | null, generatedBy?: string | null, instructions?: string | null } | null } | null };
+
 export type GetGoalQueryVariables = Exact<{
   id?: InputMaybe<Scalars['Int']['input']>;
   slug?: InputMaybe<Scalars['String']['input']>;
@@ -868,7 +914,7 @@ export type GetStoryQueryVariables = Exact<{
 }>;
 
 
-export type GetStoryQuery = { __typename?: 'Query', story?: { __typename?: 'Story', id: number, goalId: number, createdBy: string, content: string, createdAt: string, updatedAt: string, goal?: { __typename?: 'Goal', id: number, title: string, slug?: string | null } | null } | null };
+export type GetStoryQuery = { __typename?: 'Query', story?: { __typename?: 'Story', id: number, goalId: number, createdBy: string, content: string, audioKey?: string | null, audioUrl?: string | null, audioGeneratedAt?: string | null, createdAt: string, updatedAt: string, goal?: { __typename?: 'Goal', id: number, title: string, slug?: string | null } | null } | null };
 
 export type UpdateNoteMutationVariables = Exact<{
   id: Scalars['Int']['input'];
@@ -1717,6 +1763,60 @@ export type GetAllNotesQueryHookResult = ReturnType<typeof useGetAllNotesQuery>;
 export type GetAllNotesLazyQueryHookResult = ReturnType<typeof useGetAllNotesLazyQuery>;
 export type GetAllNotesSuspenseQueryHookResult = ReturnType<typeof useGetAllNotesSuspenseQuery>;
 export type GetAllNotesQueryResult = Apollo.QueryResult<GetAllNotesQuery, GetAllNotesQueryVariables>;
+export const GetAudioFromR2Document = gql`
+    query GetAudioFromR2($key: String!) {
+  audioFromR2(key: $key) {
+    success
+    message
+    audioUrl
+    key
+    metadata {
+      voice
+      model
+      textLength
+      chunks
+      generatedBy
+      instructions
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetAudioFromR2Query__
+ *
+ * To run a query within a React component, call `useGetAudioFromR2Query` and pass it any options that fit your needs.
+ * When your component renders, `useGetAudioFromR2Query` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetAudioFromR2Query({
+ *   variables: {
+ *      key: // value for 'key'
+ *   },
+ * });
+ */
+export function useGetAudioFromR2Query(baseOptions: Apollo.QueryHookOptions<GetAudioFromR2Query, GetAudioFromR2QueryVariables> & ({ variables: GetAudioFromR2QueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetAudioFromR2Query, GetAudioFromR2QueryVariables>(GetAudioFromR2Document, options);
+      }
+export function useGetAudioFromR2LazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetAudioFromR2Query, GetAudioFromR2QueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetAudioFromR2Query, GetAudioFromR2QueryVariables>(GetAudioFromR2Document, options);
+        }
+// @ts-ignore
+export function useGetAudioFromR2SuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetAudioFromR2Query, GetAudioFromR2QueryVariables>): Apollo.UseSuspenseQueryResult<GetAudioFromR2Query, GetAudioFromR2QueryVariables>;
+export function useGetAudioFromR2SuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetAudioFromR2Query, GetAudioFromR2QueryVariables>): Apollo.UseSuspenseQueryResult<GetAudioFromR2Query | undefined, GetAudioFromR2QueryVariables>;
+export function useGetAudioFromR2SuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetAudioFromR2Query, GetAudioFromR2QueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetAudioFromR2Query, GetAudioFromR2QueryVariables>(GetAudioFromR2Document, options);
+        }
+export type GetAudioFromR2QueryHookResult = ReturnType<typeof useGetAudioFromR2Query>;
+export type GetAudioFromR2LazyQueryHookResult = ReturnType<typeof useGetAudioFromR2LazyQuery>;
+export type GetAudioFromR2SuspenseQueryHookResult = ReturnType<typeof useGetAudioFromR2SuspenseQuery>;
+export type GetAudioFromR2QueryResult = Apollo.QueryResult<GetAudioFromR2Query, GetAudioFromR2QueryVariables>;
 export const GetGoalDocument = gql`
     query GetGoal($id: Int, $slug: String) {
   goal(id: $id, slug: $slug) {
@@ -2088,6 +2188,9 @@ export const GetStoryDocument = gql`
     goalId
     createdBy
     content
+    audioKey
+    audioUrl
+    audioGeneratedAt
     createdAt
     updatedAt
     goal {

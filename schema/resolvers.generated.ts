@@ -1,6 +1,7 @@
 /* This file was automatically generated. DO NOT UPDATE MANUALLY. */
     import type   { Resolvers } from './types.generated';
     import    { allNotes as Query_allNotes } from './resolvers/Query/allNotes';
+import    { audioFromR2 as Query_audioFromR2 } from './resolvers/Query/audioFromR2';
 import    { claimCard as Query_claimCard } from './resolvers/Query/claimCard';
 import    { claimCardsForNote as Query_claimCardsForNote } from './resolvers/Query/claimCardsForNote';
 import    { generationJob as Query_generationJob } from './resolvers/Query/generationJob';
@@ -36,7 +37,9 @@ import    { updateStory as Mutation_updateStory } from './resolvers/Mutation/upd
 import    { audioJobStatus as Subscription_audioJobStatus } from './resolvers/Subscription/audioJobStatus';
 import    { researchJobStatus as Subscription_researchJobStatus } from './resolvers/Subscription/researchJobStatus';
 import    { AudioAsset } from './resolvers/AudioAsset';
+import    { AudioFromR2Result } from './resolvers/AudioFromR2Result';
 import    { AudioManifest } from './resolvers/AudioManifest';
+import    { AudioMetadata } from './resolvers/AudioMetadata';
 import    { AudioSegmentInfo } from './resolvers/AudioSegmentInfo';
 import    { BuildClaimCardsResult } from './resolvers/BuildClaimCardsResult';
 import    { CheckNoteClaimsResult } from './resolvers/CheckNoteClaimsResult';
@@ -67,11 +70,13 @@ import    { Story } from './resolvers/Story';
 import    { TextSegment } from './resolvers/TextSegment';
 import    { TherapeuticQuestion } from './resolvers/TherapeuticQuestion';
     export const resolvers: Resolvers = {
-      Query: { allNotes: Query_allNotes,claimCard: Query_claimCard,claimCardsForNote: Query_claimCardsForNote,generationJob: Query_generationJob,generationJobs: Query_generationJobs,goal: Query_goal,goals: Query_goals,note: Query_note,notes: Query_notes,research: Query_research,stories: Query_stories,story: Query_story,therapeuticQuestions: Query_therapeuticQuestions },
+      Query: { allNotes: Query_allNotes,audioFromR2: Query_audioFromR2,claimCard: Query_claimCard,claimCardsForNote: Query_claimCardsForNote,generationJob: Query_generationJob,generationJobs: Query_generationJobs,goal: Query_goal,goals: Query_goals,note: Query_note,notes: Query_notes,research: Query_research,stories: Query_stories,story: Query_story,therapeuticQuestions: Query_therapeuticQuestions },
       Mutation: { buildClaimCards: Mutation_buildClaimCards,checkNoteClaims: Mutation_checkNoteClaims,createGoal: Mutation_createGoal,createNote: Mutation_createNote,createStory: Mutation_createStory,deleteClaimCard: Mutation_deleteClaimCard,deleteGoal: Mutation_deleteGoal,deleteNote: Mutation_deleteNote,deleteResearch: Mutation_deleteResearch,deleteStory: Mutation_deleteStory,deleteTherapeuticQuestions: Mutation_deleteTherapeuticQuestions,generateAudio: Mutation_generateAudio,generateLongFormText: Mutation_generateLongFormText,generateOpenAIAudio: Mutation_generateOpenAIAudio,generateResearch: Mutation_generateResearch,generateTherapeuticQuestions: Mutation_generateTherapeuticQuestions,refreshClaimCard: Mutation_refreshClaimCard,updateGoal: Mutation_updateGoal,updateNote: Mutation_updateNote,updateStory: Mutation_updateStory },
       Subscription: { audioJobStatus: Subscription_audioJobStatus,researchJobStatus: Subscription_researchJobStatus },
       AudioAsset: AudioAsset,
+AudioFromR2Result: AudioFromR2Result,
 AudioManifest: AudioManifest,
+AudioMetadata: AudioMetadata,
 AudioSegmentInfo: AudioSegmentInfo,
 BuildClaimCardsResult: BuildClaimCardsResult,
 CheckNoteClaimsResult: CheckNoteClaimsResult,

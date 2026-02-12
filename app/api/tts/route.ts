@@ -16,13 +16,12 @@ async function chunkTextForSpeech(text: string): Promise<string[]> {
   // Create MDocument from text
   const doc = MDocument.fromText(text);
 
-  // Use sentence strategy for natural speech patterns
+  // Use recursive strategy for smart content structure splitting
   const chunks = await doc.chunk({
-    strategy: "sentence",
+    strategy: "recursive",
     maxSize: MAX_CHARS,
-    minSize: 50,
-    overlap: 0,
-    sentenceEnders: [".", "!", "?", "。", "！", "？"], // Support multiple languages
+    overlap: 50,
+    separators: ["\n\n", "\n", ". ", "! ", "? "],
   });
 
   // Extract text from chunks
@@ -31,7 +30,14 @@ async function chunkTextForSpeech(text: string): Promise<string[]> {
 
 export async function POST(request: NextRequest) {
   try {
-    const { text, voice, uploadToCloud } = await request.json();
+    const {
+      text,
+      voice,
+      uploadToCloud,
+      streamFormat,
+      instructions,
+      responseFormat,
+    } = await request.json();
 
     if (!text) {
       return NextResponse.json({ error: "Text is required" }, { status: 400 });
@@ -40,6 +46,8 @@ export async function POST(request: NextRequest) {
     // Use alloy voice by default (calm, clear, professional)
     // Other options: ash, ballad, coral, echo, fable, onyx, nova, sage, shimmer
     const selectedVoice = voice || "alloy";
+    const format = responseFormat || "mp3";
+    const useSSE = streamFormat === "sse";
 
     // Check if text needs to be chunked
     if (text.length > MAX_CHARS) {
@@ -53,8 +61,9 @@ export async function POST(request: NextRequest) {
           model: "gpt-4o-mini-tts",
           voice: selectedVoice,
           input: chunk,
-          response_format: "mp3",
+          response_format: format as any,
           speed: 0.9,
+          ...(instructions && { instructions }),
         });
 
         const buffer = Buffer.from(await response.arrayBuffer());
@@ -70,12 +79,13 @@ export async function POST(request: NextRequest) {
         const result = await uploadToR2({
           key,
           body: combined,
-          contentType: "audio/mpeg",
+          contentType: `audio/${format}`,
           metadata: {
             voice: selectedVoice,
             model: "gpt-4o-mini-tts",
             textLength: text.length.toString(),
             chunks: chunks.length.toString(),
+            ...(instructions && { instructions }),
           },
         });
 
@@ -90,8 +100,53 @@ export async function POST(request: NextRequest) {
       // Return audio directly
       return new NextResponse(combined, {
         headers: {
-          "Content-Type": "audio/mpeg",
+          "Content-Type": `audio/${format}`,
           "Content-Length": combined.length.toString(),
+        },
+      });
+    }
+
+    // For short text with SSE streaming
+    if (useSSE && !uploadToCloud) {
+      const response = await openai.audio.speech.create({
+        model: "gpt-4o-mini-tts",
+        voice: selectedVoice,
+        input: text,
+        response_format: format as any,
+        speed: 0.9,
+        stream_format: "sse",
+        ...(instructions && { instructions }),
+      });
+
+      // Create SSE stream
+      const stream = new ReadableStream({
+        async start(controller) {
+          try {
+            const reader = response.body?.getReader();
+            if (!reader) {
+              controller.close();
+              return;
+            }
+
+            while (true) {
+              const { done, value } = await reader.read();
+              if (done) {
+                controller.close();
+                break;
+              }
+              controller.enqueue(value);
+            }
+          } catch (error) {
+            controller.error(error);
+          }
+        },
+      });
+
+      return new NextResponse(stream, {
+        headers: {
+          "Content-Type": "text/event-stream",
+          "Cache-Control": "no-cache",
+          Connection: "keep-alive",
         },
       });
     }
@@ -101,8 +156,9 @@ export async function POST(request: NextRequest) {
       model: "gpt-4o-mini-tts",
       voice: selectedVoice,
       input: text,
-      response_format: "mp3",
+      response_format: format as any,
       speed: 0.9,
+      ...(instructions && { instructions }),
     });
 
     // Upload to R2 if requested
@@ -114,11 +170,12 @@ export async function POST(request: NextRequest) {
       const result = await uploadToR2({
         key,
         body: buffer,
-        contentType: "audio/mpeg",
+        contentType: `audio/${format}`,
         metadata: {
           voice: selectedVoice,
           model: "gpt-4o-mini-tts",
           textLength: text.length.toString(),
+          ...(instructions && { instructions }),
         },
       });
 
@@ -156,7 +213,7 @@ export async function POST(request: NextRequest) {
 
     return new NextResponse(stream, {
       headers: {
-        "Content-Type": "audio/mpeg",
+        "Content-Type": `audio/${format}`,
         "Cache-Control": "no-cache",
         "Transfer-Encoding": "chunked",
       },

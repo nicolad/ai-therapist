@@ -10,10 +10,27 @@ type AudioAsset {
   voice: String!
 }
 
+type AudioFromR2Result {
+  audioUrl: String
+  key: String
+  message: String
+  metadata: AudioMetadata
+  success: Boolean!
+}
+
 type AudioManifest {
   segmentCount: Int!
   segments: [AudioSegmentInfo!]!
   totalDuration: Float
+}
+
+type AudioMetadata {
+  chunks: String
+  generatedBy: String
+  instructions: String
+  model: String
+  textLength: String
+  voice: String
 }
 
 type AudioSegmentInfo {
@@ -178,9 +195,12 @@ type GenerateLongFormTextResult {
 }
 
 input GenerateOpenAIAudioInput {
+  instructions: String
   model: OpenAITTSModel
   responseFormat: OpenAIAudioFormat
   speed: Float
+  storyId: Int
+  streamFormat: OpenAIStreamFormat
   text: String!
   uploadToCloud: Boolean
   voice: OpenAITTSVoice
@@ -334,6 +354,11 @@ enum OpenAIAudioFormat {
   WAV
 }
 
+enum OpenAIStreamFormat {
+  AUDIO
+  SSE
+}
+
 enum OpenAITTSModel {
   GPT_4O_MINI_TTS
   TTS_1
@@ -344,13 +369,16 @@ enum OpenAITTSVoice {
   ALLOY
   ASH
   BALLAD
+  CEDAR
   CORAL
   ECHO
   FABLE
+  MARIN
   NOVA
   ONYX
   SAGE
   SHIMMER
+  VERSE
 }
 
 type PaperCandidate {
@@ -368,6 +396,7 @@ type PaperCandidate {
 
 type Query {
   allNotes: [Note!]!
+  audioFromR2(key: String!): AudioFromR2Result
   claimCard(id: ID!): ClaimCard
   claimCardsForNote(noteId: Int!): [ClaimCard!]!
   generationJob(id: String!): GenerationJob
@@ -415,6 +444,9 @@ enum ResearchSource {
 }
 
 type Story {
+  audioGeneratedAt: String
+  audioKey: String
+  audioUrl: String
   content: String!
   createdAt: String!
   createdBy: String!

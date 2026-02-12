@@ -630,6 +630,9 @@ export async function listStories(goalId: number, createdBy: string) {
     goalId: row.goal_id as number,
     createdBy: row.user_id as string,
     content: row.content as string,
+    audioKey: row.audio_key as string | null,
+    audioUrl: row.audio_url as string | null,
+    audioGeneratedAt: row.audio_generated_at as string | null,
     createdAt: row.created_at as string,
     updatedAt: row.updated_at as string,
   }));
@@ -651,6 +654,9 @@ export async function getStory(storyId: number, createdBy: string) {
     goalId: row.goal_id as number,
     createdBy: row.user_id as string,
     content: row.content as string,
+    audioKey: row.audio_key as string | null,
+    audioUrl: row.audio_url as string | null,
+    audioGeneratedAt: row.audio_generated_at as string | null,
     createdAt: row.created_at as string,
     updatedAt: row.updated_at as string,
   };

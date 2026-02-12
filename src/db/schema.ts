@@ -89,6 +89,9 @@ export const stories = sqliteTable("stories", {
     .references(() => goals.id, { onDelete: "cascade" }),
   userId: text("user_id").notNull(),
   content: text("content").notNull(),
+  audioKey: text("audio_key"),
+  audioUrl: text("audio_url"),
+  audioGeneratedAt: text("audio_generated_at"),
   createdAt: text("created_at")
     .notNull()
     .default(sql`CURRENT_TIMESTAMP`),
