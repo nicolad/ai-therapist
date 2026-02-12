@@ -41,7 +41,9 @@ async function main() {
   // Validate required parameters
   if (!createdBy) {
     console.error("❌ Error: --userId or --createdBy parameter is required");
-    console.log("Usage: tsx scripts/link-note-to-goal.ts --noteSlug=<slug> --createdBy=<email>");
+    console.log(
+      "Usage: tsx scripts/link-note-to-goal.ts --noteSlug=<slug> --createdBy=<email>",
+    );
     return;
   }
 

@@ -15,7 +15,6 @@ query GetNotes($entityId: Int!, $entityType: String!) {
       title
       description
       status
-      targetDate
     }
     createdAt
     updatedAt

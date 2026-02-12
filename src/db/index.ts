@@ -59,7 +59,6 @@ export async function getGoal(goalId: number, createdBy: string) {
     slug: (row.slug as string) || null,
     title: row.title as string,
     description: (row.description as string) || null,
-    targetDate: (row.target_date as string) || null,
     status: row.status as string,
     therapeuticText: (row.therapeutic_text as string) || null,
     therapeuticTextLanguage: (row.therapeutic_text_language as string) || null,
@@ -88,7 +87,6 @@ export async function getGoalBySlug(slug: string, createdBy: string) {
     slug: (row.slug as string) || null,
     title: row.title as string,
     description: (row.description as string) || null,
-    targetDate: (row.target_date as string) || null,
     status: row.status as string,
     therapeuticText: (row.therapeutic_text as string) || null,
     therapeuticTextLanguage: (row.therapeutic_text_language as string) || null,
@@ -126,7 +124,6 @@ export async function listGoals(
     createdBy: row.user_id as string,
     title: row.title as string,
     description: (row.description as string) || null,
-    targetDate: (row.target_date as string) || null,
     status: row.status as string,
     createdAt: row.created_at as string,
     updatedAt: row.updated_at as string,
@@ -139,13 +136,12 @@ export async function createGoal(params: {
   slug?: string;
   title: string;
   description?: string | null;
-  targetDate?: string | null;
 }) {
   const status = "active";
 
   const result = await turso.execute({
-    sql: `INSERT INTO goals (family_member_id, user_id, slug, title, description, target_date, status)
-          VALUES (?, ?, ?, ?, ?, ?, ?)
+    sql: `INSERT INTO goals (family_member_id, user_id, slug, title, description, status)
+          VALUES (?, ?, ?, ?, ?, ?)
           RETURNING id`,
     args: [
       params.familyMemberId,
@@ -153,7 +149,6 @@ export async function createGoal(params: {
       params.slug || null,
       params.title,
       params.description || null,
-      params.targetDate || null,
       status,
     ],
   });
@@ -168,7 +163,6 @@ export async function updateGoal(
     slug?: string;
     title?: string;
     description?: string | null;
-    targetDate?: string | null;
     status?: string;
   },
 ) {
@@ -188,11 +182,6 @@ export async function updateGoal(
   if (updates.description !== undefined) {
     fields.push("description = ?");
     args.push(updates.description);
-  }
-
-  if (updates.targetDate !== undefined) {
-    fields.push("target_date = ?");
-    args.push(updates.targetDate);
   }
 
   if (updates.status !== undefined) {

@@ -126,7 +126,6 @@ export enum ClaimVerdict {
 export type CreateGoalInput = {
   description?: InputMaybe<Scalars['String']['input']>;
   familyMemberId: Scalars['Int']['input'];
-  targetDate?: InputMaybe<Scalars['String']['input']>;
   title: Scalars['String']['input'];
 };
 
@@ -282,7 +281,6 @@ export type Goal = {
   slug?: Maybe<Scalars['String']['output']>;
   status: Scalars['String']['output'];
   stories: Array<GoalStory>;
-  targetDate?: Maybe<Scalars['String']['output']>;
   therapeuticText?: Maybe<Scalars['String']['output']>;
   therapeuticTextGeneratedAt?: Maybe<Scalars['String']['output']>;
   therapeuticTextLanguage?: Maybe<Scalars['String']['output']>;
@@ -632,7 +630,6 @@ export type TherapeuticQuestion = {
 export type UpdateGoalInput = {
   description?: InputMaybe<Scalars['String']['input']>;
   status?: InputMaybe<Scalars['String']['input']>;
-  targetDate?: InputMaybe<Scalars['String']['input']>;
   title?: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -740,7 +737,7 @@ export type CreateGoalMutationVariables = Exact<{
 }>;
 
 
-export type CreateGoalMutation = { __typename?: 'Mutation', createGoal: { __typename?: 'Goal', id: number, slug?: string | null, title: string, description?: string | null, status: string, targetDate?: string | null, createdAt: string, updatedAt: string, familyMemberId: number } };
+export type CreateGoalMutation = { __typename?: 'Mutation', createGoal: { __typename?: 'Goal', id: number, slug?: string | null, title: string, description?: string | null, status: string, createdAt: string, updatedAt: string, familyMemberId: number } };
 
 export type CreateNoteMutationVariables = Exact<{
   input: CreateNoteInput;
@@ -793,7 +790,7 @@ export type GenerateLongFormTextRomanianMutation = { __typename?: 'Mutation', ge
 export type GetAllNotesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetAllNotesQuery = { __typename?: 'Query', allNotes: Array<{ __typename?: 'Note', id: number, entityId: number, entityType: string, createdBy: string, noteType?: string | null, slug?: string | null, title?: string | null, content: string, tags?: Array<string> | null, createdAt: string, updatedAt: string, goal?: { __typename?: 'Goal', id: number, title: string, description?: string | null, status: string, targetDate?: string | null } | null }> };
+export type GetAllNotesQuery = { __typename?: 'Query', allNotes: Array<{ __typename?: 'Note', id: number, entityId: number, entityType: string, createdBy: string, noteType?: string | null, slug?: string | null, title?: string | null, content: string, tags?: Array<string> | null, createdAt: string, updatedAt: string, goal?: { __typename?: 'Goal', id: number, title: string, description?: string | null, status: string } | null }> };
 
 export type GetGoalQueryVariables = Exact<{
   id?: InputMaybe<Scalars['Int']['input']>;
@@ -801,7 +798,7 @@ export type GetGoalQueryVariables = Exact<{
 }>;
 
 
-export type GetGoalQuery = { __typename?: 'Query', goal?: { __typename?: 'Goal', id: number, slug?: string | null, title: string, description?: string | null, status: string, targetDate?: string | null, familyMemberId: number, createdBy: string, therapeuticText?: string | null, therapeuticTextLanguage?: string | null, therapeuticTextGeneratedAt?: string | null, createdAt: string, updatedAt: string, notes: Array<{ __typename?: 'Note', id: number, slug?: string | null, content: string, noteType?: string | null, tags?: Array<string> | null, createdAt: string, updatedAt: string }>, research: Array<{ __typename?: 'Research', id: number, title: string, authors: Array<string>, year?: number | null, journal?: string | null, url?: string | null }> } | null };
+export type GetGoalQuery = { __typename?: 'Query', goal?: { __typename?: 'Goal', id: number, slug?: string | null, title: string, description?: string | null, status: string, familyMemberId: number, createdBy: string, therapeuticText?: string | null, therapeuticTextLanguage?: string | null, therapeuticTextGeneratedAt?: string | null, createdAt: string, updatedAt: string, notes: Array<{ __typename?: 'Note', id: number, slug?: string | null, content: string, noteType?: string | null, tags?: Array<string> | null, createdAt: string, updatedAt: string }>, research: Array<{ __typename?: 'Research', id: number, title: string, authors: Array<string>, year?: number | null, journal?: string | null, url?: string | null }> } | null };
 
 export type GetGoalsQueryVariables = Exact<{
   familyMemberId?: InputMaybe<Scalars['Int']['input']>;
@@ -809,7 +806,7 @@ export type GetGoalsQueryVariables = Exact<{
 }>;
 
 
-export type GetGoalsQuery = { __typename?: 'Query', goals: Array<{ __typename?: 'Goal', id: number, title: string, description?: string | null, status: string, targetDate?: string | null, familyMemberId: number, createdBy: string, createdAt: string, updatedAt: string, notes: Array<{ __typename?: 'Note', id: number, slug?: string | null, noteType?: string | null, tags?: Array<string> | null, createdAt: string }> }> };
+export type GetGoalsQuery = { __typename?: 'Query', goals: Array<{ __typename?: 'Goal', id: number, title: string, description?: string | null, status: string, familyMemberId: number, createdBy: string, createdAt: string, updatedAt: string, notes: Array<{ __typename?: 'Note', id: number, slug?: string | null, noteType?: string | null, tags?: Array<string> | null, createdAt: string }> }> };
 
 export type GetNoteQueryVariables = Exact<{
   id?: InputMaybe<Scalars['Int']['input']>;
@@ -817,7 +814,7 @@ export type GetNoteQueryVariables = Exact<{
 }>;
 
 
-export type GetNoteQuery = { __typename?: 'Query', note?: { __typename?: 'Note', id: number, entityId: number, entityType: string, createdBy: string, noteType?: string | null, slug?: string | null, title?: string | null, content: string, tags?: Array<string> | null, createdAt: string, updatedAt: string, goal?: { __typename?: 'Goal', id: number, title: string, description?: string | null, status: string, targetDate?: string | null, createdAt: string } | null, linkedResearch?: Array<{ __typename?: 'Research', id: number, title: string, authors: Array<string>, year?: number | null, journal?: string | null, url?: string | null, therapeuticGoalType: string, relevanceScore: number }> | null, claimCards?: Array<{ __typename?: 'ClaimCard', id: string, claim: string, verdict: ClaimVerdict, confidence: number, queries: Array<string>, createdAt: string, updatedAt: string, notes?: string | null, scope?: { __typename?: 'ClaimScope', population?: string | null, intervention?: string | null, comparator?: string | null, outcome?: string | null, timeframe?: string | null, setting?: string | null } | null, evidence: Array<{ __typename?: 'EvidenceItem', polarity: EvidencePolarity, score?: number | null, excerpt?: string | null, rationale?: string | null, locator?: { __typename?: 'EvidenceLocator', page?: number | null, section?: string | null, url?: string | null } | null, paper: { __typename?: 'PaperCandidate', title: string, year?: number | null, doi?: string | null, url?: string | null, oaUrl?: string | null, source: string, authors?: Array<string> | null, abstract?: string | null, journal?: string | null } }>, provenance: { __typename?: 'ClaimProvenance', generatedBy: string, model?: string | null, sourceTools: Array<string> } }> | null } | null };
+export type GetNoteQuery = { __typename?: 'Query', note?: { __typename?: 'Note', id: number, entityId: number, entityType: string, createdBy: string, noteType?: string | null, slug?: string | null, title?: string | null, content: string, tags?: Array<string> | null, createdAt: string, updatedAt: string, goal?: { __typename?: 'Goal', id: number, title: string, description?: string | null, status: string, createdAt: string } | null, linkedResearch?: Array<{ __typename?: 'Research', id: number, title: string, authors: Array<string>, year?: number | null, journal?: string | null, url?: string | null, therapeuticGoalType: string, relevanceScore: number }> | null, claimCards?: Array<{ __typename?: 'ClaimCard', id: string, claim: string, verdict: ClaimVerdict, confidence: number, queries: Array<string>, createdAt: string, updatedAt: string, notes?: string | null, scope?: { __typename?: 'ClaimScope', population?: string | null, intervention?: string | null, comparator?: string | null, outcome?: string | null, timeframe?: string | null, setting?: string | null } | null, evidence: Array<{ __typename?: 'EvidenceItem', polarity: EvidencePolarity, score?: number | null, excerpt?: string | null, rationale?: string | null, locator?: { __typename?: 'EvidenceLocator', page?: number | null, section?: string | null, url?: string | null } | null, paper: { __typename?: 'PaperCandidate', title: string, year?: number | null, doi?: string | null, url?: string | null, oaUrl?: string | null, source: string, authors?: Array<string> | null, abstract?: string | null, journal?: string | null } }>, provenance: { __typename?: 'ClaimProvenance', generatedBy: string, model?: string | null, sourceTools: Array<string> } }> | null } | null };
 
 export type GetNotesQueryVariables = Exact<{
   entityId: Scalars['Int']['input'];
@@ -825,7 +822,7 @@ export type GetNotesQueryVariables = Exact<{
 }>;
 
 
-export type GetNotesQuery = { __typename?: 'Query', notes: Array<{ __typename?: 'Note', id: number, entityId: number, entityType: string, createdBy: string, noteType?: string | null, slug?: string | null, title?: string | null, content: string, tags?: Array<string> | null, createdAt: string, updatedAt: string, goal?: { __typename?: 'Goal', id: number, title: string, description?: string | null, status: string, targetDate?: string | null } | null }> };
+export type GetNotesQuery = { __typename?: 'Query', notes: Array<{ __typename?: 'Note', id: number, entityId: number, entityType: string, createdBy: string, noteType?: string | null, slug?: string | null, title?: string | null, content: string, tags?: Array<string> | null, createdAt: string, updatedAt: string, goal?: { __typename?: 'Goal', id: number, title: string, description?: string | null, status: string } | null }> };
 
 export type UpdateNoteMutationVariables = Exact<{
   id: Scalars['Int']['input'];
@@ -1365,7 +1362,6 @@ export const CreateGoalDocument = gql`
     title
     description
     status
-    targetDate
     createdAt
     updatedAt
     familyMemberId
@@ -1652,7 +1648,6 @@ export const GetAllNotesDocument = gql`
       title
       description
       status
-      targetDate
     }
     createdAt
     updatedAt
@@ -1702,7 +1697,6 @@ export const GetGoalDocument = gql`
     title
     description
     status
-    targetDate
     familyMemberId
     createdBy
     therapeuticText
@@ -1774,7 +1768,6 @@ export const GetGoalsDocument = gql`
     title
     description
     status
-    targetDate
     familyMemberId
     createdBy
     notes {
@@ -1844,7 +1837,6 @@ export const GetNoteDocument = gql`
       title
       description
       status
-      targetDate
       createdAt
     }
     linkedResearch {
@@ -1962,7 +1954,6 @@ export const GetNotesDocument = gql`
       title
       description
       status
-      targetDate
     }
     createdAt
     updatedAt

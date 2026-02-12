@@ -18,7 +18,6 @@ export default function AddGoalButton() {
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [targetDate, setTargetDate] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   const [createGoal, { loading }] = useCreateGoalMutation({
@@ -26,7 +25,6 @@ export default function AddGoalButton() {
       setOpen(false);
       setTitle("");
       setDescription("");
-      setTargetDate("");
       setError(null);
     },
     onError: (err) => {
@@ -56,7 +54,6 @@ export default function AddGoalButton() {
             familyMemberId: 1, // Default family member
             title: title.trim(),
             description: description.trim() || undefined,
-            targetDate: targetDate || undefined,
           },
         },
       });
@@ -108,18 +105,6 @@ export default function AddGoalButton() {
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 rows={4}
-                disabled={loading}
-              />
-            </label>
-
-            <label>
-              <Text as="div" size="2" mb="1" weight="medium">
-                Target Date
-              </Text>
-              <TextField.Root
-                type="date"
-                value={targetDate}
-                onChange={(e) => setTargetDate(e.target.value)}
                 disabled={loading}
               />
             </label>

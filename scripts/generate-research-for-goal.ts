@@ -23,10 +23,7 @@ async function main() {
 
   try {
     // Fetch the goal
-    const goal = await tursoTools.getGoalBySlug(
-      DEFAULT_GOAL_SLUG,
-      USER_EMAIL,
-    );
+    const goal = await tursoTools.getGoalBySlug(DEFAULT_GOAL_SLUG, USER_EMAIL);
     if (!goal) {
       throw new Error(`Goal not found: ${DEFAULT_GOAL_SLUG}`);
     }

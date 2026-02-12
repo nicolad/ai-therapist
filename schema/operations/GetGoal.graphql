@@ -5,7 +5,6 @@ query GetGoal($id: Int, $slug: String) {
     title
     description
     status
-    targetDate
     familyMemberId
     createdBy
     therapeuticText

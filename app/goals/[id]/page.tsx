@@ -96,16 +96,6 @@ function GoalPageContent() {
           )}
 
           <Flex gap="4" wrap="wrap">
-            {goal.targetDate && (
-              <Flex direction="column" gap="1">
-                <Text size="1" color="gray" weight="medium">
-                  Target Date
-                </Text>
-                <Text size="2">
-                  {new Date(goal.targetDate).toLocaleDateString()}
-                </Text>
-              </Flex>
-            )}
             <Flex direction="column" gap="1">
               <Text size="1" color="gray" weight="medium">
                 Created

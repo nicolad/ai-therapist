@@ -4,7 +4,6 @@ query GetGoals($familyMemberId: Int, $status: String) {
     title
     description
     status
-    targetDate
     familyMemberId
     createdBy
     notes {

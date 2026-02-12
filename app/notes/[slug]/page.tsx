@@ -619,11 +619,6 @@ function NotePageContent() {
                 >
                   {note.goal.status}
                 </Badge>
-                {note.goal.targetDate && (
-                  <Text size="1" color="gray">
-                    Due {getRelativeTime(note.goal.targetDate)}
-                  </Text>
-                )}
               </Flex>
             </Flex>
           </Card>

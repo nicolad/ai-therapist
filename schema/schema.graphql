@@ -75,7 +75,6 @@ type Goal {
   slug: String
   title: String!
   description: String
-  targetDate: String
   status: String!
   createdAt: String!
   updatedAt: String!
@@ -239,14 +238,12 @@ input CreateGoalInput {
   familyMemberId: Int!
   title: String!
   description: String
-  targetDate: String
 }
 
 input UpdateGoalInput {
   title: String
   description: String
   status: String
-  targetDate: String
 }
 
 input CreateNoteInput {

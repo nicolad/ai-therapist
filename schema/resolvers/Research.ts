@@ -20,7 +20,6 @@ export const Research: ResearchResolvers = {
       userId: row.user_id as string,
       title: row.title as string,
       description: (row.description as string) || null,
-      targetDate: (row.target_date as string) || null,
       status: row.status as string,
       therapeuticText: (row.therapeutic_text as string) || null,
       therapeuticTextLanguage:

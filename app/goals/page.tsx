@@ -148,11 +148,6 @@ function GoalsListContent() {
                       </Badge>
                     </Flex>
                   )}
-                  {goal.targetDate && (
-                    <Text size="1" color="gray">
-                      Target: {new Date(goal.targetDate).toLocaleDateString()}
-                    </Text>
-                  )}
                   <Text size="1" color="gray">
                     Created {new Date(goal.createdAt).toLocaleDateString()}
                   </Text>
