@@ -14,7 +14,7 @@ import {
   Separator,
   TextArea,
 } from "@radix-ui/themes";
-import { ArrowLeftIcon, Pencil1Icon, TrashIcon } from "@radix-ui/react-icons";
+import { ArrowLeftIcon, Pencil1Icon, TrashIcon, SpeakerLoudIcon, StopIcon } from "@radix-ui/react-icons";
 import { useRouter, useParams } from "next/navigation";
 import dynamic from "next/dynamic";
 import {
@@ -31,6 +31,8 @@ function StoryPageContent() {
   const { data: session } = authClient.useSession();
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState("");
+  const [isPlayingAudio, setIsPlayingAudio] = useState(false);
+  const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null);
 
   const { data, loading, error, refetch } = useGetStoryQuery({
     variables: { id: storyId },
@@ -97,6 +99,59 @@ function StoryPageContent() {
       await deleteStory({
         variables: { id: storyId },
       });
+    }
+  };
+
+  const handleTextToSpeech = async () => {
+    if (isPlayingAudio && audioElement) {
+      // Stop playback
+      audioElement.pause();
+      audioElement.currentTime = 0;
+      setIsPlayingAudio(false);
+      setAudioElement(null);
+      return;
+    }
+
+    try {
+      setIsPlayingAudio(true);
+
+      const response = await fetch("/api/tts", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          text: story.content,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to generate audio");
+      }
+
+      // Convert response to blob and create audio element
+      const blob = await response.blob();
+      const audioUrl = URL.createObjectURL(blob);
+      const audio = new Audio(audioUrl);
+
+      audio.onended = () => {
+        setIsPlayingAudio(false);
+        setAudioElement(null);
+        URL.revokeObjectURL(audioUrl);
+      };
+
+      audio.onerror = () => {
+        setIsPlayingAudio(false);
+        setAudioElement(null);
+        URL.revokeObjectURL(audioUrl);
+      };
+
+      setAudioElement(audio);
+      await audio.play();
+    } catch (error) {
+      console.error("TTS Error:", error);
+      setIsPlayingAudio(false);
+      setAudioElement(null);
     }
   };
 
@@ -191,9 +246,31 @@ function StoryPageContent() {
               </Flex>
             </Flex>
           ) : (
-            <Text size="3" style={{ whiteSpace: "pre-wrap" }}>
-              {story.content}
-            </Text>
+            <Flex direction="column" gap="3">
+              <Flex justify="start">
+                <Button
+                  variant="soft"
+                  size="3"
+                  onClick={handleTextToSpeech}
+                  disabled={!story.content}
+                >
+                  {isPlayingAudio ? (
+                    <>
+                      <StopIcon />
+                      Stop Audio
+                    </>
+                  ) : (
+                    <>
+                      <SpeakerLoudIcon />
+                      Text to Speech
+                    </>
+                  )}
+                </Button>
+              </Flex>
+              <Text size="3" style={{ whiteSpace: "pre-wrap" }}>
+                {story.content}
+              </Text>
+            </Flex>
           )}
         </Flex>
       </Card>
