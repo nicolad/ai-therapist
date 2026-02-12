@@ -11,7 +11,7 @@ export const Goal: GoalResolvers = {
     const notes = await tursoTools.listNotesForEntity(
       parent.id,
       "Goal",
-      parent.userId,
+      parent.createdBy,
     );
     return notes;
   },

@@ -4,10 +4,15 @@ import { tursoTools } from "@/src/db";
 export const goals: NonNullable<QueryResolvers['goals']> = async (
   _parent,
   args,
-  _ctx,
+  ctx,
 ) => {
+  const userEmail = ctx.userEmail;
+  if (!userEmail) {
+    throw new Error("Authentication required");
+  }
+
   const goalsList = await tursoTools.listGoals(
-    args.userId,
+    userEmail,
     args.familyMemberId ?? undefined,
   );
 
@@ -20,12 +25,11 @@ export const goals: NonNullable<QueryResolvers['goals']> = async (
   return filtered.map((goal) => ({
     id: goal.id,
     familyMemberId: goal.familyMemberId,
-    userId: goal.userId,
+    createdBy: goal.createdBy,
     title: goal.title,
     description: goal.description,
     targetDate: goal.targetDate,
     status: goal.status,
-    priority: goal.priority,
     createdAt: goal.createdAt,
     updatedAt: goal.updatedAt,
     research: [],

@@ -7,28 +7,29 @@ export const updateGoal: NonNullable<MutationResolvers['updateGoal']> = async (
   args,
   ctx,
 ) => {
-  const userId = ctx.userId || "demo-user";
+  const userEmail = ctx.userEmail;
+  if (!userEmail) {
+    throw new Error("Authentication required");
+  }
 
-  await updateGoalDb(args.id, userId, {
+  await updateGoalDb(args.id, userEmail, {
     title: args.input.title ?? undefined,
     description: args.input.description ?? undefined,
     targetDate: args.input.targetDate ?? undefined,
     status: args.input.status ?? undefined,
-    priority: args.input.priority ?? undefined,
   });
 
   // Fetch the updated goal to return it
-  const goal = await tursoTools.getGoal(args.id, userId);
+  const goal = await tursoTools.getGoal(args.id, userEmail);
 
   return {
     id: goal.id,
     familyMemberId: goal.familyMemberId,
-    userId: goal.userId,
+    createdBy: goal.createdBy,
     title: goal.title,
     description: goal.description,
     targetDate: goal.targetDate,
     status: goal.status,
-    priority: goal.priority,
     therapeuticText: goal.therapeuticText,
     therapeuticTextLanguage: goal.therapeuticTextLanguage,
     therapeuticTextGeneratedAt: goal.therapeuticTextGeneratedAt,

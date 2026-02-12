@@ -20,13 +20,14 @@ import { ArrowLeftIcon } from "@radix-ui/react-icons";
 import { useRouter, useParams } from "next/navigation";
 import dynamic from "next/dynamic";
 import { useGetGoalQuery } from "@/app/__generated__/hooks";
+import { authClient } from "@/src/auth/client";
 import "./accordion.css";
 
 function GoalPageContent() {
   const router = useRouter();
   const params = useParams();
   const paramValue = params.id as string;
-  const userId = "demo-user";
+  const { data: session } = authClient.useSession();
 
   // Determine if paramValue is a number (ID) or string (slug)
   const isNumericId = /^\d+$/.test(paramValue);
@@ -37,7 +38,6 @@ function GoalPageContent() {
     variables: {
       id: goalId,
       slug: goalSlug,
-      userId,
     },
     skip: !goalId && !goalSlug,
   });
@@ -62,19 +62,6 @@ function GoalPageContent() {
     );
   }
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority.toLowerCase()) {
-      case "high":
-        return "red";
-      case "medium":
-        return "orange";
-      case "low":
-        return "blue";
-      default:
-        return "gray";
-    }
-  };
-
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
       case "active":
@@ -97,14 +84,9 @@ function GoalPageContent() {
         <Flex direction="column" gap="4" p="1">
           <Flex justify="between" align="start" gap="3">
             <Heading size="7">{goal.title}</Heading>
-            <Flex gap="2">
-              <Badge color={getStatusColor(goal.status)} size="2">
-                {goal.status}
-              </Badge>
-              <Badge color={getPriorityColor(goal.priority)} size="2">
-                {goal.priority} priority
-              </Badge>
-            </Flex>
+            <Badge color={getStatusColor(goal.status)} size="2">
+              {goal.status}
+            </Badge>
           </Flex>
 
           {goal.description && (
@@ -326,10 +308,10 @@ export default function GoalPage() {
   const router = useRouter();
   const params = useParams();
   const goalId = parseInt(params.id as string);
-  const userId = "demo-user";
+  const { data: session } = authClient.useSession();
 
   const { data } = useGetGoalQuery({
-    variables: { id: goalId, userId },
+    variables: { id: goalId },
     skip: !goalId,
   });
 

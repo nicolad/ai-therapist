@@ -1,15 +1,18 @@
 import type { MutationResolvers } from "./../../types.generated";
 import { tursoTools } from "@/src/db";
 
-export const updateNote: NonNullable<MutationResolvers['updateNote']> = async (
+export const updateNote: NonNullable<MutationResolvers["updateNote"]> = async (
   _parent,
   args,
   ctx,
 ) => {
-  const userId = ctx.userId || "demo-user";
+  const userEmail = ctx.userEmail;
+  if (!userEmail) {
+    throw new Error("Authentication required");
+  }
 
   // Update the note
-  await tursoTools.updateNote(args.id, userId, {
+  await tursoTools.updateNote(args.id, userEmail, {
     noteType: args.input.noteType ?? undefined,
     content: args.input.content ?? undefined,
     createdBy: args.input.createdBy ?? undefined,
@@ -22,7 +25,7 @@ export const updateNote: NonNullable<MutationResolvers['updateNote']> = async (
   }
 
   // Fetch the updated note
-  const note = await tursoTools.getNoteById(args.id, userId);
+  const note = await tursoTools.getNoteById(args.id, userEmail);
 
   if (!note) {
     throw new Error(`Note ${args.id} not found`);
@@ -32,11 +35,10 @@ export const updateNote: NonNullable<MutationResolvers['updateNote']> = async (
     id: note.id,
     entityId: note.entityId,
     entityType: note.entityType,
-    userId: note.userId,
+    createdBy: note.createdBy,
     noteType: note.noteType,
     slug: note.slug,
     content: note.content,
-    createdBy: note.createdBy,
     tags: note.tags,
     createdAt: note.createdAt,
     updatedAt: note.updatedAt,

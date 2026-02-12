@@ -3,7 +3,7 @@ mutation CreateNote($input: CreateNoteInput!) {
     id
     entityId
     entityType
-    userId
+    createdBy
     noteType
     slug
     content

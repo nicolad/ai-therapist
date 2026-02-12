@@ -1,12 +1,12 @@
 type AudioAsset {
   createdAt: String!
+  createdBy: String!
   goalId: Int!
   id: String!
   language: String!
   manifest: AudioManifest!
   mimeType: String!
   storyId: Int
-  userId: String!
   voice: String!
 }
 
@@ -99,14 +99,12 @@ enum ClaimVerdict {
 input CreateGoalInput {
   description: String
   familyMemberId: Int!
-  priority: String
   targetDate: String
   title: String!
 }
 
 input CreateNoteInput {
   content: String!
-  createdBy: String
   entityId: Int!
   entityType: String!
   linkedResearchIds: [Int!]
@@ -114,7 +112,6 @@ input CreateNoteInput {
   slug: String
   tags: [String!]
   title: String
-  userId: String!
 }
 
 type DeleteGoalResult {
@@ -234,11 +231,11 @@ type GenerationJob {
 
 type Goal {
   createdAt: String!
+  createdBy: String!
   description: String
   familyMemberId: Int!
   id: Int!
   notes: [Note!]!
-  priority: String!
   questions: [TherapeuticQuestion!]!
   research: [Research!]!
   slug: String
@@ -250,7 +247,6 @@ type Goal {
   therapeuticTextLanguage: String
   title: String!
   updatedAt: String!
-  userId: String!
 }
 
 type GoalStory {
@@ -319,7 +315,7 @@ type Note {
   claimCards: [ClaimCard!]
   content: String!
   createdAt: String!
-  createdBy: String
+  createdBy: String!
   entityId: Int!
   entityType: String!
   goal: Goal
@@ -330,7 +326,6 @@ type Note {
   tags: [String!]
   title: String
   updatedAt: String!
-  userId: String!
 }
 
 type PaperCandidate {
@@ -347,17 +342,17 @@ type PaperCandidate {
 }
 
 type Query {
-  allNotes(userId: String!): [Note!]!
+  allNotes: [Note!]!
   availableVoices: [ElevenLabsVoice!]!
   claimCard(id: ID!): ClaimCard
   claimCardsForNote(noteId: Int!): [ClaimCard!]!
   generationJob(id: String!): GenerationJob
   generationJobs(goalId: Int, status: String): [GenerationJob!]!
-  goal(id: Int, slug: String, userId: String!): Goal
-  goals(familyMemberId: Int, status: String, userId: String!): [Goal!]!
-  note(id: Int, slug: String, userId: String!): Note
-  notes(entityId: Int!, entityType: String!, userId: String!): [Note!]!
-  research(goalId: Int!, userId: String!): [Research!]!
+  goal(id: Int, slug: String): Goal
+  goals(familyMemberId: Int, status: String): [Goal!]!
+  note(id: Int, slug: String): Note
+  notes(entityId: Int!, entityType: String!): [Note!]!
+  research(goalId: Int!): [Research!]!
   therapeuticQuestions(goalId: Int!): [TherapeuticQuestion!]!
 }
 
@@ -421,7 +416,6 @@ type TherapeuticQuestion {
 
 input UpdateGoalInput {
   description: String
-  priority: String
   status: String
   targetDate: String
   title: String

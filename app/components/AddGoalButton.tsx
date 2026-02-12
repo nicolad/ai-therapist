@@ -8,7 +8,6 @@ import {
   Text,
   TextField,
   TextArea,
-  Select,
 } from "@radix-ui/themes";
 import { PlusIcon } from "@radix-ui/react-icons";
 import { useCreateGoalMutation } from "@/app/__generated__/hooks";
@@ -19,7 +18,6 @@ export default function AddGoalButton() {
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [priority, setPriority] = useState("medium");
   const [targetDate, setTargetDate] = useState("");
   const [error, setError] = useState<string | null>(null);
 
@@ -28,7 +26,6 @@ export default function AddGoalButton() {
       setOpen(false);
       setTitle("");
       setDescription("");
-      setPriority("medium");
       setTargetDate("");
       setError(null);
     },
@@ -59,7 +56,6 @@ export default function AddGoalButton() {
             familyMemberId: 1, // Default family member
             title: title.trim(),
             description: description.trim() || undefined,
-            priority,
             targetDate: targetDate || undefined,
           },
         },
@@ -114,24 +110,6 @@ export default function AddGoalButton() {
                 rows={4}
                 disabled={loading}
               />
-            </label>
-
-            <label>
-              <Text as="div" size="2" mb="1" weight="medium">
-                Priority
-              </Text>
-              <Select.Root
-                value={priority}
-                onValueChange={setPriority}
-                disabled={loading}
-              >
-                <Select.Trigger placeholder="Select priority" />
-                <Select.Content>
-                  <Select.Item value="low">Low</Select.Item>
-                  <Select.Item value="medium">Medium</Select.Item>
-                  <Select.Item value="high">High</Select.Item>
-                </Select.Content>
-              </Select.Root>
             </label>
 
             <label>

@@ -22,7 +22,6 @@ export const Research: ResearchResolvers = {
       description: (row.description as string) || null,
       targetDate: (row.target_date as string) || null,
       status: row.status as string,
-      priority: row.priority as string,
       therapeuticText: (row.therapeutic_text as string) || null,
       therapeuticTextLanguage:
         (row.therapeutic_text_language as string) || null,

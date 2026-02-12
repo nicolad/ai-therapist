@@ -1,9 +1,9 @@
-query GetAllNotes($userId: String!) {
-  allNotes(userId: $userId) {
+query GetAllNotes {
+  allNotes {
     id
     entityId
     entityType
-    userId
+    createdBy
     noteType
     slug
     title
@@ -15,7 +15,6 @@ query GetAllNotes($userId: String!) {
       title
       description
       status
-      priority
       targetDate
     }
     createdAt

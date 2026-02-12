@@ -1,14 +1,13 @@
-query GetGoal($id: Int, $slug: String, $userId: String!) {
-  goal(id: $id, slug: $slug, userId: $userId) {
+query GetGoal($id: Int, $slug: String) {
+  goal(id: $id, slug: $slug) {
     id
     slug
     title
     description
     status
-    priority
     targetDate
     familyMemberId
-    userId
+    createdBy
     therapeuticText
     therapeuticTextLanguage
     therapeuticTextGeneratedAt

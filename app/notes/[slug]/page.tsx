@@ -33,6 +33,7 @@ import {
   useUpdateNoteMutation,
   useDeleteNoteMutation,
 } from "@/app/__generated__/hooks";
+import { authClient } from "@/src/auth/client";
 import "./accordion.css";
 
 // Utility to format relative time
@@ -60,7 +61,7 @@ function NotePageContent() {
   const router = useRouter();
   const params = useParams();
   const slug = params.slug as string;
-  const userId = "demo-user";
+  const { data: session } = authClient.useSession();
 
   const [showFullDescription, setShowFullDescription] = useState(false);
 
@@ -71,7 +72,7 @@ function NotePageContent() {
   const [openClaims, setOpenClaims] = useState<string[]>([]);
 
   const { data, loading, error } = useGetNoteQuery({
-    variables: { slug, userId },
+    variables: { slug },
     skip: !slug,
   });
 
@@ -104,19 +105,6 @@ function NotePageContent() {
       return claim.includes(q);
     });
   }, [claimCards, claimsQuery]);
-
-  const getPriorityColor = (priority: string) => {
-    switch (priority?.toLowerCase()) {
-      case "high":
-        return "red";
-      case "medium":
-        return "orange";
-      case "low":
-        return "blue";
-      default:
-        return "gray";
-    }
-  };
 
   const getStatusColor = (status: string) => {
     switch (status?.toLowerCase()) {
@@ -631,13 +619,6 @@ function NotePageContent() {
                 >
                   {note.goal.status}
                 </Badge>
-                <Badge
-                  color={getPriorityColor(note.goal.priority)}
-                  variant="outline"
-                  size="1"
-                >
-                  {note.goal.priority}
-                </Badge>
                 {note.goal.targetDate && (
                   <Text size="1" color="gray">
                     Due {getRelativeTime(note.goal.targetDate)}
@@ -729,10 +710,10 @@ export default function NotePage() {
   const router = useRouter();
   const params = useParams();
   const slug = params.slug as string;
-  const userId = "demo-user";
+  const { data: session } = authClient.useSession();
 
   const { data } = useGetNoteQuery({
-    variables: { slug, userId },
+    variables: { slug },
     skip: !slug,
   });
 

@@ -21,7 +21,7 @@ export const Note: NoteResolvers = {
     }
 
     try {
-      const goal = await tursoTools.getGoal(parent.entityId, parent.userId);
+      const goal = await tursoTools.getGoal(parent.entityId, parent.createdBy);
       return {
         ...goal,
         notes: [],

@@ -4,16 +4,21 @@ import { tursoTools } from "@/src/db";
 export const note: NonNullable<QueryResolvers['note']> = async (
   _parent,
   args,
-  _ctx,
+  ctx,
 ) => {
+  const userEmail = ctx.userEmail;
+  if (!userEmail) {
+    throw new Error("Authentication required");
+  }
+
   let foundNote;
 
   if (args.slug) {
     // Query by slug
-    foundNote = await tursoTools.getNoteBySlug(args.slug, args.userId);
+    foundNote = await tursoTools.getNoteBySlug(args.slug, userEmail);
   } else if (args.id) {
     // Query by ID
-    foundNote = await tursoTools.getNoteById(args.id, args.userId);
+    foundNote = await tursoTools.getNoteById(args.id, userEmail);
   } else {
     return null;
   }
@@ -26,12 +31,11 @@ export const note: NonNullable<QueryResolvers['note']> = async (
     id: foundNote.id,
     entityId: foundNote.entityId,
     entityType: foundNote.entityType,
-    userId: foundNote.userId,
+    createdBy: foundNote.createdBy || userEmail,
     noteType: foundNote.noteType || null,
     slug: foundNote.slug || null,
     title: foundNote.title || null,
     content: foundNote.content,
-    createdBy: foundNote.createdBy || null,
     tags: foundNote.tags || null,
     createdAt: foundNote.createdAt,
     updatedAt: foundNote.updatedAt,

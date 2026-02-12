@@ -6,30 +6,30 @@ export const createGoal: NonNullable<MutationResolvers['createGoal']> = async (
   args,
   ctx,
 ) => {
-  // Use userId from context if available, otherwise use a default
-  const userId = ctx.userId || "demo-user";
+  const userEmail = ctx.userEmail;
+  if (!userEmail) {
+    throw new Error("Authentication required");
+  }
 
   const goalId = await tursoTools.createGoal({
     familyMemberId: args.input.familyMemberId,
-    userId,
+    createdBy: userEmail,
     title: args.input.title,
     description: args.input.description || null,
     targetDate: args.input.targetDate || null,
-    priority: args.input.priority || "medium",
   });
 
   // Fetch the created goal to return it
-  const goal = await tursoTools.getGoal(goalId, userId);
+  const goal = await tursoTools.getGoal(goalId, userEmail);
 
   return {
     id: goal.id,
     familyMemberId: goal.familyMemberId,
-    userId: goal.userId,
+    createdBy: goal.createdBy,
     title: goal.title,
     description: goal.description,
     targetDate: goal.targetDate,
     status: goal.status,
-    priority: goal.priority,
     createdAt: goal.createdAt,
     updatedAt: goal.updatedAt,
     questions: [],

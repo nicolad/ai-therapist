@@ -20,13 +20,13 @@ export type Scalars = {
 export type AudioAsset = {
   __typename?: 'AudioAsset';
   createdAt: Scalars['String']['output'];
+  createdBy: Scalars['String']['output'];
   goalId: Scalars['Int']['output'];
   id: Scalars['String']['output'];
   language: Scalars['String']['output'];
   manifest: AudioManifest;
   mimeType: Scalars['String']['output'];
   storyId?: Maybe<Scalars['Int']['output']>;
-  userId: Scalars['String']['output'];
   voice: Scalars['String']['output'];
 };
 
@@ -126,14 +126,12 @@ export enum ClaimVerdict {
 export type CreateGoalInput = {
   description?: InputMaybe<Scalars['String']['input']>;
   familyMemberId: Scalars['Int']['input'];
-  priority?: InputMaybe<Scalars['String']['input']>;
   targetDate?: InputMaybe<Scalars['String']['input']>;
   title: Scalars['String']['input'];
 };
 
 export type CreateNoteInput = {
   content: Scalars['String']['input'];
-  createdBy?: InputMaybe<Scalars['String']['input']>;
   entityId: Scalars['Int']['input'];
   entityType: Scalars['String']['input'];
   linkedResearchIds?: InputMaybe<Array<Scalars['Int']['input']>>;
@@ -141,7 +139,6 @@ export type CreateNoteInput = {
   slug?: InputMaybe<Scalars['String']['input']>;
   tags?: InputMaybe<Array<Scalars['String']['input']>>;
   title?: InputMaybe<Scalars['String']['input']>;
-  userId: Scalars['String']['input'];
 };
 
 export type DeleteGoalResult = {
@@ -275,11 +272,11 @@ export type GenerationJob = {
 export type Goal = {
   __typename?: 'Goal';
   createdAt: Scalars['String']['output'];
+  createdBy: Scalars['String']['output'];
   description?: Maybe<Scalars['String']['output']>;
   familyMemberId: Scalars['Int']['output'];
   id: Scalars['Int']['output'];
   notes: Array<Note>;
-  priority: Scalars['String']['output'];
   questions: Array<TherapeuticQuestion>;
   research: Array<Research>;
   slug?: Maybe<Scalars['String']['output']>;
@@ -291,7 +288,6 @@ export type Goal = {
   therapeuticTextLanguage?: Maybe<Scalars['String']['output']>;
   title: Scalars['String']['output'];
   updatedAt: Scalars['String']['output'];
-  userId: Scalars['String']['output'];
 };
 
 export type GoalStory = {
@@ -463,7 +459,7 @@ export type Note = {
   claimCards?: Maybe<Array<ClaimCard>>;
   content: Scalars['String']['output'];
   createdAt: Scalars['String']['output'];
-  createdBy?: Maybe<Scalars['String']['output']>;
+  createdBy: Scalars['String']['output'];
   entityId: Scalars['Int']['output'];
   entityType: Scalars['String']['output'];
   goal?: Maybe<Goal>;
@@ -474,7 +470,6 @@ export type Note = {
   tags?: Maybe<Array<Scalars['String']['output']>>;
   title?: Maybe<Scalars['String']['output']>;
   updatedAt: Scalars['String']['output'];
-  userId: Scalars['String']['output'];
 };
 
 export type PaperCandidate = {
@@ -508,11 +503,6 @@ export type Query = {
 };
 
 
-export type QueryAllNotesArgs = {
-  userId: Scalars['String']['input'];
-};
-
-
 export type QueryClaimCardArgs = {
   id: Scalars['ID']['input'];
 };
@@ -537,34 +527,29 @@ export type QueryGenerationJobsArgs = {
 export type QueryGoalArgs = {
   id?: InputMaybe<Scalars['Int']['input']>;
   slug?: InputMaybe<Scalars['String']['input']>;
-  userId: Scalars['String']['input'];
 };
 
 
 export type QueryGoalsArgs = {
   familyMemberId?: InputMaybe<Scalars['Int']['input']>;
   status?: InputMaybe<Scalars['String']['input']>;
-  userId: Scalars['String']['input'];
 };
 
 
 export type QueryNoteArgs = {
   id?: InputMaybe<Scalars['Int']['input']>;
   slug?: InputMaybe<Scalars['String']['input']>;
-  userId: Scalars['String']['input'];
 };
 
 
 export type QueryNotesArgs = {
   entityId: Scalars['Int']['input'];
   entityType: Scalars['String']['input'];
-  userId: Scalars['String']['input'];
 };
 
 
 export type QueryResearchArgs = {
   goalId: Scalars['Int']['input'];
-  userId: Scalars['String']['input'];
 };
 
 
@@ -646,7 +631,6 @@ export type TherapeuticQuestion = {
 
 export type UpdateGoalInput = {
   description?: InputMaybe<Scalars['String']['input']>;
-  priority?: InputMaybe<Scalars['String']['input']>;
   status?: InputMaybe<Scalars['String']['input']>;
   targetDate?: InputMaybe<Scalars['String']['input']>;
   title?: InputMaybe<Scalars['String']['input']>;
@@ -756,14 +740,14 @@ export type CreateGoalMutationVariables = Exact<{
 }>;
 
 
-export type CreateGoalMutation = { __typename?: 'Mutation', createGoal: { __typename?: 'Goal', id: number, slug?: string | null, title: string, description?: string | null, status: string, priority: string, targetDate?: string | null, createdAt: string, updatedAt: string, familyMemberId: number } };
+export type CreateGoalMutation = { __typename?: 'Mutation', createGoal: { __typename?: 'Goal', id: number, slug?: string | null, title: string, description?: string | null, status: string, targetDate?: string | null, createdAt: string, updatedAt: string, familyMemberId: number } };
 
 export type CreateNoteMutationVariables = Exact<{
   input: CreateNoteInput;
 }>;
 
 
-export type CreateNoteMutation = { __typename?: 'Mutation', createNote: { __typename?: 'Note', id: number, entityId: number, entityType: string, userId: string, noteType?: string | null, slug?: string | null, content: string, createdBy?: string | null, tags?: Array<string> | null, createdAt: string, updatedAt: string } };
+export type CreateNoteMutation = { __typename?: 'Mutation', createNote: { __typename?: 'Note', id: number, entityId: number, entityType: string, createdBy: string, noteType?: string | null, slug?: string | null, content: string, tags?: Array<string> | null, createdAt: string, updatedAt: string } };
 
 export type DeleteNoteMutationVariables = Exact<{
   id: Scalars['Int']['input'];
@@ -806,48 +790,42 @@ export type GenerateLongFormTextRomanianMutationVariables = Exact<{
 
 export type GenerateLongFormTextRomanianMutation = { __typename?: 'Mutation', generateLongFormText: { __typename?: 'GenerateLongFormTextResult', success: boolean, message?: string | null, text?: string | null, audioUrl?: string | null, manifestUrl?: string | null, segmentUrls?: Array<string> | null } };
 
-export type GetAllNotesQueryVariables = Exact<{
-  userId: Scalars['String']['input'];
-}>;
+export type GetAllNotesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetAllNotesQuery = { __typename?: 'Query', allNotes: Array<{ __typename?: 'Note', id: number, entityId: number, entityType: string, userId: string, noteType?: string | null, slug?: string | null, title?: string | null, content: string, createdBy?: string | null, tags?: Array<string> | null, createdAt: string, updatedAt: string, goal?: { __typename?: 'Goal', id: number, title: string, description?: string | null, status: string, priority: string, targetDate?: string | null } | null }> };
+export type GetAllNotesQuery = { __typename?: 'Query', allNotes: Array<{ __typename?: 'Note', id: number, entityId: number, entityType: string, createdBy: string, noteType?: string | null, slug?: string | null, title?: string | null, content: string, tags?: Array<string> | null, createdAt: string, updatedAt: string, goal?: { __typename?: 'Goal', id: number, title: string, description?: string | null, status: string, targetDate?: string | null } | null }> };
 
 export type GetGoalQueryVariables = Exact<{
   id?: InputMaybe<Scalars['Int']['input']>;
   slug?: InputMaybe<Scalars['String']['input']>;
-  userId: Scalars['String']['input'];
 }>;
 
 
-export type GetGoalQuery = { __typename?: 'Query', goal?: { __typename?: 'Goal', id: number, slug?: string | null, title: string, description?: string | null, status: string, priority: string, targetDate?: string | null, familyMemberId: number, userId: string, therapeuticText?: string | null, therapeuticTextLanguage?: string | null, therapeuticTextGeneratedAt?: string | null, createdAt: string, updatedAt: string, notes: Array<{ __typename?: 'Note', id: number, slug?: string | null, content: string, noteType?: string | null, tags?: Array<string> | null, createdAt: string, updatedAt: string }>, research: Array<{ __typename?: 'Research', id: number, title: string, authors: Array<string>, year?: number | null, journal?: string | null, url?: string | null }> } | null };
+export type GetGoalQuery = { __typename?: 'Query', goal?: { __typename?: 'Goal', id: number, slug?: string | null, title: string, description?: string | null, status: string, targetDate?: string | null, familyMemberId: number, createdBy: string, therapeuticText?: string | null, therapeuticTextLanguage?: string | null, therapeuticTextGeneratedAt?: string | null, createdAt: string, updatedAt: string, notes: Array<{ __typename?: 'Note', id: number, slug?: string | null, content: string, noteType?: string | null, tags?: Array<string> | null, createdAt: string, updatedAt: string }>, research: Array<{ __typename?: 'Research', id: number, title: string, authors: Array<string>, year?: number | null, journal?: string | null, url?: string | null }> } | null };
 
 export type GetGoalsQueryVariables = Exact<{
   familyMemberId?: InputMaybe<Scalars['Int']['input']>;
   status?: InputMaybe<Scalars['String']['input']>;
-  userId: Scalars['String']['input'];
 }>;
 
 
-export type GetGoalsQuery = { __typename?: 'Query', goals: Array<{ __typename?: 'Goal', id: number, title: string, description?: string | null, status: string, priority: string, targetDate?: string | null, familyMemberId: number, userId: string, createdAt: string, updatedAt: string, notes: Array<{ __typename?: 'Note', id: number, slug?: string | null, noteType?: string | null, tags?: Array<string> | null, createdAt: string }> }> };
+export type GetGoalsQuery = { __typename?: 'Query', goals: Array<{ __typename?: 'Goal', id: number, title: string, description?: string | null, status: string, targetDate?: string | null, familyMemberId: number, createdBy: string, createdAt: string, updatedAt: string, notes: Array<{ __typename?: 'Note', id: number, slug?: string | null, noteType?: string | null, tags?: Array<string> | null, createdAt: string }> }> };
 
 export type GetNoteQueryVariables = Exact<{
   id?: InputMaybe<Scalars['Int']['input']>;
   slug?: InputMaybe<Scalars['String']['input']>;
-  userId: Scalars['String']['input'];
 }>;
 
 
-export type GetNoteQuery = { __typename?: 'Query', note?: { __typename?: 'Note', id: number, entityId: number, entityType: string, userId: string, noteType?: string | null, slug?: string | null, title?: string | null, content: string, createdBy?: string | null, tags?: Array<string> | null, createdAt: string, updatedAt: string, goal?: { __typename?: 'Goal', id: number, title: string, description?: string | null, status: string, priority: string, targetDate?: string | null, createdAt: string } | null, linkedResearch?: Array<{ __typename?: 'Research', id: number, title: string, authors: Array<string>, year?: number | null, journal?: string | null, url?: string | null, therapeuticGoalType: string, relevanceScore: number }> | null, claimCards?: Array<{ __typename?: 'ClaimCard', id: string, claim: string, verdict: ClaimVerdict, confidence: number, queries: Array<string>, createdAt: string, updatedAt: string, notes?: string | null, scope?: { __typename?: 'ClaimScope', population?: string | null, intervention?: string | null, comparator?: string | null, outcome?: string | null, timeframe?: string | null, setting?: string | null } | null, evidence: Array<{ __typename?: 'EvidenceItem', polarity: EvidencePolarity, score?: number | null, excerpt?: string | null, rationale?: string | null, locator?: { __typename?: 'EvidenceLocator', page?: number | null, section?: string | null, url?: string | null } | null, paper: { __typename?: 'PaperCandidate', title: string, year?: number | null, doi?: string | null, url?: string | null, oaUrl?: string | null, source: string, authors?: Array<string> | null, abstract?: string | null, journal?: string | null } }>, provenance: { __typename?: 'ClaimProvenance', generatedBy: string, model?: string | null, sourceTools: Array<string> } }> | null } | null };
+export type GetNoteQuery = { __typename?: 'Query', note?: { __typename?: 'Note', id: number, entityId: number, entityType: string, createdBy: string, noteType?: string | null, slug?: string | null, title?: string | null, content: string, tags?: Array<string> | null, createdAt: string, updatedAt: string, goal?: { __typename?: 'Goal', id: number, title: string, description?: string | null, status: string, targetDate?: string | null, createdAt: string } | null, linkedResearch?: Array<{ __typename?: 'Research', id: number, title: string, authors: Array<string>, year?: number | null, journal?: string | null, url?: string | null, therapeuticGoalType: string, relevanceScore: number }> | null, claimCards?: Array<{ __typename?: 'ClaimCard', id: string, claim: string, verdict: ClaimVerdict, confidence: number, queries: Array<string>, createdAt: string, updatedAt: string, notes?: string | null, scope?: { __typename?: 'ClaimScope', population?: string | null, intervention?: string | null, comparator?: string | null, outcome?: string | null, timeframe?: string | null, setting?: string | null } | null, evidence: Array<{ __typename?: 'EvidenceItem', polarity: EvidencePolarity, score?: number | null, excerpt?: string | null, rationale?: string | null, locator?: { __typename?: 'EvidenceLocator', page?: number | null, section?: string | null, url?: string | null } | null, paper: { __typename?: 'PaperCandidate', title: string, year?: number | null, doi?: string | null, url?: string | null, oaUrl?: string | null, source: string, authors?: Array<string> | null, abstract?: string | null, journal?: string | null } }>, provenance: { __typename?: 'ClaimProvenance', generatedBy: string, model?: string | null, sourceTools: Array<string> } }> | null } | null };
 
 export type GetNotesQueryVariables = Exact<{
   entityId: Scalars['Int']['input'];
   entityType: Scalars['String']['input'];
-  userId: Scalars['String']['input'];
 }>;
 
 
-export type GetNotesQuery = { __typename?: 'Query', notes: Array<{ __typename?: 'Note', id: number, entityId: number, entityType: string, userId: string, noteType?: string | null, slug?: string | null, title?: string | null, content: string, createdBy?: string | null, tags?: Array<string> | null, createdAt: string, updatedAt: string, goal?: { __typename?: 'Goal', id: number, title: string, description?: string | null, status: string, priority: string, targetDate?: string | null } | null }> };
+export type GetNotesQuery = { __typename?: 'Query', notes: Array<{ __typename?: 'Note', id: number, entityId: number, entityType: string, createdBy: string, noteType?: string | null, slug?: string | null, title?: string | null, content: string, tags?: Array<string> | null, createdAt: string, updatedAt: string, goal?: { __typename?: 'Goal', id: number, title: string, description?: string | null, status: string, targetDate?: string | null } | null }> };
 
 export type UpdateNoteMutationVariables = Exact<{
   id: Scalars['Int']['input'];
@@ -855,7 +833,7 @@ export type UpdateNoteMutationVariables = Exact<{
 }>;
 
 
-export type UpdateNoteMutation = { __typename?: 'Mutation', updateNote: { __typename?: 'Note', id: number, entityId: number, entityType: string, userId: string, noteType?: string | null, content: string, createdBy?: string | null, tags?: Array<string> | null, createdAt: string, updatedAt: string } };
+export type UpdateNoteMutation = { __typename?: 'Mutation', updateNote: { __typename?: 'Note', id: number, entityId: number, entityType: string, createdBy: string, noteType?: string | null, content: string, tags?: Array<string> | null, createdAt: string, updatedAt: string } };
 
 
 export const GenerateAudioFromTextDocument = gql`
@@ -1387,7 +1365,6 @@ export const CreateGoalDocument = gql`
     title
     description
     status
-    priority
     targetDate
     createdAt
     updatedAt
@@ -1427,7 +1404,7 @@ export const CreateNoteDocument = gql`
     id
     entityId
     entityType
-    userId
+    createdBy
     noteType
     slug
     content
@@ -1658,12 +1635,12 @@ export type GenerateLongFormTextRomanianMutationHookResult = ReturnType<typeof u
 export type GenerateLongFormTextRomanianMutationResult = Apollo.MutationResult<GenerateLongFormTextRomanianMutation>;
 export type GenerateLongFormTextRomanianMutationOptions = Apollo.BaseMutationOptions<GenerateLongFormTextRomanianMutation, GenerateLongFormTextRomanianMutationVariables>;
 export const GetAllNotesDocument = gql`
-    query GetAllNotes($userId: String!) {
-  allNotes(userId: $userId) {
+    query GetAllNotes {
+  allNotes {
     id
     entityId
     entityType
-    userId
+    createdBy
     noteType
     slug
     title
@@ -1675,7 +1652,6 @@ export const GetAllNotesDocument = gql`
       title
       description
       status
-      priority
       targetDate
     }
     createdAt
@@ -1696,11 +1672,10 @@ export const GetAllNotesDocument = gql`
  * @example
  * const { data, loading, error } = useGetAllNotesQuery({
  *   variables: {
- *      userId: // value for 'userId'
  *   },
  * });
  */
-export function useGetAllNotesQuery(baseOptions: Apollo.QueryHookOptions<GetAllNotesQuery, GetAllNotesQueryVariables> & ({ variables: GetAllNotesQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+export function useGetAllNotesQuery(baseOptions?: Apollo.QueryHookOptions<GetAllNotesQuery, GetAllNotesQueryVariables>) {
         const options = {...defaultOptions, ...baseOptions}
         return Apollo.useQuery<GetAllNotesQuery, GetAllNotesQueryVariables>(GetAllNotesDocument, options);
       }
@@ -1720,17 +1695,16 @@ export type GetAllNotesLazyQueryHookResult = ReturnType<typeof useGetAllNotesLaz
 export type GetAllNotesSuspenseQueryHookResult = ReturnType<typeof useGetAllNotesSuspenseQuery>;
 export type GetAllNotesQueryResult = Apollo.QueryResult<GetAllNotesQuery, GetAllNotesQueryVariables>;
 export const GetGoalDocument = gql`
-    query GetGoal($id: Int, $slug: String, $userId: String!) {
-  goal(id: $id, slug: $slug, userId: $userId) {
+    query GetGoal($id: Int, $slug: String) {
+  goal(id: $id, slug: $slug) {
     id
     slug
     title
     description
     status
-    priority
     targetDate
     familyMemberId
-    userId
+    createdBy
     therapeuticText
     therapeuticTextLanguage
     therapeuticTextGeneratedAt
@@ -1771,11 +1745,10 @@ export const GetGoalDocument = gql`
  *   variables: {
  *      id: // value for 'id'
  *      slug: // value for 'slug'
- *      userId: // value for 'userId'
  *   },
  * });
  */
-export function useGetGoalQuery(baseOptions: Apollo.QueryHookOptions<GetGoalQuery, GetGoalQueryVariables> & ({ variables: GetGoalQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+export function useGetGoalQuery(baseOptions?: Apollo.QueryHookOptions<GetGoalQuery, GetGoalQueryVariables>) {
         const options = {...defaultOptions, ...baseOptions}
         return Apollo.useQuery<GetGoalQuery, GetGoalQueryVariables>(GetGoalDocument, options);
       }
@@ -1795,16 +1768,15 @@ export type GetGoalLazyQueryHookResult = ReturnType<typeof useGetGoalLazyQuery>;
 export type GetGoalSuspenseQueryHookResult = ReturnType<typeof useGetGoalSuspenseQuery>;
 export type GetGoalQueryResult = Apollo.QueryResult<GetGoalQuery, GetGoalQueryVariables>;
 export const GetGoalsDocument = gql`
-    query GetGoals($familyMemberId: Int, $status: String, $userId: String!) {
-  goals(familyMemberId: $familyMemberId, status: $status, userId: $userId) {
+    query GetGoals($familyMemberId: Int, $status: String) {
+  goals(familyMemberId: $familyMemberId, status: $status) {
     id
     title
     description
     status
-    priority
     targetDate
     familyMemberId
-    userId
+    createdBy
     notes {
       id
       slug
@@ -1832,11 +1804,10 @@ export const GetGoalsDocument = gql`
  *   variables: {
  *      familyMemberId: // value for 'familyMemberId'
  *      status: // value for 'status'
- *      userId: // value for 'userId'
  *   },
  * });
  */
-export function useGetGoalsQuery(baseOptions: Apollo.QueryHookOptions<GetGoalsQuery, GetGoalsQueryVariables> & ({ variables: GetGoalsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+export function useGetGoalsQuery(baseOptions?: Apollo.QueryHookOptions<GetGoalsQuery, GetGoalsQueryVariables>) {
         const options = {...defaultOptions, ...baseOptions}
         return Apollo.useQuery<GetGoalsQuery, GetGoalsQueryVariables>(GetGoalsDocument, options);
       }
@@ -1856,12 +1827,12 @@ export type GetGoalsLazyQueryHookResult = ReturnType<typeof useGetGoalsLazyQuery
 export type GetGoalsSuspenseQueryHookResult = ReturnType<typeof useGetGoalsSuspenseQuery>;
 export type GetGoalsQueryResult = Apollo.QueryResult<GetGoalsQuery, GetGoalsQueryVariables>;
 export const GetNoteDocument = gql`
-    query GetNote($id: Int, $slug: String, $userId: String!) {
-  note(id: $id, slug: $slug, userId: $userId) {
+    query GetNote($id: Int, $slug: String) {
+  note(id: $id, slug: $slug) {
     id
     entityId
     entityType
-    userId
+    createdBy
     noteType
     slug
     title
@@ -1873,7 +1844,6 @@ export const GetNoteDocument = gql`
       title
       description
       status
-      priority
       targetDate
       createdAt
     }
@@ -1952,11 +1922,10 @@ export const GetNoteDocument = gql`
  *   variables: {
  *      id: // value for 'id'
  *      slug: // value for 'slug'
- *      userId: // value for 'userId'
  *   },
  * });
  */
-export function useGetNoteQuery(baseOptions: Apollo.QueryHookOptions<GetNoteQuery, GetNoteQueryVariables> & ({ variables: GetNoteQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+export function useGetNoteQuery(baseOptions?: Apollo.QueryHookOptions<GetNoteQuery, GetNoteQueryVariables>) {
         const options = {...defaultOptions, ...baseOptions}
         return Apollo.useQuery<GetNoteQuery, GetNoteQueryVariables>(GetNoteDocument, options);
       }
@@ -1976,12 +1945,12 @@ export type GetNoteLazyQueryHookResult = ReturnType<typeof useGetNoteLazyQuery>;
 export type GetNoteSuspenseQueryHookResult = ReturnType<typeof useGetNoteSuspenseQuery>;
 export type GetNoteQueryResult = Apollo.QueryResult<GetNoteQuery, GetNoteQueryVariables>;
 export const GetNotesDocument = gql`
-    query GetNotes($entityId: Int!, $entityType: String!, $userId: String!) {
-  notes(entityId: $entityId, entityType: $entityType, userId: $userId) {
+    query GetNotes($entityId: Int!, $entityType: String!) {
+  notes(entityId: $entityId, entityType: $entityType) {
     id
     entityId
     entityType
-    userId
+    createdBy
     noteType
     slug
     title
@@ -1993,7 +1962,6 @@ export const GetNotesDocument = gql`
       title
       description
       status
-      priority
       targetDate
     }
     createdAt
@@ -2016,7 +1984,6 @@ export const GetNotesDocument = gql`
  *   variables: {
  *      entityId: // value for 'entityId'
  *      entityType: // value for 'entityType'
- *      userId: // value for 'userId'
  *   },
  * });
  */
@@ -2045,7 +2012,7 @@ export const UpdateNoteDocument = gql`
     id
     entityId
     entityType
-    userId
+    createdBy
     noteType
     content
     createdBy

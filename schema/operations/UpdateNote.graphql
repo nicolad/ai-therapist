@@ -3,7 +3,7 @@ mutation UpdateNote($id: Int!, $input: UpdateNoteInput!) {
     id
     entityId
     entityType
-    userId
+    createdBy
     noteType
     content
     createdBy

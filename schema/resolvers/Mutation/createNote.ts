@@ -1,19 +1,24 @@
 import type { MutationResolvers } from "./../../types.generated";
 import { tursoTools } from "@/src/db";
 
-export const createNote: NonNullable<MutationResolvers['createNote']> = async (
+export const createNote: NonNullable<MutationResolvers["createNote"]> = async (
   _parent,
   args,
-  _ctx,
+  ctx,
 ) => {
+  const userEmail = ctx.userEmail;
+  if (!userEmail) {
+    throw new Error("Authentication required");
+  }
+
   const noteId = await tursoTools.createNote({
     entityId: args.input.entityId,
     entityType: args.input.entityType,
-    userId: args.input.userId,
+    userId: userEmail,
     content: args.input.content,
     slug: args.input.slug || null,
     noteType: args.input.noteType || null,
-    createdBy: args.input.createdBy || null,
+    createdBy: userEmail,
     tags: args.input.tags || [],
   });
 
@@ -21,7 +26,7 @@ export const createNote: NonNullable<MutationResolvers['createNote']> = async (
   const notes = await tursoTools.listNotesForEntity(
     args.input.entityId,
     args.input.entityType,
-    args.input.userId,
+    userEmail,
   );
 
   const createdNote = notes.find((note) => note.id === noteId);
@@ -34,11 +39,10 @@ export const createNote: NonNullable<MutationResolvers['createNote']> = async (
     id: createdNote.id,
     entityId: createdNote.entityId,
     entityType: createdNote.entityType,
-    userId: createdNote.userId,
+    createdBy: createdNote.createdBy,
     noteType: createdNote.noteType || null,
     slug: createdNote.slug || null,
     content: createdNote.content,
-    createdBy: createdNote.createdBy || null,
     tags: createdNote.tags,
     createdAt: createdNote.createdAt,
     updatedAt: createdNote.updatedAt,

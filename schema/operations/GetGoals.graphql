@@ -1,13 +1,12 @@
-query GetGoals($familyMemberId: Int, $status: String, $userId: String!) {
-  goals(familyMemberId: $familyMemberId, status: $status, userId: $userId) {
+query GetGoals($familyMemberId: Int, $status: String) {
+  goals(familyMemberId: $familyMemberId, status: $status) {
     id
     title
     description
     status
-    priority
     targetDate
     familyMemberId
-    userId
+    createdBy
     notes {
       id
       slug

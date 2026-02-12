@@ -22,13 +22,13 @@ export type Scalars = {
 export type AudioAsset = {
   __typename?: 'AudioAsset';
   createdAt: Scalars['String']['output'];
+  createdBy: Scalars['String']['output'];
   goalId: Scalars['Int']['output'];
   id: Scalars['String']['output'];
   language: Scalars['String']['output'];
   manifest: AudioManifest;
   mimeType: Scalars['String']['output'];
   storyId?: Maybe<Scalars['Int']['output']>;
-  userId: Scalars['String']['output'];
   voice: Scalars['String']['output'];
 };
 
@@ -127,14 +127,12 @@ export type ClaimVerdict =
 export type CreateGoalInput = {
   description?: InputMaybe<Scalars['String']['input']>;
   familyMemberId: Scalars['Int']['input'];
-  priority?: InputMaybe<Scalars['String']['input']>;
   targetDate?: InputMaybe<Scalars['String']['input']>;
   title: Scalars['String']['input'];
 };
 
 export type CreateNoteInput = {
   content: Scalars['String']['input'];
-  createdBy?: InputMaybe<Scalars['String']['input']>;
   entityId: Scalars['Int']['input'];
   entityType: Scalars['String']['input'];
   linkedResearchIds?: InputMaybe<Array<Scalars['Int']['input']>>;
@@ -142,7 +140,6 @@ export type CreateNoteInput = {
   slug?: InputMaybe<Scalars['String']['input']>;
   tags?: InputMaybe<Array<Scalars['String']['input']>>;
   title?: InputMaybe<Scalars['String']['input']>;
-  userId: Scalars['String']['input'];
 };
 
 export type DeleteGoalResult = {
@@ -275,11 +272,11 @@ export type GenerationJob = {
 export type Goal = {
   __typename?: 'Goal';
   createdAt: Scalars['String']['output'];
+  createdBy: Scalars['String']['output'];
   description?: Maybe<Scalars['String']['output']>;
   familyMemberId: Scalars['Int']['output'];
   id: Scalars['Int']['output'];
   notes: Array<Note>;
-  priority: Scalars['String']['output'];
   questions: Array<TherapeuticQuestion>;
   research: Array<Research>;
   slug?: Maybe<Scalars['String']['output']>;
@@ -291,7 +288,6 @@ export type Goal = {
   therapeuticTextLanguage?: Maybe<Scalars['String']['output']>;
   title: Scalars['String']['output'];
   updatedAt: Scalars['String']['output'];
-  userId: Scalars['String']['output'];
 };
 
 export type GoalStory = {
@@ -461,7 +457,7 @@ export type Note = {
   claimCards?: Maybe<Array<ClaimCard>>;
   content: Scalars['String']['output'];
   createdAt: Scalars['String']['output'];
-  createdBy?: Maybe<Scalars['String']['output']>;
+  createdBy: Scalars['String']['output'];
   entityId: Scalars['Int']['output'];
   entityType: Scalars['String']['output'];
   goal?: Maybe<Goal>;
@@ -472,7 +468,6 @@ export type Note = {
   tags?: Maybe<Array<Scalars['String']['output']>>;
   title?: Maybe<Scalars['String']['output']>;
   updatedAt: Scalars['String']['output'];
-  userId: Scalars['String']['output'];
 };
 
 export type PaperCandidate = {
@@ -506,11 +501,6 @@ export type Query = {
 };
 
 
-export type QueryallNotesArgs = {
-  userId: Scalars['String']['input'];
-};
-
-
 export type QueryclaimCardArgs = {
   id: Scalars['ID']['input'];
 };
@@ -535,34 +525,29 @@ export type QuerygenerationJobsArgs = {
 export type QuerygoalArgs = {
   id?: InputMaybe<Scalars['Int']['input']>;
   slug?: InputMaybe<Scalars['String']['input']>;
-  userId: Scalars['String']['input'];
 };
 
 
 export type QuerygoalsArgs = {
   familyMemberId?: InputMaybe<Scalars['Int']['input']>;
   status?: InputMaybe<Scalars['String']['input']>;
-  userId: Scalars['String']['input'];
 };
 
 
 export type QuerynoteArgs = {
   id?: InputMaybe<Scalars['Int']['input']>;
   slug?: InputMaybe<Scalars['String']['input']>;
-  userId: Scalars['String']['input'];
 };
 
 
 export type QuerynotesArgs = {
   entityId: Scalars['Int']['input'];
   entityType: Scalars['String']['input'];
-  userId: Scalars['String']['input'];
 };
 
 
 export type QueryresearchArgs = {
   goalId: Scalars['Int']['input'];
-  userId: Scalars['String']['input'];
 };
 
 
@@ -643,7 +628,6 @@ export type TherapeuticQuestion = {
 
 export type UpdateGoalInput = {
   description?: InputMaybe<Scalars['String']['input']>;
-  priority?: InputMaybe<Scalars['String']['input']>;
   status?: InputMaybe<Scalars['String']['input']>;
   targetDate?: InputMaybe<Scalars['String']['input']>;
   title?: InputMaybe<Scalars['String']['input']>;
@@ -860,13 +844,13 @@ export type ResolversParentTypes = {
 
 export type AudioAssetResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['AudioAsset'] = ResolversParentTypes['AudioAsset']> = {
   createdAt?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  createdBy?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   goalId?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   id?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   language?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   manifest?: Resolver<ResolversTypes['AudioManifest'], ParentType, ContextType>;
   mimeType?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   storyId?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
-  userId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   voice?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
 };
 
@@ -1025,11 +1009,11 @@ export type GenerationJobResolvers<ContextType = GraphQLContext, ParentType exte
 
 export type GoalResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Goal'] = ResolversParentTypes['Goal']> = {
   createdAt?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  createdBy?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   description?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   familyMemberId?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   id?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   notes?: Resolver<Array<ResolversTypes['Note']>, ParentType, ContextType>;
-  priority?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   questions?: Resolver<Array<ResolversTypes['TherapeuticQuestion']>, ParentType, ContextType>;
   research?: Resolver<Array<ResolversTypes['Research']>, ParentType, ContextType>;
   slug?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
@@ -1041,7 +1025,6 @@ export type GoalResolvers<ContextType = GraphQLContext, ParentType extends Resol
   therapeuticTextLanguage?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   title?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   updatedAt?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  userId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
 };
 
 export type GoalStoryResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['GoalStory'] = ResolversParentTypes['GoalStory']> = {
@@ -1101,7 +1084,7 @@ export type NoteResolvers<ContextType = GraphQLContext, ParentType extends Resol
   claimCards?: Resolver<Maybe<Array<ResolversTypes['ClaimCard']>>, ParentType, ContextType>;
   content?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   createdAt?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  createdBy?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  createdBy?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   entityId?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   entityType?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   goal?: Resolver<Maybe<ResolversTypes['Goal']>, ParentType, ContextType>;
@@ -1112,7 +1095,6 @@ export type NoteResolvers<ContextType = GraphQLContext, ParentType extends Resol
   tags?: Resolver<Maybe<Array<ResolversTypes['String']>>, ParentType, ContextType>;
   title?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   updatedAt?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  userId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
 };
 
 export type PaperCandidateResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['PaperCandidate'] = ResolversParentTypes['PaperCandidate']> = {
@@ -1129,17 +1111,17 @@ export type PaperCandidateResolvers<ContextType = GraphQLContext, ParentType ext
 };
 
 export type QueryResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
-  allNotes?: Resolver<Array<ResolversTypes['Note']>, ParentType, ContextType, RequireFields<QueryallNotesArgs, 'userId'>>;
+  allNotes?: Resolver<Array<ResolversTypes['Note']>, ParentType, ContextType>;
   availableVoices?: Resolver<Array<ResolversTypes['ElevenLabsVoice']>, ParentType, ContextType>;
   claimCard?: Resolver<Maybe<ResolversTypes['ClaimCard']>, ParentType, ContextType, RequireFields<QueryclaimCardArgs, 'id'>>;
   claimCardsForNote?: Resolver<Array<ResolversTypes['ClaimCard']>, ParentType, ContextType, RequireFields<QueryclaimCardsForNoteArgs, 'noteId'>>;
   generationJob?: Resolver<Maybe<ResolversTypes['GenerationJob']>, ParentType, ContextType, RequireFields<QuerygenerationJobArgs, 'id'>>;
   generationJobs?: Resolver<Array<ResolversTypes['GenerationJob']>, ParentType, ContextType, Partial<QuerygenerationJobsArgs>>;
-  goal?: Resolver<Maybe<ResolversTypes['Goal']>, ParentType, ContextType, RequireFields<QuerygoalArgs, 'userId'>>;
-  goals?: Resolver<Array<ResolversTypes['Goal']>, ParentType, ContextType, RequireFields<QuerygoalsArgs, 'userId'>>;
-  note?: Resolver<Maybe<ResolversTypes['Note']>, ParentType, ContextType, RequireFields<QuerynoteArgs, 'userId'>>;
-  notes?: Resolver<Array<ResolversTypes['Note']>, ParentType, ContextType, RequireFields<QuerynotesArgs, 'entityId' | 'entityType' | 'userId'>>;
-  research?: Resolver<Array<ResolversTypes['Research']>, ParentType, ContextType, RequireFields<QueryresearchArgs, 'goalId' | 'userId'>>;
+  goal?: Resolver<Maybe<ResolversTypes['Goal']>, ParentType, ContextType, Partial<QuerygoalArgs>>;
+  goals?: Resolver<Array<ResolversTypes['Goal']>, ParentType, ContextType, Partial<QuerygoalsArgs>>;
+  note?: Resolver<Maybe<ResolversTypes['Note']>, ParentType, ContextType, Partial<QuerynoteArgs>>;
+  notes?: Resolver<Array<ResolversTypes['Note']>, ParentType, ContextType, RequireFields<QuerynotesArgs, 'entityId' | 'entityType'>>;
+  research?: Resolver<Array<ResolversTypes['Research']>, ParentType, ContextType, RequireFields<QueryresearchArgs, 'goalId'>>;
   therapeuticQuestions?: Resolver<Array<ResolversTypes['TherapeuticQuestion']>, ParentType, ContextType, RequireFields<QuerytherapeuticQuestionsArgs, 'goalId'>>;
 };
 

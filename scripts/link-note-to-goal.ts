@@ -17,7 +17,7 @@ async function main() {
   let noteId: number | undefined;
   let goalTitle = "Strengthen Resilience in a Tough Job Search";
   let goalDescription: string | undefined;
-  let userId = "demo-user";
+  let createdBy = "demo-user";
   let familyMemberId = 1;
 
   for (const arg of args) {
@@ -29,8 +29,8 @@ async function main() {
       goalTitle = arg.split("=")[1];
     } else if (arg.startsWith("--goalDescription=")) {
       goalDescription = arg.split("=")[1];
-    } else if (arg.startsWith("--userId=")) {
-      userId = arg.split("=")[1];
+    } else if (arg.startsWith("--userId=") || arg.startsWith("--createdBy=")) {
+      createdBy = arg.split("=")[1];
     } else if (arg.startsWith("--familyMemberId=")) {
       familyMemberId = parseInt(arg.split("=")[1]);
     }
@@ -42,10 +42,10 @@ async function main() {
   let note;
   if (noteSlug) {
     console.log(`📝 Finding note by slug: ${noteSlug}`);
-    note = await tursoTools.getNoteBySlug(noteSlug, userId);
+    note = await tursoTools.getNoteBySlug(noteSlug, createdBy);
   } else if (noteId) {
     console.log(`📝 Finding note by ID: ${noteId}`);
-    note = await tursoTools.getNoteById(noteId, userId);
+    note = await tursoTools.getNoteById(noteId, createdBy);
   } else {
     // If no note specified, list all notes to help the user
     console.log("❌ No note specified. Use --noteSlug or --noteId");
@@ -53,7 +53,7 @@ async function main() {
 
     const result = await turso.execute({
       sql: `SELECT id, slug, entity_type, entity_id, content, tags, created_at FROM notes WHERE user_id = ? ORDER BY created_at DESC LIMIT 20`,
-      args: [userId],
+      args: [createdBy],
     });
 
     if (result.rows.length === 0) {
@@ -92,26 +92,24 @@ async function main() {
   console.log(`🎯 Creating goal: "${goalTitle}"`);
   const goalId = await tursoTools.createGoal({
     familyMemberId,
-    userId,
+    createdBy,
     title: goalTitle,
     description: goalDescription || null,
-    priority: "high",
   });
 
-  const goal = await tursoTools.getGoal(goalId, userId);
+  const goal = await tursoTools.getGoal(goalId, createdBy);
   console.log(`✅ Created goal: ID=${goal.id}`);
   console.log(`   Title: ${goal.title}`);
-  console.log(`   Priority: ${goal.priority}`);
   console.log(`   Status: ${goal.status}\n`);
 
   // Step 3: Update the note to link to the goal
   console.log(`🔗 Linking note ${note.id} to goal ${goalId}...`);
-  await tursoTools.updateNote(note.id, userId, {
+  await tursoTools.updateNote(note.id, createdBy, {
     entityId: goalId,
     entityType: "Goal",
   });
 
-  const updatedNote = await tursoTools.getNoteById(note.id, userId);
+  const updatedNote = await tursoTools.getNoteById(note.id, createdBy);
   console.log(`✅ Updated note successfully!`);
   console.log(
     `   New entity: ${updatedNote?.entityType}/${updatedNote?.entityId}\n`,

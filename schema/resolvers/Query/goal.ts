@@ -4,14 +4,19 @@ import { tursoTools } from "@/src/db";
 export const goal: NonNullable<QueryResolvers['goal']> = async (
   _parent,
   args,
-  _ctx,
+  ctx,
 ) => {
+  const userEmail = ctx.userEmail;
+  if (!userEmail) {
+    throw new Error("Authentication required");
+  }
+
   let goal;
 
   if (args.slug) {
-    goal = await tursoTools.getGoalBySlug(args.slug, args.userId);
+    goal = await tursoTools.getGoalBySlug(args.slug, userEmail);
   } else if (args.id) {
-    goal = await tursoTools.getGoal(args.id, args.userId);
+    goal = await tursoTools.getGoal(args.id, userEmail);
   } else {
     throw new Error("Either id or slug must be provided");
   }
@@ -19,13 +24,12 @@ export const goal: NonNullable<QueryResolvers['goal']> = async (
   return {
     id: goal.id,
     familyMemberId: goal.familyMemberId,
-    userId: goal.userId,
+    createdBy: goal.createdBy,
     slug: goal.slug,
     title: goal.title,
     description: goal.description,
     targetDate: goal.targetDate,
     status: goal.status,
-    priority: goal.priority,
     therapeuticText: goal.therapeuticText,
     therapeuticTextLanguage: goal.therapeuticTextLanguage,
     therapeuticTextGeneratedAt: goal.therapeuticTextGeneratedAt,

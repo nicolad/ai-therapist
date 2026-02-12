@@ -1,9 +1,9 @@
-query GetNotes($entityId: Int!, $entityType: String!, $userId: String!) {
-  notes(entityId: $entityId, entityType: $entityType, userId: $userId) {
+query GetNotes($entityId: Int!, $entityType: String!) {
+  notes(entityId: $entityId, entityType: $entityType) {
     id
     entityId
     entityType
-    userId
+    createdBy
     noteType
     slug
     title
@@ -15,7 +15,6 @@ query GetNotes($entityId: Int!, $entityType: String!, $userId: String!) {
       title
       description
       status
-      priority
       targetDate
     }
     createdAt

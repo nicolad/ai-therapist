@@ -21,14 +21,12 @@ import AddGoalButton from "@/app/components/AddGoalButton";
 function GoalsListContent() {
   const router = useRouter();
   const { data: session } = authClient.useSession();
-  const userId = session?.user?.id || "demo-user";
   const [statusFilter, setStatusFilter] = useState<string | undefined>(
     undefined,
   );
 
   const { data, loading, error, refetch } = useGetGoalsQuery({
     variables: {
-      userId,
       status: statusFilter,
     },
   });
@@ -53,19 +51,6 @@ function GoalsListContent() {
   }
 
   const goals = data?.goals || [];
-
-  const getPriorityColor = (priority: string) => {
-    switch (priority.toLowerCase()) {
-      case "high":
-        return "red";
-      case "medium":
-        return "orange";
-      case "low":
-        return "blue";
-      default:
-        return "gray";
-    }
-  };
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
@@ -145,22 +130,13 @@ function GoalsListContent() {
                       </Text>
                     )}
                   </Flex>
-                  <Flex direction="column" gap="2" align="end">
-                    <Badge
-                      color={getStatusColor(goal.status)}
-                      variant="soft"
-                      size="2"
-                    >
-                      {goal.status}
-                    </Badge>
-                    <Badge
-                      color={getPriorityColor(goal.priority)}
-                      variant="soft"
-                      size="1"
-                    >
-                      {goal.priority}
-                    </Badge>
-                  </Flex>
+                  <Badge
+                    color={getStatusColor(goal.status)}
+                    variant="soft"
+                    size="2"
+                  >
+                    {goal.status}
+                  </Badge>
                 </Flex>
 
                 <Flex gap="4" align="center" wrap="wrap">

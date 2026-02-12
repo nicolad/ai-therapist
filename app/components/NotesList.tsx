@@ -22,21 +22,16 @@ import { useRouter } from "next/navigation";
 interface NotesListProps {
   entityId: number;
   entityType: string;
-  userId: string;
 }
 
-export default function NotesList({
-  entityId,
-  entityType,
-  userId,
-}: NotesListProps) {
+export default function NotesList({ entityId, entityType }: NotesListProps) {
   const router = useRouter();
   const [showAddNote, setShowAddNote] = useState(false);
   const [newNoteContent, setNewNoteContent] = useState("");
   const [newNoteTags, setNewNoteTags] = useState("");
 
   const { data, loading, error, refetch } = useGetNotesQuery({
-    variables: { entityId, entityType, userId },
+    variables: { entityId, entityType },
   });
 
   const [createNote, { loading: submitting }] = useCreateNoteMutation({
@@ -52,7 +47,6 @@ export default function NotesList({
           input: {
             entityId,
             entityType,
-            userId,
             content: newNoteContent,
             tags: newNoteTags
               .split(",")

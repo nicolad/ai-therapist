@@ -41,10 +41,10 @@ export const db = new Proxy({} as ReturnType<typeof drizzle>, {
 // Goals
 // ============================================
 
-export async function getGoal(goalId: number, userId: string) {
+export async function getGoal(goalId: number, createdBy: string) {
   const result = await turso.execute({
     sql: `SELECT * FROM goals WHERE id = ? AND user_id = ?`,
-    args: [goalId, userId],
+    args: [goalId, createdBy],
   });
 
   if (result.rows.length === 0) {
@@ -55,13 +55,12 @@ export async function getGoal(goalId: number, userId: string) {
   return {
     id: row.id as number,
     familyMemberId: row.family_member_id as number,
-    userId: row.user_id as string,
+    createdBy: row.user_id as string,
     slug: (row.slug as string) || null,
     title: row.title as string,
     description: (row.description as string) || null,
     targetDate: (row.target_date as string) || null,
     status: row.status as string,
-    priority: row.priority as string,
     therapeuticText: (row.therapeutic_text as string) || null,
     therapeuticTextLanguage: (row.therapeutic_text_language as string) || null,
     therapeuticTextGeneratedAt:
@@ -71,10 +70,10 @@ export async function getGoal(goalId: number, userId: string) {
   };
 }
 
-export async function getGoalBySlug(slug: string, userId: string) {
+export async function getGoalBySlug(slug: string, createdBy: string) {
   const result = await turso.execute({
     sql: `SELECT * FROM goals WHERE slug = ? AND user_id = ?`,
-    args: [slug, userId],
+    args: [slug, createdBy],
   });
 
   if (result.rows.length === 0) {
@@ -85,13 +84,12 @@ export async function getGoalBySlug(slug: string, userId: string) {
   return {
     id: row.id as number,
     familyMemberId: row.family_member_id as number,
-    userId: row.user_id as string,
+    createdBy: row.user_id as string,
     slug: (row.slug as string) || null,
     title: row.title as string,
     description: (row.description as string) || null,
     targetDate: (row.target_date as string) || null,
     status: row.status as string,
-    priority: row.priority as string,
     therapeuticText: (row.therapeutic_text as string) || null,
     therapeuticTextLanguage: (row.therapeutic_text_language as string) || null,
     therapeuticTextGeneratedAt:
@@ -102,12 +100,12 @@ export async function getGoalBySlug(slug: string, userId: string) {
 }
 
 export async function listGoals(
-  userId: string,
+  createdBy: string,
   familyMemberId?: number,
   status?: string,
 ) {
   let sql = `SELECT * FROM goals WHERE user_id = ?`;
-  const args: any[] = [userId];
+  const args: any[] = [createdBy];
 
   if (familyMemberId) {
     sql += ` AND family_member_id = ?`;
@@ -125,12 +123,11 @@ export async function listGoals(
   return result.rows.map((row) => ({
     id: row.id as number,
     familyMemberId: row.family_member_id as number,
-    userId: row.user_id as string,
+    createdBy: row.user_id as string,
     title: row.title as string,
     description: (row.description as string) || null,
     targetDate: (row.target_date as string) || null,
     status: row.status as string,
-    priority: row.priority as string,
     createdAt: row.created_at as string,
     updatedAt: row.updated_at as string,
   }));
@@ -138,29 +135,26 @@ export async function listGoals(
 
 export async function createGoal(params: {
   familyMemberId: number;
-  userId: string;
+  createdBy: string;
   slug?: string;
   title: string;
   description?: string | null;
   targetDate?: string | null;
-  priority?: string;
 }) {
-  const priority = params.priority || "medium";
   const status = "active";
 
   const result = await turso.execute({
-    sql: `INSERT INTO goals (family_member_id, user_id, slug, title, description, target_date, status, priority)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    sql: `INSERT INTO goals (family_member_id, user_id, slug, title, description, target_date, status)
+          VALUES (?, ?, ?, ?, ?, ?, ?)
           RETURNING id`,
     args: [
       params.familyMemberId,
-      params.userId,
+      params.createdBy,
       params.slug || null,
       params.title,
       params.description || null,
       params.targetDate || null,
       status,
-      priority,
     ],
   });
 
@@ -169,14 +163,13 @@ export async function createGoal(params: {
 
 export async function updateGoal(
   goalId: number,
-  userId: string,
+  createdBy: string,
   updates: {
     slug?: string;
     title?: string;
     description?: string | null;
     targetDate?: string | null;
     status?: string;
-    priority?: string;
   },
 ) {
   const fields: string[] = [];
@@ -207,13 +200,8 @@ export async function updateGoal(
     args.push(updates.status);
   }
 
-  if (updates.priority !== undefined) {
-    fields.push("priority = ?");
-    args.push(updates.priority);
-  }
-
   fields.push("updated_at = datetime('now')");
-  args.push(goalId, userId);
+  args.push(goalId, createdBy);
 
   await turso.execute({
     sql: `UPDATE goals SET ${fields.join(", ")} WHERE id = ? AND user_id = ?`,
@@ -442,12 +430,11 @@ export async function getNoteById(noteId: number, userId: string) {
     id: row.id as number,
     entityId: row.entity_id as number,
     entityType: row.entity_type as string,
-    userId: row.user_id as string,
+    createdBy: row.user_id as string,
     noteType: (row.note_type as string) || null,
     slug: (row.slug as string) || null,
     title: (row.title as string) || null,
     content: row.content as string,
-    createdBy: (row.created_by as string) || null,
     tags: row.tags ? JSON.parse(row.tags as string) : [],
     createdAt: row.created_at as string,
     updatedAt: row.updated_at as string,
@@ -469,12 +456,11 @@ export async function getNoteBySlug(slug: string, userId: string) {
     id: row.id as number,
     entityId: row.entity_id as number,
     entityType: row.entity_type as string,
-    userId: row.user_id as string,
+    createdBy: row.user_id as string,
     noteType: (row.note_type as string) || null,
     slug: (row.slug as string) || null,
     title: (row.title as string) || null,
     content: row.content as string,
-    createdBy: (row.created_by as string) || null,
     tags: row.tags ? JSON.parse(row.tags as string) : [],
     createdAt: row.created_at as string,
     updatedAt: row.updated_at as string,
@@ -491,12 +477,11 @@ export async function getAllNotesForUser(userId: string) {
     id: row.id as number,
     entityId: row.entity_id as number,
     entityType: row.entity_type as string,
-    userId: row.user_id as string,
+    createdBy: row.user_id as string,
     noteType: (row.note_type as string) || null,
     slug: (row.slug as string) || null,
     title: (row.title as string) || null,
     content: row.content as string,
-    createdBy: (row.created_by as string) || null,
     tags: row.tags ? JSON.parse(row.tags as string) : [],
     createdAt: row.created_at as string,
     updatedAt: row.updated_at as string,
@@ -517,12 +502,11 @@ export async function listNotesForEntity(
     id: row.id as number,
     entityId: row.entity_id as number,
     entityType: row.entity_type as string,
-    userId: row.user_id as string,
+    createdBy: row.user_id as string,
     noteType: (row.note_type as string) || null,
     slug: (row.slug as string) || null,
     title: (row.title as string) || null,
     content: row.content as string,
-    createdBy: (row.created_by as string) || null,
     tags: row.tags ? JSON.parse(row.tags as string) : [],
     createdAt: row.created_at as string,
     updatedAt: row.updated_at as string,
@@ -795,7 +779,7 @@ export async function getAudioAssetsForStory(storyId: number) {
 
   return result.rows.map((row) => ({
     id: row.id as string,
-    userId: row.user_id as string,
+    createdBy: row.user_id as string,
     goalId: row.goal_id as number,
     storyId: (row.story_id as number) || null,
     language: row.language as string,
