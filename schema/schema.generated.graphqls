@@ -210,6 +210,23 @@ type GenerateLongFormTextResult {
   text: String
 }
 
+input GenerateOpenAIAudioInput {
+  model: OpenAITTSModel
+  responseFormat: OpenAIAudioFormat
+  speed: Float
+  text: String!
+  voice: OpenAITTSVoice
+}
+
+type GenerateOpenAIAudioResult {
+  audioBuffer: String
+  audioUrl: String
+  duration: Float
+  message: String
+  sizeBytes: Int
+  success: Boolean!
+}
+
 type GenerateQuestionsResult {
   jobId: String
   message: String
@@ -314,6 +331,7 @@ type Mutation {
   generateAudio(goalId: Int!, language: String, storyId: Int, text: String, voice: String): GenerateAudioResult!
   generateAudioFromText(input: GenerateAudioFromTextInput!): GenerateAudioFromTextResult!
   generateLongFormText(goalId: Int!, language: String, minutes: Int): GenerateLongFormTextResult!
+  generateOpenAIAudio(input: GenerateOpenAIAudioInput!): GenerateOpenAIAudioResult!
   generateResearch(goalId: Int!): GenerateResearchResult!
   generateTherapeuticQuestions(goalId: Int!): GenerateQuestionsResult!
   refreshClaimCard(id: ID!): ClaimCard!
@@ -338,6 +356,34 @@ type Note {
   tags: [String!]
   title: String
   updatedAt: String!
+}
+
+enum OpenAIAudioFormat {
+  AAC
+  FLAC
+  MP3
+  OPUS
+  PCM
+  WAV
+}
+
+enum OpenAITTSModel {
+  GPT_4O_MINI_TTS
+  TTS_1
+  TTS_1_HD
+}
+
+enum OpenAITTSVoice {
+  ALLOY
+  ASH
+  BALLAD
+  CORAL
+  ECHO
+  FABLE
+  NOVA
+  ONYX
+  SAGE
+  SHIMMER
 }
 
 type PaperCandidate {

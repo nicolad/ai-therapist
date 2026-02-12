@@ -1,0 +1,10 @@
+mutation GenerateOpenAIAudio($input: GenerateOpenAIAudioInput!) {
+  generateOpenAIAudio(input: $input) {
+    success
+    message
+    audioBuffer
+    audioUrl
+    sizeBytes
+    duration
+  }
+}

@@ -28,6 +28,7 @@ import    { deleteTherapeuticQuestions as Mutation_deleteTherapeuticQuestions } 
 import    { generateAudio as Mutation_generateAudio } from './resolvers/Mutation/generateAudio';
 import    { generateAudioFromText as Mutation_generateAudioFromText } from './resolvers/Mutation/generateAudioFromText';
 import    { generateLongFormText as Mutation_generateLongFormText } from './resolvers/Mutation/generateLongFormText';
+import    { generateOpenAIAudio as Mutation_generateOpenAIAudio } from './resolvers/Mutation/generateOpenAIAudio';
 import    { generateResearch as Mutation_generateResearch } from './resolvers/Mutation/generateResearch';
 import    { generateTherapeuticQuestions as Mutation_generateTherapeuticQuestions } from './resolvers/Mutation/generateTherapeuticQuestions';
 import    { refreshClaimCard as Mutation_refreshClaimCard } from './resolvers/Mutation/refreshClaimCard';
@@ -56,6 +57,7 @@ import    { EvidenceLocator } from './resolvers/EvidenceLocator';
 import    { GenerateAudioFromTextResult } from './resolvers/GenerateAudioFromTextResult';
 import    { GenerateAudioResult } from './resolvers/GenerateAudioResult';
 import    { GenerateLongFormTextResult } from './resolvers/GenerateLongFormTextResult';
+import    { GenerateOpenAIAudioResult } from './resolvers/GenerateOpenAIAudioResult';
 import    { GenerateQuestionsResult } from './resolvers/GenerateQuestionsResult';
 import    { GenerateResearchResult } from './resolvers/GenerateResearchResult';
 import    { GenerationJob } from './resolvers/GenerationJob';
@@ -72,7 +74,7 @@ import    { TherapeuticQuestion } from './resolvers/TherapeuticQuestion';
 import    { UploadAudioToR2Result } from './resolvers/UploadAudioToR2Result';
     export const resolvers: Resolvers = {
       Query: { allNotes: Query_allNotes,availableVoices: Query_availableVoices,claimCard: Query_claimCard,claimCardsForNote: Query_claimCardsForNote,generationJob: Query_generationJob,generationJobs: Query_generationJobs,goal: Query_goal,goals: Query_goals,note: Query_note,notes: Query_notes,research: Query_research,stories: Query_stories,story: Query_story,therapeuticQuestions: Query_therapeuticQuestions },
-      Mutation: { buildClaimCards: Mutation_buildClaimCards,checkNoteClaims: Mutation_checkNoteClaims,createGoal: Mutation_createGoal,createNote: Mutation_createNote,createStory: Mutation_createStory,deleteClaimCard: Mutation_deleteClaimCard,deleteGoal: Mutation_deleteGoal,deleteNote: Mutation_deleteNote,deleteResearch: Mutation_deleteResearch,deleteStory: Mutation_deleteStory,deleteTherapeuticQuestions: Mutation_deleteTherapeuticQuestions,generateAudio: Mutation_generateAudio,generateAudioFromText: Mutation_generateAudioFromText,generateLongFormText: Mutation_generateLongFormText,generateResearch: Mutation_generateResearch,generateTherapeuticQuestions: Mutation_generateTherapeuticQuestions,refreshClaimCard: Mutation_refreshClaimCard,updateGoal: Mutation_updateGoal,updateNote: Mutation_updateNote,updateStory: Mutation_updateStory,uploadAudioToR2: Mutation_uploadAudioToR2 },
+      Mutation: { buildClaimCards: Mutation_buildClaimCards,checkNoteClaims: Mutation_checkNoteClaims,createGoal: Mutation_createGoal,createNote: Mutation_createNote,createStory: Mutation_createStory,deleteClaimCard: Mutation_deleteClaimCard,deleteGoal: Mutation_deleteGoal,deleteNote: Mutation_deleteNote,deleteResearch: Mutation_deleteResearch,deleteStory: Mutation_deleteStory,deleteTherapeuticQuestions: Mutation_deleteTherapeuticQuestions,generateAudio: Mutation_generateAudio,generateAudioFromText: Mutation_generateAudioFromText,generateLongFormText: Mutation_generateLongFormText,generateOpenAIAudio: Mutation_generateOpenAIAudio,generateResearch: Mutation_generateResearch,generateTherapeuticQuestions: Mutation_generateTherapeuticQuestions,refreshClaimCard: Mutation_refreshClaimCard,updateGoal: Mutation_updateGoal,updateNote: Mutation_updateNote,updateStory: Mutation_updateStory,uploadAudioToR2: Mutation_uploadAudioToR2 },
       Subscription: { audioJobStatus: Subscription_audioJobStatus,researchJobStatus: Subscription_researchJobStatus },
       AudioAsset: AudioAsset,
 AudioManifest: AudioManifest,
@@ -93,6 +95,7 @@ EvidenceLocator: EvidenceLocator,
 GenerateAudioFromTextResult: GenerateAudioFromTextResult,
 GenerateAudioResult: GenerateAudioResult,
 GenerateLongFormTextResult: GenerateLongFormTextResult,
+GenerateOpenAIAudioResult: GenerateOpenAIAudioResult,
 GenerateQuestionsResult: GenerateQuestionsResult,
 GenerateResearchResult: GenerateResearchResult,
 GenerationJob: GenerationJob,

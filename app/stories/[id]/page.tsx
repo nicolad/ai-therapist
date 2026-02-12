@@ -27,6 +27,10 @@ import {
   useGetStoryQuery,
   useUpdateStoryMutation,
   useDeleteStoryMutation,
+  useGenerateOpenAiAudioMutation,
+  OpenAittsVoice,
+  OpenAittsModel,
+  OpenAiAudioFormat,
 } from "@/app/__generated__/hooks";
 import { authClient } from "@/src/auth/client";
 
@@ -66,6 +70,9 @@ function StoryPageContent() {
       }
     },
   });
+
+  const [generateAudio, { loading: generatingAudio }] =
+    useGenerateOpenAiAudioMutation();
 
   const story = data?.story;
 
@@ -123,22 +130,39 @@ function StoryPageContent() {
     try {
       setIsPlayingAudio(true);
 
-      const response = await fetch("/api/tts", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      // Use GraphQL mutation for OpenAI TTS
+      const result = await generateAudio({
+        variables: {
+          input: {
+            text: story.content,
+            voice: OpenAittsVoice.Alloy,
+            model: OpenAittsModel.Gpt_4OMiniTts,
+            speed: 0.9,
+            responseFormat: OpenAiAudioFormat.Mp3,
+          },
         },
-        body: JSON.stringify({
-          text: story.content,
-        }),
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to generate audio");
+      if (!result.data?.generateOpenAIAudio.success) {
+        throw new Error(
+          result.data?.generateOpenAIAudio.message || "Failed to generate audio",
+        );
       }
 
-      // Convert response to blob and create audio element
-      const blob = await response.blob();
+      const audioBuffer = result.data.generateOpenAIAudio.audioBuffer;
+      if (!audioBuffer) {
+        throw new Error("No audio data received");
+      }
+
+      // Convert base64 to blob
+      const binaryString = atob(audioBuffer);
+      const bytes = new Uint8Array(binaryString.length);
+      for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+      const blob = new Blob([bytes], { type: "audio/mpeg" });
+
+      // Create audio element
       const audioUrl = URL.createObjectURL(blob);
       const audio = new Audio(audioUrl);
 
@@ -263,7 +287,8 @@ function StoryPageContent() {
                   variant="primary"
                   size="large"
                   onClick={handleTextToSpeech}
-                  disabled={!story.content}
+                  disabled={!story.content || generatingAudio}
+                  loading={generatingAudio}
                 >
                   {isPlayingAudio ? (
                     <>

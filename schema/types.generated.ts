@@ -248,6 +248,24 @@ export type GenerateLongFormTextResult = {
   text?: Maybe<Scalars['String']['output']>;
 };
 
+export type GenerateOpenAIAudioInput = {
+  model?: InputMaybe<OpenAITTSModel>;
+  responseFormat?: InputMaybe<OpenAIAudioFormat>;
+  speed?: InputMaybe<Scalars['Float']['input']>;
+  text: Scalars['String']['input'];
+  voice?: InputMaybe<OpenAITTSVoice>;
+};
+
+export type GenerateOpenAIAudioResult = {
+  __typename?: 'GenerateOpenAIAudioResult';
+  audioBuffer?: Maybe<Scalars['String']['output']>;
+  audioUrl?: Maybe<Scalars['String']['output']>;
+  duration?: Maybe<Scalars['Float']['output']>;
+  message?: Maybe<Scalars['String']['output']>;
+  sizeBytes?: Maybe<Scalars['Int']['output']>;
+  success: Scalars['Boolean']['output'];
+};
+
 export type GenerateQuestionsResult = {
   __typename?: 'GenerateQuestionsResult';
   jobId?: Maybe<Scalars['String']['output']>;
@@ -358,6 +376,7 @@ export type Mutation = {
   generateAudio: GenerateAudioResult;
   generateAudioFromText: GenerateAudioFromTextResult;
   generateLongFormText: GenerateLongFormTextResult;
+  generateOpenAIAudio: GenerateOpenAIAudioResult;
   generateResearch: GenerateResearchResult;
   generateTherapeuticQuestions: GenerateQuestionsResult;
   refreshClaimCard: ClaimCard;
@@ -444,6 +463,11 @@ export type MutationgenerateLongFormTextArgs = {
 };
 
 
+export type MutationgenerateOpenAIAudioArgs = {
+  input: GenerateOpenAIAudioInput;
+};
+
+
 export type MutationgenerateResearchArgs = {
   goalId: Scalars['Int']['input'];
 };
@@ -498,6 +522,31 @@ export type Note = {
   title?: Maybe<Scalars['String']['output']>;
   updatedAt: Scalars['String']['output'];
 };
+
+export type OpenAIAudioFormat =
+  | 'AAC'
+  | 'FLAC'
+  | 'MP3'
+  | 'OPUS'
+  | 'PCM'
+  | 'WAV';
+
+export type OpenAITTSModel =
+  | 'GPT_4O_MINI_TTS'
+  | 'TTS_1'
+  | 'TTS_1_HD';
+
+export type OpenAITTSVoice =
+  | 'ALLOY'
+  | 'ASH'
+  | 'BALLAD'
+  | 'CORAL'
+  | 'ECHO'
+  | 'FABLE'
+  | 'NOVA'
+  | 'ONYX'
+  | 'SAGE'
+  | 'SHIMMER';
 
 export type PaperCandidate = {
   __typename?: 'PaperCandidate';
@@ -823,6 +872,8 @@ export type ResolversTypes = {
   GenerateAudioFromTextResult: ResolverTypeWrapper<GenerateAudioFromTextResult>;
   GenerateAudioResult: ResolverTypeWrapper<GenerateAudioResult>;
   GenerateLongFormTextResult: ResolverTypeWrapper<GenerateLongFormTextResult>;
+  GenerateOpenAIAudioInput: GenerateOpenAIAudioInput;
+  GenerateOpenAIAudioResult: ResolverTypeWrapper<GenerateOpenAIAudioResult>;
   GenerateQuestionsResult: ResolverTypeWrapper<GenerateQuestionsResult>;
   GenerateResearchResult: ResolverTypeWrapper<GenerateResearchResult>;
   GenerationJob: ResolverTypeWrapper<Omit<GenerationJob, 'status' | 'type'> & { status: ResolversTypes['JobStatus'], type: ResolversTypes['JobType'] }>;
@@ -834,6 +885,9 @@ export type ResolversTypes = {
   JobType: ResolverTypeWrapper<'AUDIO' | 'RESEARCH' | 'QUESTIONS' | 'LONGFORM'>;
   Mutation: ResolverTypeWrapper<Record<PropertyKey, never>>;
   Note: ResolverTypeWrapper<Omit<Note, 'claimCards' | 'goal' | 'linkedResearch'> & { claimCards?: Maybe<Array<ResolversTypes['ClaimCard']>>, goal?: Maybe<ResolversTypes['Goal']>, linkedResearch?: Maybe<Array<ResolversTypes['Research']>> }>;
+  OpenAIAudioFormat: ResolverTypeWrapper<'MP3' | 'OPUS' | 'AAC' | 'FLAC' | 'WAV' | 'PCM'>;
+  OpenAITTSModel: ResolverTypeWrapper<'TTS_1' | 'TTS_1_HD' | 'GPT_4O_MINI_TTS'>;
+  OpenAITTSVoice: ResolverTypeWrapper<'ALLOY' | 'ASH' | 'BALLAD' | 'CORAL' | 'ECHO' | 'FABLE' | 'ONYX' | 'NOVA' | 'SAGE' | 'SHIMMER'>;
   PaperCandidate: ResolverTypeWrapper<PaperCandidate>;
   Query: ResolverTypeWrapper<Record<PropertyKey, never>>;
   Research: ResolverTypeWrapper<Omit<Research, 'goal'> & { goal?: Maybe<ResolversTypes['Goal']> }>;
@@ -882,6 +936,8 @@ export type ResolversParentTypes = {
   GenerateAudioFromTextResult: GenerateAudioFromTextResult;
   GenerateAudioResult: GenerateAudioResult;
   GenerateLongFormTextResult: GenerateLongFormTextResult;
+  GenerateOpenAIAudioInput: GenerateOpenAIAudioInput;
+  GenerateOpenAIAudioResult: GenerateOpenAIAudioResult;
   GenerateQuestionsResult: GenerateQuestionsResult;
   GenerateResearchResult: GenerateResearchResult;
   GenerationJob: GenerationJob;
@@ -1047,6 +1103,15 @@ export type GenerateLongFormTextResultResolvers<ContextType = GraphQLContext, Pa
   text?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
 };
 
+export type GenerateOpenAIAudioResultResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['GenerateOpenAIAudioResult'] = ResolversParentTypes['GenerateOpenAIAudioResult']> = {
+  audioBuffer?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  audioUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  duration?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  message?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  sizeBytes?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  success?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+};
+
 export type GenerateQuestionsResultResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['GenerateQuestionsResult'] = ResolversParentTypes['GenerateQuestionsResult']> = {
   jobId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   message?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
@@ -1142,6 +1207,7 @@ export type MutationResolvers<ContextType = GraphQLContext, ParentType extends R
   generateAudio?: Resolver<ResolversTypes['GenerateAudioResult'], ParentType, ContextType, RequireFields<MutationgenerateAudioArgs, 'goalId'>>;
   generateAudioFromText?: Resolver<ResolversTypes['GenerateAudioFromTextResult'], ParentType, ContextType, RequireFields<MutationgenerateAudioFromTextArgs, 'input'>>;
   generateLongFormText?: Resolver<ResolversTypes['GenerateLongFormTextResult'], ParentType, ContextType, RequireFields<MutationgenerateLongFormTextArgs, 'goalId'>>;
+  generateOpenAIAudio?: Resolver<ResolversTypes['GenerateOpenAIAudioResult'], ParentType, ContextType, RequireFields<MutationgenerateOpenAIAudioArgs, 'input'>>;
   generateResearch?: Resolver<ResolversTypes['GenerateResearchResult'], ParentType, ContextType, RequireFields<MutationgenerateResearchArgs, 'goalId'>>;
   generateTherapeuticQuestions?: Resolver<ResolversTypes['GenerateQuestionsResult'], ParentType, ContextType, RequireFields<MutationgenerateTherapeuticQuestionsArgs, 'goalId'>>;
   refreshClaimCard?: Resolver<ResolversTypes['ClaimCard'], ParentType, ContextType, RequireFields<MutationrefreshClaimCardArgs, 'id'>>;
@@ -1167,6 +1233,12 @@ export type NoteResolvers<ContextType = GraphQLContext, ParentType extends Resol
   title?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   updatedAt?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
 };
+
+export type OpenAIAudioFormatResolvers = EnumResolverSignature<{ AAC?: any, FLAC?: any, MP3?: any, OPUS?: any, PCM?: any, WAV?: any }, ResolversTypes['OpenAIAudioFormat']>;
+
+export type OpenAITTSModelResolvers = EnumResolverSignature<{ GPT_4O_MINI_TTS?: any, TTS_1?: any, TTS_1_HD?: any }, ResolversTypes['OpenAITTSModel']>;
+
+export type OpenAITTSVoiceResolvers = EnumResolverSignature<{ ALLOY?: any, ASH?: any, BALLAD?: any, CORAL?: any, ECHO?: any, FABLE?: any, NOVA?: any, ONYX?: any, SAGE?: any, SHIMMER?: any }, ResolversTypes['OpenAITTSVoice']>;
 
 export type PaperCandidateResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['PaperCandidate'] = ResolversParentTypes['PaperCandidate']> = {
   abstract?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
@@ -1288,6 +1360,7 @@ export type Resolvers<ContextType = GraphQLContext> = {
   GenerateAudioFromTextResult?: GenerateAudioFromTextResultResolvers<ContextType>;
   GenerateAudioResult?: GenerateAudioResultResolvers<ContextType>;
   GenerateLongFormTextResult?: GenerateLongFormTextResultResolvers<ContextType>;
+  GenerateOpenAIAudioResult?: GenerateOpenAIAudioResultResolvers<ContextType>;
   GenerateQuestionsResult?: GenerateQuestionsResultResolvers<ContextType>;
   GenerateResearchResult?: GenerateResearchResultResolvers<ContextType>;
   GenerationJob?: GenerationJobResolvers<ContextType>;
@@ -1299,6 +1372,9 @@ export type Resolvers<ContextType = GraphQLContext> = {
   JobType?: JobTypeResolvers;
   Mutation?: MutationResolvers<ContextType>;
   Note?: NoteResolvers<ContextType>;
+  OpenAIAudioFormat?: OpenAIAudioFormatResolvers;
+  OpenAITTSModel?: OpenAITTSModelResolvers;
+  OpenAITTSVoice?: OpenAITTSVoiceResolvers;
   PaperCandidate?: PaperCandidateResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
   Research?: ResearchResolvers<ContextType>;

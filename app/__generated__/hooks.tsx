@@ -248,6 +248,24 @@ export type GenerateLongFormTextResult = {
   text?: Maybe<Scalars['String']['output']>;
 };
 
+export type GenerateOpenAiAudioInput = {
+  model?: InputMaybe<OpenAittsModel>;
+  responseFormat?: InputMaybe<OpenAiAudioFormat>;
+  speed?: InputMaybe<Scalars['Float']['input']>;
+  text: Scalars['String']['input'];
+  voice?: InputMaybe<OpenAittsVoice>;
+};
+
+export type GenerateOpenAiAudioResult = {
+  __typename?: 'GenerateOpenAIAudioResult';
+  audioBuffer?: Maybe<Scalars['String']['output']>;
+  audioUrl?: Maybe<Scalars['String']['output']>;
+  duration?: Maybe<Scalars['Float']['output']>;
+  message?: Maybe<Scalars['String']['output']>;
+  sizeBytes?: Maybe<Scalars['Int']['output']>;
+  success: Scalars['Boolean']['output'];
+};
+
 export type GenerateQuestionsResult = {
   __typename?: 'GenerateQuestionsResult';
   jobId?: Maybe<Scalars['String']['output']>;
@@ -360,6 +378,7 @@ export type Mutation = {
   generateAudio: GenerateAudioResult;
   generateAudioFromText: GenerateAudioFromTextResult;
   generateLongFormText: GenerateLongFormTextResult;
+  generateOpenAIAudio: GenerateOpenAiAudioResult;
   generateResearch: GenerateResearchResult;
   generateTherapeuticQuestions: GenerateQuestionsResult;
   refreshClaimCard: ClaimCard;
@@ -446,6 +465,11 @@ export type MutationGenerateLongFormTextArgs = {
 };
 
 
+export type MutationGenerateOpenAiAudioArgs = {
+  input: GenerateOpenAiAudioInput;
+};
+
+
 export type MutationGenerateResearchArgs = {
   goalId: Scalars['Int']['input'];
 };
@@ -500,6 +524,34 @@ export type Note = {
   title?: Maybe<Scalars['String']['output']>;
   updatedAt: Scalars['String']['output'];
 };
+
+export enum OpenAiAudioFormat {
+  Aac = 'AAC',
+  Flac = 'FLAC',
+  Mp3 = 'MP3',
+  Opus = 'OPUS',
+  Pcm = 'PCM',
+  Wav = 'WAV'
+}
+
+export enum OpenAittsModel {
+  Gpt_4OMiniTts = 'GPT_4O_MINI_TTS',
+  Tts_1 = 'TTS_1',
+  Tts_1Hd = 'TTS_1_HD'
+}
+
+export enum OpenAittsVoice {
+  Alloy = 'ALLOY',
+  Ash = 'ASH',
+  Ballad = 'BALLAD',
+  Coral = 'CORAL',
+  Echo = 'ECHO',
+  Fable = 'FABLE',
+  Nova = 'NOVA',
+  Onyx = 'ONYX',
+  Sage = 'SAGE',
+  Shimmer = 'SHIMMER'
+}
 
 export type PaperCandidate = {
   __typename?: 'PaperCandidate';
@@ -858,6 +910,13 @@ export type GenerateLongFormTextRomanianMutationVariables = Exact<{
 
 
 export type GenerateLongFormTextRomanianMutation = { __typename?: 'Mutation', generateLongFormText: { __typename?: 'GenerateLongFormTextResult', success: boolean, message?: string | null, text?: string | null, audioUrl?: string | null, manifestUrl?: string | null, segmentUrls?: Array<string> | null } };
+
+export type GenerateOpenAiAudioMutationVariables = Exact<{
+  input: GenerateOpenAiAudioInput;
+}>;
+
+
+export type GenerateOpenAiAudioMutation = { __typename?: 'Mutation', generateOpenAIAudio: { __typename?: 'GenerateOpenAIAudioResult', success: boolean, message?: string | null, audioBuffer?: string | null, audioUrl?: string | null, sizeBytes?: number | null, duration?: number | null } };
 
 export type GetAllNotesQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -1796,6 +1855,44 @@ export function useGenerateLongFormTextRomanianMutation(baseOptions?: Apollo.Mut
 export type GenerateLongFormTextRomanianMutationHookResult = ReturnType<typeof useGenerateLongFormTextRomanianMutation>;
 export type GenerateLongFormTextRomanianMutationResult = Apollo.MutationResult<GenerateLongFormTextRomanianMutation>;
 export type GenerateLongFormTextRomanianMutationOptions = Apollo.BaseMutationOptions<GenerateLongFormTextRomanianMutation, GenerateLongFormTextRomanianMutationVariables>;
+export const GenerateOpenAiAudioDocument = gql`
+    mutation GenerateOpenAIAudio($input: GenerateOpenAIAudioInput!) {
+  generateOpenAIAudio(input: $input) {
+    success
+    message
+    audioBuffer
+    audioUrl
+    sizeBytes
+    duration
+  }
+}
+    `;
+export type GenerateOpenAiAudioMutationFn = Apollo.MutationFunction<GenerateOpenAiAudioMutation, GenerateOpenAiAudioMutationVariables>;
+
+/**
+ * __useGenerateOpenAiAudioMutation__
+ *
+ * To run a mutation, you first call `useGenerateOpenAiAudioMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useGenerateOpenAiAudioMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [generateOpenAiAudioMutation, { data, loading, error }] = useGenerateOpenAiAudioMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useGenerateOpenAiAudioMutation(baseOptions?: Apollo.MutationHookOptions<GenerateOpenAiAudioMutation, GenerateOpenAiAudioMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<GenerateOpenAiAudioMutation, GenerateOpenAiAudioMutationVariables>(GenerateOpenAiAudioDocument, options);
+      }
+export type GenerateOpenAiAudioMutationHookResult = ReturnType<typeof useGenerateOpenAiAudioMutation>;
+export type GenerateOpenAiAudioMutationResult = Apollo.MutationResult<GenerateOpenAiAudioMutation>;
+export type GenerateOpenAiAudioMutationOptions = Apollo.BaseMutationOptions<GenerateOpenAiAudioMutation, GenerateOpenAiAudioMutationVariables>;
 export const GetAllNotesDocument = gql`
     query GetAllNotes {
   allNotes {

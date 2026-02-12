@@ -64,6 +64,11 @@ type Mutation {
     input: GenerateAudioFromTextInput!
   ): GenerateAudioFromTextResult!
   uploadAudioToR2(input: UploadAudioToR2Input!): UploadAudioToR2Result!
+
+  # OpenAI TTS
+  generateOpenAIAudio(
+    input: GenerateOpenAIAudioInput!
+  ): GenerateOpenAIAudioResult!
 }
 
 type Subscription {
@@ -525,4 +530,53 @@ input AudioMetadataInput {
   voice: String
   model: String
   generatedAt: String
+}
+
+# ============================================
+# OpenAI TTS Types
+# ============================================
+
+enum OpenAITTSVoice {
+  ALLOY
+  ASH
+  BALLAD
+  CORAL
+  ECHO
+  FABLE
+  ONYX
+  NOVA
+  SAGE
+  SHIMMER
+}
+
+enum OpenAITTSModel {
+  TTS_1
+  TTS_1_HD
+  GPT_4O_MINI_TTS
+}
+
+enum OpenAIAudioFormat {
+  MP3
+  OPUS
+  AAC
+  FLAC
+  WAV
+  PCM
+}
+
+input GenerateOpenAIAudioInput {
+  text: String!
+  voice: OpenAITTSVoice
+  model: OpenAITTSModel
+  speed: Float
+  responseFormat: OpenAIAudioFormat
+}
+
+type GenerateOpenAIAudioResult {
+  success: Boolean!
+  message: String
+  audioBuffer: String
+  audioUrl: String
+  sizeBytes: Int
+  duration: Float
 }
