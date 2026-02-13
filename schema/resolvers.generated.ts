@@ -8,6 +8,7 @@ import    { generationJob as Query_generationJob } from './resolvers/Query/gener
 import    { generationJobs as Query_generationJobs } from './resolvers/Query/generationJobs';
 import    { goal as Query_goal } from './resolvers/Query/goal';
 import    { goals as Query_goals } from './resolvers/Query/goals';
+import    { mySharedNotes as Query_mySharedNotes } from './resolvers/Query/mySharedNotes';
 import    { note as Query_note } from './resolvers/Query/note';
 import    { notes as Query_notes } from './resolvers/Query/notes';
 import    { research as Query_research } from './resolvers/Query/research';
@@ -31,6 +32,9 @@ import    { generateOpenAIAudio as Mutation_generateOpenAIAudio } from './resolv
 import    { generateResearch as Mutation_generateResearch } from './resolvers/Mutation/generateResearch';
 import    { generateTherapeuticQuestions as Mutation_generateTherapeuticQuestions } from './resolvers/Mutation/generateTherapeuticQuestions';
 import    { refreshClaimCard as Mutation_refreshClaimCard } from './resolvers/Mutation/refreshClaimCard';
+import    { setNoteVisibility as Mutation_setNoteVisibility } from './resolvers/Mutation/setNoteVisibility';
+import    { shareNote as Mutation_shareNote } from './resolvers/Mutation/shareNote';
+import    { unshareNote as Mutation_unshareNote } from './resolvers/Mutation/unshareNote';
 import    { updateGoal as Mutation_updateGoal } from './resolvers/Mutation/updateGoal';
 import    { updateNote as Mutation_updateNote } from './resolvers/Mutation/updateNote';
 import    { updateStory as Mutation_updateStory } from './resolvers/Mutation/updateStory';
@@ -64,14 +68,16 @@ import    { GoalStory } from './resolvers/GoalStory';
 import    { JobError } from './resolvers/JobError';
 import    { JobResult } from './resolvers/JobResult';
 import    { Note } from './resolvers/Note';
+import    { NoteAccess } from './resolvers/NoteAccess';
+import    { NoteShare } from './resolvers/NoteShare';
 import    { PaperCandidate } from './resolvers/PaperCandidate';
 import    { Research } from './resolvers/Research';
 import    { Story } from './resolvers/Story';
 import    { TextSegment } from './resolvers/TextSegment';
 import    { TherapeuticQuestion } from './resolvers/TherapeuticQuestion';
     export const resolvers: Resolvers = {
-      Query: { allNotes: Query_allNotes,audioFromR2: Query_audioFromR2,claimCard: Query_claimCard,claimCardsForNote: Query_claimCardsForNote,generationJob: Query_generationJob,generationJobs: Query_generationJobs,goal: Query_goal,goals: Query_goals,note: Query_note,notes: Query_notes,research: Query_research,stories: Query_stories,story: Query_story,therapeuticQuestions: Query_therapeuticQuestions },
-      Mutation: { buildClaimCards: Mutation_buildClaimCards,checkNoteClaims: Mutation_checkNoteClaims,createGoal: Mutation_createGoal,createNote: Mutation_createNote,createStory: Mutation_createStory,deleteClaimCard: Mutation_deleteClaimCard,deleteGoal: Mutation_deleteGoal,deleteNote: Mutation_deleteNote,deleteResearch: Mutation_deleteResearch,deleteStory: Mutation_deleteStory,deleteTherapeuticQuestions: Mutation_deleteTherapeuticQuestions,generateAudio: Mutation_generateAudio,generateLongFormText: Mutation_generateLongFormText,generateOpenAIAudio: Mutation_generateOpenAIAudio,generateResearch: Mutation_generateResearch,generateTherapeuticQuestions: Mutation_generateTherapeuticQuestions,refreshClaimCard: Mutation_refreshClaimCard,updateGoal: Mutation_updateGoal,updateNote: Mutation_updateNote,updateStory: Mutation_updateStory },
+      Query: { allNotes: Query_allNotes,audioFromR2: Query_audioFromR2,claimCard: Query_claimCard,claimCardsForNote: Query_claimCardsForNote,generationJob: Query_generationJob,generationJobs: Query_generationJobs,goal: Query_goal,goals: Query_goals,mySharedNotes: Query_mySharedNotes,note: Query_note,notes: Query_notes,research: Query_research,stories: Query_stories,story: Query_story,therapeuticQuestions: Query_therapeuticQuestions },
+      Mutation: { buildClaimCards: Mutation_buildClaimCards,checkNoteClaims: Mutation_checkNoteClaims,createGoal: Mutation_createGoal,createNote: Mutation_createNote,createStory: Mutation_createStory,deleteClaimCard: Mutation_deleteClaimCard,deleteGoal: Mutation_deleteGoal,deleteNote: Mutation_deleteNote,deleteResearch: Mutation_deleteResearch,deleteStory: Mutation_deleteStory,deleteTherapeuticQuestions: Mutation_deleteTherapeuticQuestions,generateAudio: Mutation_generateAudio,generateLongFormText: Mutation_generateLongFormText,generateOpenAIAudio: Mutation_generateOpenAIAudio,generateResearch: Mutation_generateResearch,generateTherapeuticQuestions: Mutation_generateTherapeuticQuestions,refreshClaimCard: Mutation_refreshClaimCard,setNoteVisibility: Mutation_setNoteVisibility,shareNote: Mutation_shareNote,unshareNote: Mutation_unshareNote,updateGoal: Mutation_updateGoal,updateNote: Mutation_updateNote,updateStory: Mutation_updateStory },
       Subscription: { audioJobStatus: Subscription_audioJobStatus,researchJobStatus: Subscription_researchJobStatus },
       AudioAsset: AudioAsset,
 AudioFromR2Result: AudioFromR2Result,
@@ -101,6 +107,8 @@ GoalStory: GoalStory,
 JobError: JobError,
 JobResult: JobResult,
 Note: Note,
+NoteAccess: NoteAccess,
+NoteShare: NoteShare,
 PaperCandidate: PaperCandidate,
 Research: Research,
 Story: Story,

@@ -406,8 +406,8 @@ export async function getResearchForNote(noteId: number) {
 
 export async function getNoteById(noteId: number, userId: string) {
   const result = await turso.execute({
-    sql: `SELECT * FROM notes WHERE id = ? AND user_id = ?`,
-    args: [noteId, userId],
+    sql: `SELECT * FROM notes WHERE id = ?`,
+    args: [noteId],
   });
 
   if (result.rows.length === 0) {
@@ -425,6 +425,7 @@ export async function getNoteById(noteId: number, userId: string) {
     title: (row.title as string) || null,
     content: row.content as string,
     tags: row.tags ? JSON.parse(row.tags as string) : [],
+    visibility: (row.visibility as string) || 'PRIVATE',
     createdAt: row.created_at as string,
     updatedAt: row.updated_at as string,
   };
@@ -432,8 +433,8 @@ export async function getNoteById(noteId: number, userId: string) {
 
 export async function getNoteBySlug(slug: string, userId: string) {
   const result = await turso.execute({
-    sql: `SELECT * FROM notes WHERE slug = ? AND user_id = ?`,
-    args: [slug, userId],
+    sql: `SELECT * FROM notes WHERE slug = ?`,
+    args: [slug],
   });
 
   if (result.rows.length === 0) {
@@ -451,6 +452,7 @@ export async function getNoteBySlug(slug: string, userId: string) {
     title: (row.title as string) || null,
     content: row.content as string,
     tags: row.tags ? JSON.parse(row.tags as string) : [],
+    visibility: (row.visibility as string) || 'PRIVATE',
     createdAt: row.created_at as string,
     updatedAt: row.updated_at as string,
   };
@@ -472,6 +474,7 @@ export async function getAllNotesForUser(userId: string) {
     title: (row.title as string) || null,
     content: row.content as string,
     tags: row.tags ? JSON.parse(row.tags as string) : [],
+    visibility: (row.visibility as string) || 'PRIVATE',
     createdAt: row.created_at as string,
     updatedAt: row.updated_at as string,
   }));
@@ -497,6 +500,7 @@ export async function listNotesForEntity(
     title: (row.title as string) || null,
     content: row.content as string,
     tags: row.tags ? JSON.parse(row.tags as string) : [],
+    visibility: (row.visibility as string) || 'PRIVATE',
     createdAt: row.created_at as string,
     updatedAt: row.updated_at as string,
   }));
@@ -613,6 +617,186 @@ export async function linkResearchToNote(
       args: [noteId, researchId],
     });
   }
+}
+
+// ============================================
+// Note Access Control & Sharing
+// ============================================
+
+function normalizeEmail(email: string): string {
+  return email.trim().toLowerCase();
+}
+
+export async function canViewerReadNote(
+  noteId: number,
+  viewerEmail: string | null,
+): Promise<{ canRead: boolean; canEdit: boolean; reason: string }> {
+  const result = await turso.execute({
+    sql: `
+      SELECT
+        n.visibility,
+        n.user_id as owner_email,
+        CASE
+          WHEN n.visibility = 'PUBLIC' THEN 1
+          WHEN n.user_id = ? THEN 1
+          WHEN EXISTS (
+            SELECT 1 FROM note_shares s
+            WHERE s.note_id = n.id AND s.email = ?
+          ) THEN 1
+          ELSE 0
+        END AS can_read
+      FROM notes n
+      WHERE n.id = ?
+      LIMIT 1;
+    `,
+    args: [viewerEmail || '', normalizeEmail(viewerEmail || ''), noteId],
+  });
+
+  if (result.rows.length === 0) {
+    return { canRead: false, canEdit: false, reason: 'NOT_FOUND' };
+  }
+
+  const row = result.rows[0];
+  const canRead = (row.can_read as number) === 1;
+  const ownerEmail = row.owner_email as string;
+  const visibility = row.visibility as string;
+
+  if (!canRead) {
+    return { canRead: false, canEdit: false, reason: 'FORBIDDEN' };
+  }
+
+  // Check if viewer is owner
+  if (viewerEmail === ownerEmail) {
+    return { canRead: true, canEdit: true, reason: 'OWNER' };
+  }
+
+  // Check if public
+  if (visibility === 'PUBLIC') {
+    return { canRead: true, canEdit: false, reason: 'PUBLIC' };
+  }
+
+  // Check share role
+  const shareResult = await turso.execute({
+    sql: `SELECT role FROM note_shares WHERE note_id = ? AND email = ?`,
+    args: [noteId, normalizeEmail(viewerEmail || '')],
+  });
+
+  if (shareResult.rows.length > 0) {
+    const role = shareResult.rows[0].role as string;
+    return {
+      canRead: true,
+      canEdit: role === 'EDITOR',
+      reason: `SHARED_${role}`,
+    };
+  }
+
+  return { canRead: true, canEdit: false, reason: 'SHARED' };
+}
+
+export async function setNoteVisibility(
+  noteId: number,
+  visibility: 'PRIVATE' | 'PUBLIC',
+  userId: string,
+) {
+  await turso.execute({
+    sql: `UPDATE notes SET visibility = ?, updated_at = datetime('now') WHERE id = ? AND user_id = ?`,
+    args: [visibility, noteId, userId],
+  });
+
+  return getNoteById(noteId, userId);
+}
+
+export async function shareNote(
+  noteId: number,
+  email: string,
+  role: 'READER' | 'EDITOR',
+  createdBy: string,
+) {
+  const normalizedEmail = normalizeEmail(email);
+
+  await turso.execute({
+    sql: `
+      INSERT INTO note_shares (note_id, email, role, created_by)
+      VALUES (?, ?, ?, ?)
+      ON CONFLICT(note_id, email)
+      DO UPDATE SET role = excluded.role
+    `,
+    args: [noteId, normalizedEmail, role, createdBy],
+  });
+
+  const result = await turso.execute({
+    sql: `SELECT * FROM note_shares WHERE note_id = ? AND email = ?`,
+    args: [noteId, normalizedEmail],
+  });
+
+  const row = result.rows[0];
+  return {
+    noteId: row.note_id as number,
+    email: row.email as string,
+    role: row.role as string,
+    createdBy: row.created_by as string,
+    createdAt: row.created_at as string,
+  };
+}
+
+export async function unshareNote(
+  noteId: number,
+  email: string,
+  userId: string,
+) {
+  const normalizedEmail = normalizeEmail(email);
+
+  const result = await turso.execute({
+    sql: `DELETE FROM note_shares WHERE note_id = ? AND email = ?`,
+    args: [noteId, normalizedEmail],
+  });
+
+  return (result.rowsAffected || 0) > 0;
+}
+
+export async function getNoteShares(noteId: number) {
+  const result = await turso.execute({
+    sql: `SELECT * FROM note_shares WHERE note_id = ? ORDER BY created_at DESC`,
+    args: [noteId],
+  });
+
+  return result.rows.map((row) => ({
+    noteId: row.note_id as number,
+    email: row.email as string,
+    role: row.role as string,
+    createdBy: row.created_by as string,
+    createdAt: row.created_at as string,
+  }));
+}
+
+export async function getSharedNotes(viewerEmail: string) {
+  const normalizedEmail = normalizeEmail(viewerEmail);
+
+  const result = await turso.execute({
+    sql: `
+      SELECT n.*
+      FROM notes n
+      JOIN note_shares s ON s.note_id = n.id
+      WHERE s.email = ?
+      ORDER BY n.updated_at DESC
+    `,
+    args: [normalizedEmail],
+  });
+
+  return result.rows.map((row) => ({
+    id: row.id as number,
+    entityId: row.entity_id as number,
+    entityType: row.entity_type as string,
+    createdBy: row.user_id as string,
+    noteType: (row.note_type as string) || null,
+    slug: (row.slug as string) || null,
+    title: (row.title as string) || null,
+    content: row.content as string,
+    tags: row.tags ? JSON.parse(row.tags as string) : [],
+    visibility: (row.visibility as string) || 'PRIVATE',
+    createdAt: row.created_at as string,
+    updatedAt: row.updated_at as string,
+  }));
 }
 
 // ============================================
@@ -888,6 +1072,12 @@ export const tursoTools = {
   createNote,
   updateNote,
   linkResearchToNote,
+  canViewerReadNote,
+  setNoteVisibility,
+  shareNote,
+  unshareNote,
+  getNoteShares,
+  getSharedNotes,
   listStories,
   getStory,
   createStory,

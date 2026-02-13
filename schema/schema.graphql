@@ -6,6 +6,8 @@ type Query {
   notes(entityId: Int!, entityType: String!): [Note!]!
   allNotes: [Note!]!
   note(id: Int, slug: String): Note
+  mySharedNotes: [Note!]!
+
   stories(goalId: Int!): [Story!]!
   story(id: Int!): Story
   generationJob(id: String!): GenerationJob
@@ -47,6 +49,9 @@ type Mutation {
   createNote(input: CreateNoteInput!): Note!
   updateNote(id: Int!, input: UpdateNoteInput!): Note!
   deleteNote(id: Int!): DeleteNoteResult!
+  setNoteVisibility(noteId: Int!, visibility: NoteVisibility!): Note!
+  shareNote(noteId: Int!, email: String!, role: NoteShareRole): NoteShare!
+  unshareNote(noteId: Int!, email: String!): Boolean!
 
   # Stories
   createStory(input: CreateStoryInput!): Story!
@@ -73,6 +78,30 @@ type Subscription {
 # ============================================
 # Core Types
 # ============================================
+
+enum NoteVisibility {
+  PRIVATE
+  PUBLIC
+}
+
+enum NoteShareRole {
+  READER
+  EDITOR
+}
+
+type NoteShare {
+  noteId: Int!
+  email: String!
+  role: NoteShareRole!
+  createdAt: String!
+  createdBy: String!
+}
+
+type NoteAccess {
+  canRead: Boolean!
+  canEdit: Boolean!
+  reason: String
+}
 
 type Goal {
   id: Int!
@@ -172,9 +201,12 @@ type Note {
   title: String
   content: String!
   tags: [String!]
+  visibility: NoteVisibility!
   linkedResearch: [Research!]
   claimCards: [ClaimCard!]
   goal: Goal
+  shares: [NoteShare!]!
+  viewerAccess: NoteAccess!
   createdAt: String!
   updatedAt: String!
 }

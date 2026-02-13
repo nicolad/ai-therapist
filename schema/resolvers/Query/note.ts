@@ -7,18 +7,15 @@ export const note: NonNullable<QueryResolvers['note']> = async (
   ctx,
 ) => {
   const userEmail = ctx.userEmail;
-  if (!userEmail) {
-    throw new Error("Authentication required");
-  }
-
+  
   let foundNote;
 
   if (args.slug) {
     // Query by slug
-    foundNote = await tursoTools.getNoteBySlug(args.slug, userEmail);
+    foundNote = await tursoTools.getNoteBySlug(args.slug, userEmail || '');
   } else if (args.id) {
     // Query by ID
-    foundNote = await tursoTools.getNoteById(args.id, userEmail);
+    foundNote = await tursoTools.getNoteById(args.id, userEmail || '');
   } else {
     return null;
   }
@@ -27,17 +24,25 @@ export const note: NonNullable<QueryResolvers['note']> = async (
     return null;
   }
 
+  // Check if viewer can read this note
+  const access = await tursoTools.canViewerReadNote(foundNote.id, userEmail || null);
+  
+  if (!access.canRead) {
+    return null; // Return null instead of error to avoid leaking note existence
+  }
+
   return {
     id: foundNote.id,
     entityId: foundNote.entityId,
     entityType: foundNote.entityType,
-    createdBy: foundNote.createdBy || userEmail,
+    createdBy: foundNote.createdBy || userEmail || '',
     noteType: foundNote.noteType || null,
     slug: foundNote.slug || null,
     title: foundNote.title || null,
     content: foundNote.content,
     tags: foundNote.tags || null,
+    visibility: (foundNote.visibility as 'PRIVATE' | 'PUBLIC') || 'PRIVATE',
     createdAt: foundNote.createdAt,
     updatedAt: foundNote.updatedAt,
-  };
+  } as any; // Field resolvers will populate viewerAccess
 };

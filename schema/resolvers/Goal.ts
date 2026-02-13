@@ -13,7 +13,7 @@ export const Goal: GoalResolvers = {
       "Goal",
       parent.createdBy,
     );
-    return notes;
+    return notes as any; // Field resolvers will populate viewerAccess
   },
 
   questions: async (parent, _args, _ctx) => {

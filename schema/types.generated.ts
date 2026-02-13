@@ -368,6 +368,9 @@ export type Mutation = {
   generateResearch: GenerateResearchResult;
   generateTherapeuticQuestions: GenerateQuestionsResult;
   refreshClaimCard: ClaimCard;
+  setNoteVisibility: Note;
+  shareNote: NoteShare;
+  unshareNote: Scalars['Boolean']['output'];
   updateGoal: Goal;
   updateNote: Note;
   updateStory: Story;
@@ -465,6 +468,25 @@ export type MutationrefreshClaimCardArgs = {
 };
 
 
+export type MutationsetNoteVisibilityArgs = {
+  noteId: Scalars['Int']['input'];
+  visibility: NoteVisibility;
+};
+
+
+export type MutationshareNoteArgs = {
+  email: Scalars['String']['input'];
+  noteId: Scalars['Int']['input'];
+  role?: InputMaybe<NoteShareRole>;
+};
+
+
+export type MutationunshareNoteArgs = {
+  email: Scalars['String']['input'];
+  noteId: Scalars['Int']['input'];
+};
+
+
 export type MutationupdateGoalArgs = {
   id: Scalars['Int']['input'];
   input: UpdateGoalInput;
@@ -494,11 +516,38 @@ export type Note = {
   id: Scalars['Int']['output'];
   linkedResearch?: Maybe<Array<Research>>;
   noteType?: Maybe<Scalars['String']['output']>;
+  shares: Array<NoteShare>;
   slug?: Maybe<Scalars['String']['output']>;
   tags?: Maybe<Array<Scalars['String']['output']>>;
   title?: Maybe<Scalars['String']['output']>;
   updatedAt: Scalars['String']['output'];
+  viewerAccess: NoteAccess;
+  visibility: NoteVisibility;
 };
+
+export type NoteAccess = {
+  __typename?: 'NoteAccess';
+  canEdit: Scalars['Boolean']['output'];
+  canRead: Scalars['Boolean']['output'];
+  reason?: Maybe<Scalars['String']['output']>;
+};
+
+export type NoteShare = {
+  __typename?: 'NoteShare';
+  createdAt: Scalars['String']['output'];
+  createdBy: Scalars['String']['output'];
+  email: Scalars['String']['output'];
+  noteId: Scalars['Int']['output'];
+  role: NoteShareRole;
+};
+
+export type NoteShareRole =
+  | 'EDITOR'
+  | 'READER';
+
+export type NoteVisibility =
+  | 'PRIVATE'
+  | 'PUBLIC';
 
 export type OpenAIAudioFormat =
   | 'AAC'
@@ -556,6 +605,7 @@ export type Query = {
   generationJobs: Array<GenerationJob>;
   goal?: Maybe<Goal>;
   goals: Array<Goal>;
+  mySharedNotes: Array<Note>;
   note?: Maybe<Note>;
   notes: Array<Note>;
   research: Array<Research>;
@@ -854,7 +904,11 @@ export type ResolversTypes = {
   JobStatus: ResolverTypeWrapper<'RUNNING' | 'SUCCEEDED' | 'FAILED'>;
   JobType: ResolverTypeWrapper<'AUDIO' | 'RESEARCH' | 'QUESTIONS' | 'LONGFORM'>;
   Mutation: ResolverTypeWrapper<Record<PropertyKey, never>>;
-  Note: ResolverTypeWrapper<Omit<Note, 'claimCards' | 'goal' | 'linkedResearch'> & { claimCards?: Maybe<Array<ResolversTypes['ClaimCard']>>, goal?: Maybe<ResolversTypes['Goal']>, linkedResearch?: Maybe<Array<ResolversTypes['Research']>> }>;
+  Note: ResolverTypeWrapper<Omit<Note, 'claimCards' | 'goal' | 'linkedResearch' | 'shares' | 'visibility'> & { claimCards?: Maybe<Array<ResolversTypes['ClaimCard']>>, goal?: Maybe<ResolversTypes['Goal']>, linkedResearch?: Maybe<Array<ResolversTypes['Research']>>, shares: Array<ResolversTypes['NoteShare']>, visibility: ResolversTypes['NoteVisibility'] }>;
+  NoteAccess: ResolverTypeWrapper<NoteAccess>;
+  NoteShare: ResolverTypeWrapper<Omit<NoteShare, 'role'> & { role: ResolversTypes['NoteShareRole'] }>;
+  NoteShareRole: ResolverTypeWrapper<'READER' | 'EDITOR'>;
+  NoteVisibility: ResolverTypeWrapper<'PRIVATE' | 'PUBLIC'>;
   OpenAIAudioFormat: ResolverTypeWrapper<'MP3' | 'OPUS' | 'AAC' | 'FLAC' | 'WAV' | 'PCM'>;
   OpenAIStreamFormat: ResolverTypeWrapper<'SSE' | 'AUDIO'>;
   OpenAITTSModel: ResolverTypeWrapper<'TTS_1' | 'TTS_1_HD' | 'GPT_4O_MINI_TTS'>;
@@ -913,7 +967,9 @@ export type ResolversParentTypes = {
   JobError: JobError;
   JobResult: JobResult;
   Mutation: Record<PropertyKey, never>;
-  Note: Omit<Note, 'claimCards' | 'goal' | 'linkedResearch'> & { claimCards?: Maybe<Array<ResolversParentTypes['ClaimCard']>>, goal?: Maybe<ResolversParentTypes['Goal']>, linkedResearch?: Maybe<Array<ResolversParentTypes['Research']>> };
+  Note: Omit<Note, 'claimCards' | 'goal' | 'linkedResearch' | 'shares'> & { claimCards?: Maybe<Array<ResolversParentTypes['ClaimCard']>>, goal?: Maybe<ResolversParentTypes['Goal']>, linkedResearch?: Maybe<Array<ResolversParentTypes['Research']>>, shares: Array<ResolversParentTypes['NoteShare']> };
+  NoteAccess: NoteAccess;
+  NoteShare: NoteShare;
   PaperCandidate: PaperCandidate;
   Query: Record<PropertyKey, never>;
   Research: Omit<Research, 'goal'> & { goal?: Maybe<ResolversParentTypes['Goal']> };
@@ -1179,6 +1235,9 @@ export type MutationResolvers<ContextType = GraphQLContext, ParentType extends R
   generateResearch?: Resolver<ResolversTypes['GenerateResearchResult'], ParentType, ContextType, RequireFields<MutationgenerateResearchArgs, 'goalId'>>;
   generateTherapeuticQuestions?: Resolver<ResolversTypes['GenerateQuestionsResult'], ParentType, ContextType, RequireFields<MutationgenerateTherapeuticQuestionsArgs, 'goalId'>>;
   refreshClaimCard?: Resolver<ResolversTypes['ClaimCard'], ParentType, ContextType, RequireFields<MutationrefreshClaimCardArgs, 'id'>>;
+  setNoteVisibility?: Resolver<ResolversTypes['Note'], ParentType, ContextType, RequireFields<MutationsetNoteVisibilityArgs, 'noteId' | 'visibility'>>;
+  shareNote?: Resolver<ResolversTypes['NoteShare'], ParentType, ContextType, RequireFields<MutationshareNoteArgs, 'email' | 'noteId'>>;
+  unshareNote?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationunshareNoteArgs, 'email' | 'noteId'>>;
   updateGoal?: Resolver<ResolversTypes['Goal'], ParentType, ContextType, RequireFields<MutationupdateGoalArgs, 'id' | 'input'>>;
   updateNote?: Resolver<ResolversTypes['Note'], ParentType, ContextType, RequireFields<MutationupdateNoteArgs, 'id' | 'input'>>;
   updateStory?: Resolver<ResolversTypes['Story'], ParentType, ContextType, RequireFields<MutationupdateStoryArgs, 'id' | 'input'>>;
@@ -1195,11 +1254,32 @@ export type NoteResolvers<ContextType = GraphQLContext, ParentType extends Resol
   id?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   linkedResearch?: Resolver<Maybe<Array<ResolversTypes['Research']>>, ParentType, ContextType>;
   noteType?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  shares?: Resolver<Array<ResolversTypes['NoteShare']>, ParentType, ContextType>;
   slug?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   tags?: Resolver<Maybe<Array<ResolversTypes['String']>>, ParentType, ContextType>;
   title?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   updatedAt?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  viewerAccess?: Resolver<ResolversTypes['NoteAccess'], ParentType, ContextType>;
+  visibility?: Resolver<ResolversTypes['NoteVisibility'], ParentType, ContextType>;
 };
+
+export type NoteAccessResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['NoteAccess'] = ResolversParentTypes['NoteAccess']> = {
+  canEdit?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  canRead?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  reason?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+};
+
+export type NoteShareResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['NoteShare'] = ResolversParentTypes['NoteShare']> = {
+  createdAt?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  createdBy?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  email?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  noteId?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  role?: Resolver<ResolversTypes['NoteShareRole'], ParentType, ContextType>;
+};
+
+export type NoteShareRoleResolvers = EnumResolverSignature<{ EDITOR?: any, READER?: any }, ResolversTypes['NoteShareRole']>;
+
+export type NoteVisibilityResolvers = EnumResolverSignature<{ PRIVATE?: any, PUBLIC?: any }, ResolversTypes['NoteVisibility']>;
 
 export type OpenAIAudioFormatResolvers = EnumResolverSignature<{ AAC?: any, FLAC?: any, MP3?: any, OPUS?: any, PCM?: any, WAV?: any }, ResolversTypes['OpenAIAudioFormat']>;
 
@@ -1231,6 +1311,7 @@ export type QueryResolvers<ContextType = GraphQLContext, ParentType extends Reso
   generationJobs?: Resolver<Array<ResolversTypes['GenerationJob']>, ParentType, ContextType, Partial<QuerygenerationJobsArgs>>;
   goal?: Resolver<Maybe<ResolversTypes['Goal']>, ParentType, ContextType, Partial<QuerygoalArgs>>;
   goals?: Resolver<Array<ResolversTypes['Goal']>, ParentType, ContextType, Partial<QuerygoalsArgs>>;
+  mySharedNotes?: Resolver<Array<ResolversTypes['Note']>, ParentType, ContextType>;
   note?: Resolver<Maybe<ResolversTypes['Note']>, ParentType, ContextType, Partial<QuerynoteArgs>>;
   notes?: Resolver<Array<ResolversTypes['Note']>, ParentType, ContextType, RequireFields<QuerynotesArgs, 'entityId' | 'entityType'>>;
   research?: Resolver<Array<ResolversTypes['Research']>, ParentType, ContextType, RequireFields<QueryresearchArgs, 'goalId'>>;
@@ -1336,6 +1417,10 @@ export type Resolvers<ContextType = GraphQLContext> = {
   JobType?: JobTypeResolvers;
   Mutation?: MutationResolvers<ContextType>;
   Note?: NoteResolvers<ContextType>;
+  NoteAccess?: NoteAccessResolvers<ContextType>;
+  NoteShare?: NoteShareResolvers<ContextType>;
+  NoteShareRole?: NoteShareRoleResolvers;
+  NoteVisibility?: NoteVisibilityResolvers;
   OpenAIAudioFormat?: OpenAIAudioFormatResolvers;
   OpenAIStreamFormat?: OpenAIStreamFormatResolvers;
   OpenAITTSModel?: OpenAITTSModelResolvers;

@@ -369,6 +369,9 @@ export type Mutation = {
   generateResearch: GenerateResearchResult;
   generateTherapeuticQuestions: GenerateQuestionsResult;
   refreshClaimCard: ClaimCard;
+  setNoteVisibility: Note;
+  shareNote: NoteShare;
+  unshareNote: Scalars['Boolean']['output'];
   updateGoal: Goal;
   updateNote: Note;
   updateStory: Story;
@@ -466,6 +469,25 @@ export type MutationRefreshClaimCardArgs = {
 };
 
 
+export type MutationSetNoteVisibilityArgs = {
+  noteId: Scalars['Int']['input'];
+  visibility: NoteVisibility;
+};
+
+
+export type MutationShareNoteArgs = {
+  email: Scalars['String']['input'];
+  noteId: Scalars['Int']['input'];
+  role?: InputMaybe<NoteShareRole>;
+};
+
+
+export type MutationUnshareNoteArgs = {
+  email: Scalars['String']['input'];
+  noteId: Scalars['Int']['input'];
+};
+
+
 export type MutationUpdateGoalArgs = {
   id: Scalars['Int']['input'];
   input: UpdateGoalInput;
@@ -495,11 +517,40 @@ export type Note = {
   id: Scalars['Int']['output'];
   linkedResearch?: Maybe<Array<Research>>;
   noteType?: Maybe<Scalars['String']['output']>;
+  shares: Array<NoteShare>;
   slug?: Maybe<Scalars['String']['output']>;
   tags?: Maybe<Array<Scalars['String']['output']>>;
   title?: Maybe<Scalars['String']['output']>;
   updatedAt: Scalars['String']['output'];
+  viewerAccess: NoteAccess;
+  visibility: NoteVisibility;
 };
+
+export type NoteAccess = {
+  __typename?: 'NoteAccess';
+  canEdit: Scalars['Boolean']['output'];
+  canRead: Scalars['Boolean']['output'];
+  reason?: Maybe<Scalars['String']['output']>;
+};
+
+export type NoteShare = {
+  __typename?: 'NoteShare';
+  createdAt: Scalars['String']['output'];
+  createdBy: Scalars['String']['output'];
+  email: Scalars['String']['output'];
+  noteId: Scalars['Int']['output'];
+  role: NoteShareRole;
+};
+
+export enum NoteShareRole {
+  Editor = 'EDITOR',
+  Reader = 'READER'
+}
+
+export enum NoteVisibility {
+  Private = 'PRIVATE',
+  Public = 'PUBLIC'
+}
 
 export enum OpenAiAudioFormat {
   Aac = 'AAC',
@@ -561,6 +612,7 @@ export type Query = {
   generationJobs: Array<GenerationJob>;
   goal?: Maybe<Goal>;
   goals: Array<Goal>;
+  mySharedNotes: Array<Note>;
   note?: Maybe<Note>;
   notes: Array<Note>;
   research: Array<Research>;

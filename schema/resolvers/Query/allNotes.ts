@@ -12,5 +12,5 @@ export const allNotes: NonNullable<QueryResolvers['allNotes']> = async (
   }
 
   const notes = await tursoTools.getAllNotesForUser(userEmail);
-  return notes;
+  return notes as any; // Field resolvers will populate viewerAccess
 };

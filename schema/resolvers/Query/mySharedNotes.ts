@@ -1,32 +1,28 @@
+
 import type { QueryResolvers } from "./../../types.generated";
 import { tursoTools } from "@/src/db";
 
-export const notes: NonNullable<QueryResolvers['notes']> = async (
-  _parent,
-  args,
-  ctx,
-) => {
+export const mySharedNotes: NonNullable<
+  QueryResolvers["mySharedNotes"]
+> = async (_parent, _args, ctx) => {
   const userEmail = ctx.userEmail;
   if (!userEmail) {
     throw new Error("Authentication required");
   }
 
-  const notesList = await tursoTools.listNotesForEntity(
-    args.entityId,
-    args.entityType,
-    userEmail,
-  );
+  const notes = await tursoTools.getSharedNotes(userEmail);
 
-  return notesList.map((note) => ({
+  return notes.map((note) => ({
     id: note.id,
     entityId: note.entityId,
     entityType: note.entityType,
-    createdBy: note.createdBy || userEmail,
+    createdBy: note.createdBy,
     noteType: note.noteType || null,
     slug: note.slug || null,
+    title: note.title || null,
     content: note.content,
-    tags: note.tags,
-    visibility: (note.visibility as 'PRIVATE' | 'PUBLIC') || 'PRIVATE',
+    tags: note.tags || null,
+    visibility: (note.visibility as "PRIVATE" | "PUBLIC") || "PRIVATE",
     createdAt: note.createdAt,
     updatedAt: note.updatedAt,
   })) as any; // Field resolvers will populate viewerAccess

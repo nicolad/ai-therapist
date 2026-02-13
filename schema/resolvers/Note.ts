@@ -35,4 +35,34 @@ export const Note: NoteResolvers = {
       return null;
     }
   },
+
+  shares: async (parent, _args, ctx) => {
+    const userEmail = ctx.userEmail;
+    
+    // Only return shares if viewer is the owner
+    if (!userEmail || userEmail !== parent.createdBy) {
+      return [];
+    }
+
+    const shares = await tursoTools.getNoteShares(parent.id);
+    return shares.map((share) => ({
+      noteId: share.noteId,
+      email: share.email,
+      role: (share.role as "READER" | "EDITOR") || "READER",
+      createdBy: share.createdBy,
+      createdAt: share.createdAt,
+    }));
+  },
+
+  viewerAccess: async (parent, _args, ctx) => {
+    const userEmail = ctx.userEmail;
+    
+    const access = await tursoTools.canViewerReadNote(parent.id, userEmail || null);
+    
+    return {
+      canRead: access.canRead,
+      canEdit: access.canEdit,
+      reason: access.reason || null,
+    };
+  },
 };

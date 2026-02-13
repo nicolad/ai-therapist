@@ -323,6 +323,9 @@ type Mutation {
   generateResearch(goalId: Int!): GenerateResearchResult!
   generateTherapeuticQuestions(goalId: Int!): GenerateQuestionsResult!
   refreshClaimCard(id: ID!): ClaimCard!
+  setNoteVisibility(noteId: Int!, visibility: NoteVisibility!): Note!
+  shareNote(email: String!, noteId: Int!, role: NoteShareRole): NoteShare!
+  unshareNote(email: String!, noteId: Int!): Boolean!
   updateGoal(id: Int!, input: UpdateGoalInput!): Goal!
   updateNote(id: Int!, input: UpdateNoteInput!): Note!
   updateStory(id: Int!, input: UpdateStoryInput!): Story!
@@ -339,10 +342,37 @@ type Note {
   id: Int!
   linkedResearch: [Research!]
   noteType: String
+  shares: [NoteShare!]!
   slug: String
   tags: [String!]
   title: String
   updatedAt: String!
+  viewerAccess: NoteAccess!
+  visibility: NoteVisibility!
+}
+
+type NoteAccess {
+  canEdit: Boolean!
+  canRead: Boolean!
+  reason: String
+}
+
+type NoteShare {
+  createdAt: String!
+  createdBy: String!
+  email: String!
+  noteId: Int!
+  role: NoteShareRole!
+}
+
+enum NoteShareRole {
+  EDITOR
+  READER
+}
+
+enum NoteVisibility {
+  PRIVATE
+  PUBLIC
 }
 
 enum OpenAIAudioFormat {
@@ -403,6 +433,7 @@ type Query {
   generationJobs(goalId: Int, status: String): [GenerationJob!]!
   goal(id: Int, slug: String): Goal
   goals(familyMemberId: Int, status: String): [Goal!]!
+  mySharedNotes: [Note!]!
   note(id: Int, slug: String): Note
   notes(entityId: Int!, entityType: String!): [Note!]!
   research(goalId: Int!): [Research!]!

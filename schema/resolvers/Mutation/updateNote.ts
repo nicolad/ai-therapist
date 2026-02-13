@@ -40,7 +40,8 @@ export const updateNote: NonNullable<MutationResolvers['updateNote']> = async (
     slug: note.slug,
     content: note.content,
     tags: note.tags,
+    visibility: (note.visibility as 'PRIVATE' | 'PUBLIC') || 'PRIVATE',
     createdAt: note.createdAt,
     updatedAt: note.updatedAt,
-  };
+  } as any; // Field resolvers will populate viewerAccess
 };
