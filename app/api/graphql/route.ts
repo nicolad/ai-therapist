@@ -21,7 +21,8 @@ const handler = startServerAndCreateNextHandler<NextRequest, GraphQLContext>(
       let userEmail: string | undefined;
       if (userId) {
         try {
-          const user = await clerkClient.users.getUser(userId);
+          const client = await clerkClient();
+          const user = await client.users.getUser(userId);
           userEmail = user.emailAddresses[0]?.emailAddress;
         } catch (error) {
           console.error("Error fetching user from Clerk:", error);
