@@ -8,6 +8,7 @@ pages_build_output_dir = ".vercel/output/static"
 binding = "DB"
 database_name = "research-thera-db"
 database_id = "52b7dab0-7027-4e9e-ae30-f719bdfff993"
+migrations_dir = "drizzle"
 
 # Environment variables
 [vars]

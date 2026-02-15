@@ -11,6 +11,6 @@ export default {
     databaseId:
       process.env.CLOUDFLARE_DATABASE_ID ||
       "52b7dab0-7027-4e9e-ae30-f719bdfff993",
-    token: process.env.CLOUDFLARE_D1_TOKEN || "",
+    token: process.env.CLOUDFLARE_D1_TOKEN!,
   },
 } satisfies Config;
