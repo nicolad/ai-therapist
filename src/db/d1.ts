@@ -37,27 +37,30 @@ interface ExecuteOptions {
 class D1Client {
   private accountId: string;
   private databaseId: string;
-  private token: string;
+  private token: string | null;
   private baseUrl: string;
 
   constructor() {
     this.accountId = CLOUDFLARE_ACCOUNT_ID;
     this.databaseId = CLOUDFLARE_DATABASE_ID;
+    this.token = CLOUDFLARE_D1_TOKEN || null;
+    this.baseUrl = `https://api.cloudflare.com/client/v4/accounts/${this.accountId}/d1/database/${this.databaseId}`;
+  }
 
-    if (!CLOUDFLARE_D1_TOKEN) {
+  private ensureToken(): string {
+    if (!this.token) {
       throw new Error(
         "CLOUDFLARE_D1_TOKEN environment variable is required for remote D1 access",
       );
     }
-
-    this.token = CLOUDFLARE_D1_TOKEN;
-    this.baseUrl = `https://api.cloudflare.com/client/v4/accounts/${this.accountId}/d1/database/${this.databaseId}`;
+    return this.token;
   }
 
   /**
    * Execute a SQL query
    */
   async execute(query: string | ExecuteOptions): Promise<{ rows: any[] }> {
+    const token = this.ensureToken();
     const sql = typeof query === "string" ? query : query.sql;
     const params = typeof query === "string" ? [] : query.args || [];
 
@@ -65,7 +68,7 @@ class D1Client {
       const response = await fetch(`${this.baseUrl}/query`, {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${this.token}`,
+          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
@@ -103,11 +106,12 @@ class D1Client {
    * Execute multiple SQL statements in a batch
    */
   async batch(queries: ExecuteOptions[]): Promise<{ rows: any[] }[]> {
+    const token = this.ensureToken();
     try {
       const response = await fetch(`${this.baseUrl}/query`, {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${this.token}`,
+          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify(
