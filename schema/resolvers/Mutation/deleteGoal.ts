@@ -1,7 +1,7 @@
 import type { MutationResolvers } from "./../../types.generated";
-import { turso } from "@/src/db";
+import { d1 } from "@/src/db";
 
-export const deleteGoal: NonNullable<MutationResolvers['deleteGoal']> = async (
+export const deleteGoal: NonNullable<MutationResolvers["deleteGoal"]> = async (
   _parent,
   args,
   ctx,
@@ -13,61 +13,61 @@ export const deleteGoal: NonNullable<MutationResolvers['deleteGoal']> = async (
 
   // Delete all associated data
   // 1. Delete claim cards linked to notes for this goal
-  await turso.execute({
+  await d1.execute({
     sql: `DELETE FROM notes_claims WHERE note_id IN (SELECT id FROM notes WHERE entity_id = ? AND entity_type = 'Goal')`,
     args: [args.id],
   });
 
   // 2. Delete research links
-  await turso.execute({
+  await d1.execute({
     sql: `DELETE FROM notes_research WHERE note_id IN (SELECT id FROM notes WHERE entity_id = ? AND entity_type = 'Goal')`,
     args: [args.id],
   });
 
   // 3. Delete notes
-  await turso.execute({
+  await d1.execute({
     sql: `DELETE FROM notes WHERE entity_id = ? AND entity_type = 'Goal' AND user_id = ?`,
     args: [args.id, userEmail],
   });
 
   // 4. Delete therapeutic questions
-  await turso.execute({
+  await d1.execute({
     sql: `DELETE FROM therapeutic_questions WHERE goal_id = ?`,
     args: [args.id],
   });
 
   // 5. Delete therapy research
-  await turso.execute({
+  await d1.execute({
     sql: `DELETE FROM therapy_research WHERE goal_id = ?`,
     args: [args.id],
   });
 
   // 6. Delete text segments
-  await turso.execute({
+  await d1.execute({
     sql: `DELETE FROM text_segments WHERE goal_id = ?`,
     args: [args.id],
   });
 
   // 7. Delete audio assets
-  await turso.execute({
+  await d1.execute({
     sql: `DELETE FROM audio_assets WHERE goal_id = ?`,
     args: [args.id],
   });
 
   // 8. Delete goal stories
-  await turso.execute({
+  await d1.execute({
     sql: `DELETE FROM goal_stories WHERE goal_id = ?`,
     args: [args.id],
   });
 
   // 9. Delete generation jobs
-  await turso.execute({
+  await d1.execute({
     sql: `DELETE FROM generation_jobs WHERE goal_id = ?`,
     args: [args.id],
   });
 
   // 10. Finally, delete the goal itself
-  await turso.execute({
+  await d1.execute({
     sql: `DELETE FROM goals WHERE id = ? AND user_id = ?`,
     args: [args.id, userEmail],
   });

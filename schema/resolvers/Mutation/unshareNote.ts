@@ -1,5 +1,5 @@
 import type { MutationResolvers } from "./../../types.generated";
-import { tursoTools } from "@/src/db";
+import { d1Tools } from "@/src/db";
 
 export const unshareNote: NonNullable<
   MutationResolvers["unshareNote"]
@@ -10,7 +10,7 @@ export const unshareNote: NonNullable<
   }
 
   // Check if user is the owner
-  const note = await tursoTools.getNoteById(args.noteId, userEmail);
+  const note = await d1Tools.getNoteById(args.noteId, userEmail);
   if (!note) {
     throw new Error("Note not found");
   }
@@ -19,7 +19,7 @@ export const unshareNote: NonNullable<
     throw new Error("Only the note owner can unshare it");
   }
 
-  const success = await tursoTools.unshareNote(
+  const success = await d1Tools.unshareNote(
     args.noteId,
     args.email,
     userEmail,

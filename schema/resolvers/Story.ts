@@ -1,5 +1,5 @@
 import type { StoryResolvers } from "./../types.generated";
-import { tursoTools } from "@/src/db";
+import { d1Tools } from "@/src/db";
 
 export const Story: StoryResolvers = {
   goal: async (parent, _args, ctx) => {
@@ -9,7 +9,7 @@ export const Story: StoryResolvers = {
     }
 
     try {
-      const goal = await tursoTools.getGoal(parent.goalId, userEmail);
+      const goal = await d1Tools.getGoal(parent.goalId, userEmail);
       return {
         ...goal,
         notes: [],

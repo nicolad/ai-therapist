@@ -1,5 +1,5 @@
 import type { QueryResolvers } from "./../../types.generated";
-import { tursoTools } from "@/src/db";
+import { d1Tools } from "@/src/db";
 
 export const goal: NonNullable<QueryResolvers['goal']> = async (
   _parent,
@@ -14,9 +14,9 @@ export const goal: NonNullable<QueryResolvers['goal']> = async (
   let goal;
 
   if (args.slug) {
-    goal = await tursoTools.getGoalBySlug(args.slug, userEmail);
+    goal = await d1Tools.getGoalBySlug(args.slug, userEmail);
   } else if (args.id) {
-    goal = await tursoTools.getGoal(args.id, userEmail);
+    goal = await d1Tools.getGoal(args.id, userEmail);
   } else {
     throw new Error("Either id or slug must be provided");
   }

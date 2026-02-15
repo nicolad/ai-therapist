@@ -112,9 +112,9 @@ export async function POST(request: NextRequest) {
 
         // Save audio to story if both storyId and userEmail are provided
         if (storyId && userEmail) {
-          const { turso } = await import("@/src/db/turso");
+          const { d1 } = await import("@/src/db/d1");
           const now = new Date().toISOString();
-          await turso.execute({
+          await d1.execute({
             sql: `UPDATE stories 
                   SET audio_key = ?, audio_url = ?, audio_generated_at = ?, updated_at = ?
                   WHERE id = ? AND user_id = ?`,
@@ -226,9 +226,9 @@ export async function POST(request: NextRequest) {
 
       // Save audio to story if both storyId and userEmail are provided
       if (storyId && userEmail) {
-        const { turso } = await import("@/src/db/turso");
+        const { d1 } = await import("@/src/db/d1");
         const now = new Date().toISOString();
-        await turso.execute({
+        await d1.execute({
           sql: `UPDATE stories 
                 SET audio_key = ?, audio_url = ?, audio_generated_at = ?, updated_at = ?
                 WHERE id = ? AND user_id = ?`,

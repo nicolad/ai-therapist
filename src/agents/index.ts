@@ -2,11 +2,15 @@ import { createDeepSeek } from "@ai-sdk/deepseek";
 import { Agent } from "@mastra/core/agent";
 import { CompositeVoice } from "@mastra/core/voice";
 import { Memory } from "@mastra/memory";
-import { LibSQLStore } from "@mastra/libsql";
+// import { LibSQLStore } from "@mastra/libsql"; // Disabled: Not compatible with D1
 import { buildTracingOptions } from "@mastra/observability";
 import { withLangfusePrompt } from "@mastra/langfuse";
 import { Langfuse } from "langfuse";
-import { TURSO_DATABASE_URL, TURSO_AUTH_TOKEN } from "@/src/config/turso";
+import {
+  CLOUDFLARE_ACCOUNT_ID,
+  CLOUDFLARE_DATABASE_ID,
+  CLOUDFLARE_D1_TOKEN,
+} from "@/src/config/d1";
 
 const deepseek = createDeepSeek({
   apiKey: process.env.DEEPSEEK_API_KEY,
@@ -18,12 +22,14 @@ const langfuse = new Langfuse({
   secretKey: process.env.LANGFUSE_SECRET_KEY!,
 });
 
-// Agent-level storage for conversation history
-const agentStorage = new LibSQLStore({
-  id: "agent-memory-storage",
-  url: TURSO_DATABASE_URL,
-  authToken: TURSO_AUTH_TOKEN,
-});
+// TODO: Agent-level storage for conversation history
+// LibSQLStore is not compatible with D1. Need to implement D1-compatible storage adapter.
+// const agentStorage = new LibSQLStore({
+//   id: "agent-memory-storage",
+//   url: "...",
+//   authToken: "...",
+// });
+const agentStorage = null as any; // Temporary: Storage disabled pending D1 adapter
 
 const storyInstructions = `
 ## Overview

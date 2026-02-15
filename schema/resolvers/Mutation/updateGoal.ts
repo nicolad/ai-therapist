@@ -1,5 +1,5 @@
 import type { MutationResolvers } from "./../../types.generated";
-import { tursoTools } from "@/src/db";
+import { d1Tools } from "@/src/db";
 import { updateGoal as updateGoalDb } from "@/src/db";
 
 export const updateGoal: NonNullable<MutationResolvers['updateGoal']> = async (
@@ -19,7 +19,7 @@ export const updateGoal: NonNullable<MutationResolvers['updateGoal']> = async (
   });
 
   // Fetch the updated goal to return it
-  const goal = await tursoTools.getGoal(args.id, userEmail);
+  const goal = await d1Tools.getGoal(args.id, userEmail);
 
   return {
     id: goal.id,

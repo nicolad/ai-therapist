@@ -19,19 +19,17 @@ if (typeof globalThis !== "undefined") {
 }
 
 import { claimCardsTools } from "../src/tools/claim-cards.tools";
-import { createClient } from "@libsql/client";
+import { d1 } from "../src/db/d1";
 import { sourceTools } from "../src/tools/sources.tools";
 import { createDeepSeek } from "@ai-sdk/deepseek";
 import { generateObject } from "ai";
 import { z } from "zod";
 import type { PaperDetails } from "../src/tools/sources.tools";
-import { TURSO_DATABASE_URL, TURSO_AUTH_TOKEN } from "../src/config/turso";
-
-// Create turso client directly
-const turso = createClient({
-  url: TURSO_DATABASE_URL,
-  authToken: TURSO_AUTH_TOKEN,
-});
+import {
+  CLOUDFLARE_ACCOUNT_ID,
+  CLOUDFLARE_DATABASE_ID,
+  CLOUDFLARE_D1_TOKEN,
+} from "../src/config/d1";
 
 const deepseek = createDeepSeek({
   apiKey: process.env.DEEPSEEK_API_KEY,
@@ -229,7 +227,7 @@ async function main() {
   try {
     // Load linked research for this note
     console.log(`📚 Loading linked research for note...`);
-    const res = await turso.execute({
+    const res = await d1.execute({
       sql: `
         SELECT
           r.id as id,

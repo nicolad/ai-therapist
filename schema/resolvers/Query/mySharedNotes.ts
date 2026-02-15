@@ -1,6 +1,6 @@
 
 import type { QueryResolvers } from "./../../types.generated";
-import { tursoTools } from "@/src/db";
+import { d1Tools } from "@/src/db";
 
 export const mySharedNotes: NonNullable<
   QueryResolvers["mySharedNotes"]
@@ -10,7 +10,7 @@ export const mySharedNotes: NonNullable<
     throw new Error("Authentication required");
   }
 
-  const notes = await tursoTools.getSharedNotes(userEmail);
+  const notes = await d1Tools.getSharedNotes(userEmail);
 
   return notes.map((note) => ({
     id: note.id,

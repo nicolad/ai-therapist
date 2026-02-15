@@ -1,14 +1,14 @@
 import type { GoalResolvers } from "./../types.generated";
-import { tursoTools } from "@/src/db";
+import { d1Tools } from "@/src/db";
 
 export const Goal: GoalResolvers = {
   research: async (parent, _args, _ctx) => {
-    const research = await tursoTools.listTherapyResearch(parent.id);
+    const research = await d1Tools.listTherapyResearch(parent.id);
     return research;
   },
 
   notes: async (parent, _args, _ctx) => {
-    const notes = await tursoTools.listNotesForEntity(
+    const notes = await d1Tools.listNotesForEntity(
       parent.id,
       "Goal",
       parent.createdBy,
@@ -17,12 +17,12 @@ export const Goal: GoalResolvers = {
   },
 
   questions: async (parent, _args, _ctx) => {
-    const questions = await tursoTools.listTherapeuticQuestions(parent.id);
+    const questions = await d1Tools.listTherapeuticQuestions(parent.id);
     return questions;
   },
 
   stories: async (parent, _args, _ctx) => {
-    const stories = await tursoTools.listGoalStories(parent.id);
+    const stories = await d1Tools.listGoalStories(parent.id);
     return stories.map((story) => ({
       ...story,
       segments: [],
@@ -35,6 +35,6 @@ export const Goal: GoalResolvers = {
     if (!userEmail) {
       return [];
     }
-    return tursoTools.listStories(parent.id, userEmail);
+    return d1Tools.listStories(parent.id, userEmail);
   },
 };

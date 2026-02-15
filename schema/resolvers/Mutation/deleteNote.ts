@@ -1,7 +1,7 @@
 import type { MutationResolvers } from "./../../types.generated";
-import { turso } from "@/src/db";
+import { d1 } from "@/src/db";
 
-export const deleteNote: NonNullable<MutationResolvers['deleteNote']> = async (
+export const deleteNote: NonNullable<MutationResolvers["deleteNote"]> = async (
   _parent,
   args,
   ctx,
@@ -12,19 +12,19 @@ export const deleteNote: NonNullable<MutationResolvers['deleteNote']> = async (
   }
 
   // Delete associated claim card links first
-  await turso.execute({
+  await d1.execute({
     sql: `DELETE FROM notes_claims WHERE note_id = ?`,
     args: [args.id],
   });
 
   // Delete research links
-  await turso.execute({
+  await d1.execute({
     sql: `DELETE FROM notes_research WHERE note_id = ?`,
     args: [args.id],
   });
 
   // Delete the note itself
-  await turso.execute({
+  await d1.execute({
     sql: `DELETE FROM notes WHERE id = ? AND user_id = ?`,
     args: [args.id, userEmail],
   });

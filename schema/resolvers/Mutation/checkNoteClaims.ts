@@ -1,12 +1,14 @@
 import type { MutationResolvers } from "../../types.generated";
-import { tursoTools, turso } from "@/src/db";
+import { d1Tools, d1 } from "@/src/db";
 import { buildClaimCardsFromItem } from "@/src/tools/generic-claim-cards.tools";
 import { createDeepSeekAdapters } from "@/src/adapters/deepseek.adapter";
 import { createResearchSourceResolver } from "@/src/adapters/research-resolver.adapter";
-import { createTursoStorageAdapter } from "@/src/adapters/turso-storage.adapter";
+import { createD1StorageAdapter } from "@/src/adapters/d1-storage.adapter";
 import type { LinkedSourceRef } from "@/src/tools/generic-claim-cards.tools";
 
-export const checkNoteClaims: NonNullable<MutationResolvers['checkNoteClaims']> = async (_parent, { input }, _ctx) => {
+export const checkNoteClaims: NonNullable<
+  MutationResolvers["checkNoteClaims"]
+> = async (_parent, { input }, _ctx) => {
   const {
     noteId,
     maxClaims = 12,
@@ -18,7 +20,7 @@ export const checkNoteClaims: NonNullable<MutationResolvers['checkNoteClaims']> 
 
   try {
     // 1. Fetch the note
-    const noteResult = await turso.execute({
+    const noteResult = await d1.execute({
       sql: `SELECT * FROM notes WHERE id = ?`,
       args: [noteId],
     });
@@ -42,7 +44,7 @@ export const checkNoteClaims: NonNullable<MutationResolvers['checkNoteClaims']> 
     };
 
     // 2. Fetch linked research papers
-    const linkedResearch = await tursoTools.getResearchForNote(noteId);
+    const linkedResearch = await d1Tools.getResearchForNote(noteId);
 
     if (linkedResearch.length === 0) {
       return {
@@ -70,7 +72,7 @@ export const checkNoteClaims: NonNullable<MutationResolvers['checkNoteClaims']> 
     // 4. Set up adapters
     const { extractor, judge } = createDeepSeekAdapters();
     const resolver = createResearchSourceResolver();
-    const storage = createTursoStorageAdapter();
+    const storage = createD1StorageAdapter();
 
     // Map GraphQL sources to resolution hints
     const resolutionHints = sources

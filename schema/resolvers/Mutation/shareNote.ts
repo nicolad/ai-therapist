@@ -1,6 +1,6 @@
 
 import type { MutationResolvers } from "./../../types.generated";
-import { tursoTools } from "@/src/db";
+import { d1Tools } from "@/src/db";
 
 export const shareNote: NonNullable<MutationResolvers["shareNote"]> = async (
   _parent,
@@ -13,7 +13,7 @@ export const shareNote: NonNullable<MutationResolvers["shareNote"]> = async (
   }
 
   // Check if user is the owner
-  const note = await tursoTools.getNoteById(args.noteId, userEmail);
+  const note = await d1Tools.getNoteById(args.noteId, userEmail);
   if (!note) {
     throw new Error("Note not found");
   }
@@ -22,7 +22,7 @@ export const shareNote: NonNullable<MutationResolvers["shareNote"]> = async (
     throw new Error("Only the note owner can share it");
   }
 
-  const share = await tursoTools.shareNote(
+  const share = await d1Tools.shareNote(
     args.noteId,
     args.email,
     args.role || "READER",

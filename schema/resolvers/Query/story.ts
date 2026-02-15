@@ -1,5 +1,5 @@
 import type { QueryResolvers } from "./../../types.generated";
-import { tursoTools } from "@/src/db";
+import { d1Tools } from "@/src/db";
 
 export const story: NonNullable<QueryResolvers['story']> = async (
   _parent,
@@ -11,5 +11,5 @@ export const story: NonNullable<QueryResolvers['story']> = async (
     throw new Error("Authentication required");
   }
 
-  return tursoTools.getStory(args.id, userEmail);
+  return d1Tools.getStory(args.id, userEmail);
 };

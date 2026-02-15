@@ -1,16 +1,15 @@
-import { createClient } from "@libsql/client";
+import { d1 } from "../src/db/d1";
 import * as dotenv from "dotenv";
 import * as fs from "fs";
 import * as path from "path";
-import { TURSO_DATABASE_URL, TURSO_AUTH_TOKEN } from "../src/config/turso";
+import {
+  CLOUDFLARE_ACCOUNT_ID,
+  CLOUDFLARE_DATABASE_ID,
+  CLOUDFLARE_D1_TOKEN,
+} from "../src/config/d1";
 
 // Load environment variables
 dotenv.config();
-
-const client = createClient({
-  url: TURSO_DATABASE_URL,
-  authToken: TURSO_AUTH_TOKEN,
-});
 
 // Read CSV data from file
 const csvPath = path.join(__dirname, "research-papers.csv");
@@ -20,7 +19,7 @@ async function insertAllResearchPapers() {
   console.log("🚀 Starting research papers insertion...\n");
 
   // Get the note ID for 'state-of-remote-work'
-  const noteResult = await client.execute({
+  const noteResult = await d1.execute({
     sql: "SELECT id FROM notes WHERE slug = ?",
     args: ["state-of-remote-work"],
   });
@@ -71,7 +70,7 @@ async function insertAllResearchPapers() {
   for (const paper of papers) {
     try {
       // Check if paper already exists by URL to prevent duplicates
-      const existingPaper = await client.execute({
+      const existingPaper = await d1.execute({
         sql: `SELECT id FROM therapy_research WHERE url = ?`,
         args: [paper!.url],
       });
@@ -86,7 +85,7 @@ async function insertAllResearchPapers() {
         );
       } else {
         // Insert new paper into therapy_research table
-        const result = await client.execute({
+        const result = await d1.execute({
           sql: `INSERT INTO therapy_research (
             goal_id, therapeutic_goal_type, title, authors, year, journal, 
             url, key_findings, therapeutic_techniques, relevance_score, 
@@ -123,7 +122,7 @@ async function insertAllResearchPapers() {
       researchIds.push(researchId);
 
       // Link to note (INSERT OR IGNORE prevents duplicate links)
-      await client.execute({
+      await d1.execute({
         sql: `INSERT OR IGNORE INTO notes_research (note_id, research_id) VALUES (?, ?)`,
         args: [noteId, researchId],
       });

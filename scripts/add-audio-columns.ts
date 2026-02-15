@@ -1,17 +1,17 @@
 import "dotenv/config";
-import { turso } from "../src/db/turso";
+import { d1 } from "../src/db/d1";
 
 async function applyMigration() {
   try {
     console.log("Applying migration: adding audio columns to stories table...");
 
-    await turso.execute("ALTER TABLE `stories` ADD `audio_key` text");
+    await d1.execute("ALTER TABLE `stories` ADD `audio_key` text");
     console.log("✓ Added audio_key column");
 
-    await turso.execute("ALTER TABLE `stories` ADD `audio_url` text");
+    await d1.execute("ALTER TABLE `stories` ADD `audio_url` text");
     console.log("✓ Added audio_url column");
 
-    await turso.execute("ALTER TABLE `stories` ADD `audio_generated_at` text");
+    await d1.execute("ALTER TABLE `stories` ADD `audio_generated_at` text");
     console.log("✓ Added audio_generated_at column");
 
     console.log("\n✅ Migration completed successfully!");

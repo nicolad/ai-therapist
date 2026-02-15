@@ -1,10 +1,10 @@
 import type { ResearchResolvers } from "./../types.generated";
-import { turso } from "@/src/db";
+import { d1 } from "@/src/db";
 
 export const Research: ResearchResolvers = {
   goal: async (parent, _args, _ctx) => {
     // Fetch the goal associated with this research
-    const result = await turso.execute({
+    const result = await d1.execute({
       sql: `SELECT * FROM goals WHERE id = ?`,
       args: [parent.goalId],
     });

@@ -1,5 +1,5 @@
 import type { QueryResolvers } from "./../../types.generated";
-import { tursoTools } from "@/src/db";
+import { d1Tools } from "@/src/db";
 
 export const goals: NonNullable<QueryResolvers['goals']> = async (
   _parent,
@@ -11,7 +11,7 @@ export const goals: NonNullable<QueryResolvers['goals']> = async (
     throw new Error("Authentication required");
   }
 
-  const goalsList = await tursoTools.listGoals(
+  const goalsList = await d1Tools.listGoals(
     userEmail,
     args.familyMemberId ?? undefined,
   );

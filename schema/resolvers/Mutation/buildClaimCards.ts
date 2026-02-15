@@ -5,7 +5,7 @@ import { createDeepSeek } from "@ai-sdk/deepseek";
 import { generateObject } from "ai";
 import { z } from "zod";
 import { toGqlClaimCards } from "../utils/normalize-claim-card";
-import { turso } from "../../../src/db/turso";
+import { d1 } from "../../../src/db/d1";
 import type { PaperDetails } from "../../../src/tools/sources.tools";
 
 // Suppress AI SDK warnings
@@ -25,7 +25,7 @@ async function loadLinkedResearchForNote(
   noteId: number,
 ): Promise<PaperCandidate[]> {
   // Query the notes_research join table to get research papers for this note
-  const res = await turso.execute({
+  const res = await d1.execute({
     sql: `
       SELECT
         r.id as id,
@@ -136,7 +136,9 @@ Return only the claims array.`,
  * 3. Maps evidence ONLY from the linked corpus (no external searches)
  * 4. Falls back to external search if useLinkedResearch=false
  */
-export const buildClaimCards: NonNullable<MutationResolvers['buildClaimCards']> = async (_parent, { input }) => {
+export const buildClaimCards: NonNullable<
+  MutationResolvers["buildClaimCards"]
+> = async (_parent, { input }) => {
   const {
     text,
     claims,

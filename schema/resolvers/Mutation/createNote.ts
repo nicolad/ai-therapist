@@ -1,5 +1,5 @@
 import type { MutationResolvers } from "./../../types.generated";
-import { tursoTools } from "@/src/db";
+import { d1Tools } from "@/src/db";
 
 export const createNote: NonNullable<MutationResolvers['createNote']> = async (
   _parent,
@@ -11,7 +11,7 @@ export const createNote: NonNullable<MutationResolvers['createNote']> = async (
     throw new Error("Authentication required");
   }
 
-  const noteId = await tursoTools.createNote({
+  const noteId = await d1Tools.createNote({
     entityId: args.input.entityId,
     entityType: args.input.entityType,
     userId: userEmail,
@@ -23,7 +23,7 @@ export const createNote: NonNullable<MutationResolvers['createNote']> = async (
   });
 
   // Fetch the created note to return it
-  const notes = await tursoTools.listNotesForEntity(
+  const notes = await d1Tools.listNotesForEntity(
     args.input.entityId,
     args.input.entityType,
     userEmail,

@@ -2,7 +2,7 @@ import type { MutationResolvers } from "./../../types.generated";
 import OpenAI from "openai";
 import { uploadToR2, generateAudioKey } from "@/lib/r2-uploader";
 import { MDocument } from "@mastra/rag";
-import { turso } from "@/src/db/turso";
+import { d1 } from "@/src/db/d1";
 import { parseBuffer } from "music-metadata";
 
 const openai = new OpenAI({
@@ -34,7 +34,7 @@ async function saveAudioToStory(
   userEmail: string,
 ): Promise<void> {
   const now = new Date().toISOString();
-  await turso.execute({
+  await d1.execute({
     sql: `UPDATE stories 
           SET audio_key = ?, audio_url = ?, audio_generated_at = ?, updated_at = ?
           WHERE id = ? AND user_id = ?`,
@@ -42,7 +42,9 @@ async function saveAudioToStory(
   });
 }
 
-export const generateOpenAIAudio: NonNullable<MutationResolvers['generateOpenAIAudio']> = async (_parent, args, ctx) => {
+export const generateOpenAIAudio: NonNullable<
+  MutationResolvers["generateOpenAIAudio"]
+> = async (_parent, args, ctx) => {
   const userEmail = ctx.userEmail;
   if (!userEmail) {
     throw new Error("Authentication required");

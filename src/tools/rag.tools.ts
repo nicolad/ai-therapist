@@ -1,21 +1,30 @@
-import { LibSQLVector } from "@mastra/libsql";
-import { TURSO_DATABASE_URL, TURSO_AUTH_TOKEN } from "@/src/config/turso";
+// import { LibSQLVector } from "@mastra/libsql"; // Disabled: Not compatible with D1
+import {
+  CLOUDFLARE_ACCOUNT_ID,
+  CLOUDFLARE_DATABASE_ID,
+  CLOUDFLARE_D1_TOKEN,
+} from "@/src/config/d1";
 
 /**
  * RAG Tools for Mastra Workflows
- * Manages vector embeddings and retrieval using LibSQLVector (Turso-native)
+ * Manages vector embeddings and retrieval using LibSQLVector
+ *
+ * Note: LibSQLVector is designed for libsql databases. With D1 migration,
+ * vector store functionality is temporarily disabled pending D1-compatible
+ * vector search implementation.
  */
 
+// TODO: Re-enable vector store with D1-compatible solution
 // Initialize vector store
-export const vectorStore = new LibSQLVector({
-  id: "goal-context-v1",
-  url: TURSO_DATABASE_URL,
-  authToken: TURSO_AUTH_TOKEN,
-});
+// export const vectorStore = new LibSQLVector({
+//   id: "goal-context-v1",
+//   url: "...",
+//   authToken: "...",
+// });
 
 /**
  * Upsert research chunks into vector store
- * TODO: Implement once Mastra LibSQLVector API is stable
+ * TODO: Implement with D1-compatible vector search
  */
 export async function upsertResearchChunks(params: {
   goalId: number;

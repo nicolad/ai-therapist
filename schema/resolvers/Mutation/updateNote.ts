@@ -1,5 +1,5 @@
 import type { MutationResolvers } from "./../../types.generated";
-import { tursoTools } from "@/src/db";
+import { d1Tools } from "@/src/db";
 
 export const updateNote: NonNullable<MutationResolvers['updateNote']> = async (
   _parent,
@@ -12,7 +12,7 @@ export const updateNote: NonNullable<MutationResolvers['updateNote']> = async (
   }
 
   // Update the note
-  await tursoTools.updateNote(args.id, userEmail, {
+  await d1Tools.updateNote(args.id, userEmail, {
     noteType: args.input.noteType ?? undefined,
     content: args.input.content ?? undefined,
     createdBy: args.input.createdBy ?? undefined,
@@ -21,11 +21,11 @@ export const updateNote: NonNullable<MutationResolvers['updateNote']> = async (
 
   // Update linked research if provided
   if (args.input.linkedResearchIds) {
-    await tursoTools.linkResearchToNote(args.id, args.input.linkedResearchIds);
+    await d1Tools.linkResearchToNote(args.id, args.input.linkedResearchIds);
   }
 
   // Fetch the updated note
-  const note = await tursoTools.getNoteById(args.id, userEmail);
+  const note = await d1Tools.getNoteById(args.id, userEmail);
 
   if (!note) {
     throw new Error(`Note ${args.id} not found`);

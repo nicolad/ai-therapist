@@ -1,15 +1,15 @@
 import type { NoteResolvers } from "./../types.generated";
-import { tursoTools } from "@/src/db";
-import { createTursoStorageAdapter } from "@/src/adapters/turso-storage.adapter";
+import { d1Tools } from "@/src/db";
+import { createD1StorageAdapter } from "@/src/adapters/d1-storage.adapter";
 
 export const Note: NoteResolvers = {
   linkedResearch: async (parent, _args, _ctx) => {
-    const research = await tursoTools.getResearchForNote(parent.id);
+    const research = await d1Tools.getResearchForNote(parent.id);
     return research;
   },
 
   claimCards: async (parent, _args, _ctx) => {
-    const storage = createTursoStorageAdapter();
+    const storage = createD1StorageAdapter();
     const cards = await storage.getCardsForItem?.(parent.id);
     return (cards || []) as any;
   },
@@ -21,7 +21,7 @@ export const Note: NoteResolvers = {
     }
 
     try {
-      const goal = await tursoTools.getGoal(parent.entityId, parent.createdBy);
+      const goal = await d1Tools.getGoal(parent.entityId, parent.createdBy);
       return {
         ...goal,
         notes: [],
@@ -38,13 +38,13 @@ export const Note: NoteResolvers = {
 
   shares: async (parent, _args, ctx) => {
     const userEmail = ctx.userEmail;
-    
+
     // Only return shares if viewer is the owner
     if (!userEmail || userEmail !== parent.createdBy) {
       return [];
     }
 
-    const shares = await tursoTools.getNoteShares(parent.id);
+    const shares = await d1Tools.getNoteShares(parent.id);
     return shares.map((share) => ({
       noteId: share.noteId,
       email: share.email,
@@ -56,9 +56,12 @@ export const Note: NoteResolvers = {
 
   viewerAccess: async (parent, _args, ctx) => {
     const userEmail = ctx.userEmail;
-    
-    const access = await tursoTools.canViewerReadNote(parent.id, userEmail || null);
-    
+
+    const access = await d1Tools.canViewerReadNote(
+      parent.id,
+      userEmail || null,
+    );
+
     return {
       canRead: access.canRead,
       canEdit: access.canEdit,

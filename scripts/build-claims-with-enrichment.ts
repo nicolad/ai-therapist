@@ -16,14 +16,13 @@
  *
  * Environment:
  *   CONTACT_EMAIL        - Required for API politeness
- *   TURSO_DATABASE_URL   - Database URL
- *   TURSO_AUTH_TOKEN     - Database auth token
+ *   CLOUDFLARE_D1_TOKEN  - Cloudflare API token for D1 database access
  *   DEEPSEEK_API_KEY     - For claim extraction
  *   OPENALEX_API_KEY     - Optional (required after Feb 13, 2026)
  *   S2_API_KEY           - Optional Semantic Scholar key
  */
 
-import { createClient } from "@libsql/client";
+import { d1 } from "../src/db/d1";
 import * as dotenv from "dotenv";
 import { createDeepSeek } from "@ai-sdk/deepseek";
 import { generateObject } from "ai";
@@ -33,7 +32,11 @@ import type { PaperDetails } from "../src/tools/sources.tools";
 import { createHash } from "node:crypto";
 import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { existsSync } from "node:fs";
-import { TURSO_DATABASE_URL, TURSO_AUTH_TOKEN } from "../src/config/turso";
+import {
+  CLOUDFLARE_ACCOUNT_ID,
+  CLOUDFLARE_DATABASE_ID,
+  CLOUDFLARE_D1_TOKEN,
+} from "../src/config/d1";
 
 dotenv.config();
 
@@ -59,11 +62,6 @@ const CFG = {
 };
 
 const USER_AGENT = `ai-therapist/1.0 (${CFG.CONTACT_EMAIL ? `mailto:${CFG.CONTACT_EMAIL}` : "research@example.com"})`;
-
-const turso = createClient({
-  url: TURSO_DATABASE_URL,
-  authToken: TURSO_AUTH_TOKEN,
-});
 
 const deepseek = createDeepSeek({
   apiKey: process.env.DEEPSEEK_API_KEY,
@@ -766,7 +764,7 @@ async function main() {
   try {
     // Step 1: Load linked research from DB
     console.log(`📚 Loading linked research from database...`);
-    const res = await turso.execute({
+    const res = await d1.execute({
       sql: `
         SELECT
           r.id as id,

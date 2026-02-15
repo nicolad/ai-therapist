@@ -1,11 +1,11 @@
 import type { QueryResolvers } from "./../../types.generated";
-import { tursoTools } from "@/src/db";
+import { d1Tools } from "@/src/db";
 
 export const research: NonNullable<QueryResolvers['research']> = async (
   _parent,
   args,
   _ctx,
 ) => {
-  const researchList = await tursoTools.listTherapyResearch(args.goalId);
+  const researchList = await d1Tools.listTherapyResearch(args.goalId);
   return researchList;
 };

@@ -1,6 +1,6 @@
 
 import type { MutationResolvers } from "./../../types.generated";
-import { tursoTools } from "@/src/db";
+import { d1Tools } from "@/src/db";
 
 export const setNoteVisibility: NonNullable<
   MutationResolvers["setNoteVisibility"]
@@ -11,7 +11,7 @@ export const setNoteVisibility: NonNullable<
   }
 
   // Check if user is the owner
-  const note = await tursoTools.getNoteById(args.noteId, userEmail);
+  const note = await d1Tools.getNoteById(args.noteId, userEmail);
   if (!note) {
     throw new Error("Note not found");
   }
@@ -20,7 +20,7 @@ export const setNoteVisibility: NonNullable<
     throw new Error("Only the note owner can change visibility");
   }
 
-  const updatedNote = await tursoTools.setNoteVisibility(
+  const updatedNote = await d1Tools.setNoteVisibility(
     args.noteId,
     args.visibility,
     userEmail,

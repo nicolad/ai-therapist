@@ -1,5 +1,5 @@
 import type { MutationResolvers } from "./../../types.generated";
-import { tursoTools } from "@/src/db";
+import { d1Tools } from "@/src/db";
 
 export const createGoal: NonNullable<MutationResolvers['createGoal']> = async (
   _parent,
@@ -11,7 +11,7 @@ export const createGoal: NonNullable<MutationResolvers['createGoal']> = async (
     throw new Error("Authentication required");
   }
 
-  const goalId = await tursoTools.createGoal({
+  const goalId = await d1Tools.createGoal({
     familyMemberId: args.input.familyMemberId,
     createdBy: userEmail,
     title: args.input.title,
@@ -19,7 +19,7 @@ export const createGoal: NonNullable<MutationResolvers['createGoal']> = async (
   });
 
   // Fetch the created goal to return it
-  const goal = await tursoTools.getGoal(goalId, userEmail);
+  const goal = await d1Tools.getGoal(goalId, userEmail);
 
   return {
     id: goal.id,

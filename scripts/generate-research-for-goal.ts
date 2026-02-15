@@ -7,7 +7,7 @@
  */
 
 import "dotenv/config";
-import { tursoTools, turso } from "@/src/db";
+import { d1Tools, d1 } from "@/src/db";
 import { generateTherapyResearchWorkflow } from "@/src/workflows/generateTherapyResearch.workflow";
 
 // Suppress AI SDK warnings
@@ -23,7 +23,7 @@ async function main() {
 
   try {
     // Fetch the goal
-    const goal = await tursoTools.getGoalBySlug(DEFAULT_GOAL_SLUG, USER_EMAIL);
+    const goal = await d1Tools.getGoalBySlug(DEFAULT_GOAL_SLUG, USER_EMAIL);
     if (!goal) {
       throw new Error(`Goal not found: ${DEFAULT_GOAL_SLUG}`);
     }
@@ -33,12 +33,11 @@ async function main() {
 
     // Clean up existing research before generating new research
     console.log("🧹 Cleaning up existing research...");
-    const deleteResult = await turso.execute({
+    await d1.execute({
       sql: `DELETE FROM therapy_research WHERE goal_id = ?`,
       args: [goal.id],
     });
-    const deletedCount = deleteResult.rowsAffected || 0;
-    console.log(`   Deleted ${deletedCount} old research papers\n`);
+    console.log(`   Deleted existing research papers\n`);
 
     // Run the research generation workflow
     console.log("🔬 Running research generation workflow...\n");
@@ -63,7 +62,7 @@ async function main() {
       // Display found research papers
       if (count > 0) {
         console.log("📚 Found research papers:\n");
-        const research = await tursoTools.listTherapyResearch(goal.id);
+        const research = await d1Tools.listTherapyResearch(goal.id);
 
         research.forEach((paper, index) => {
           console.log(`${index + 1}. ${paper.title}`);

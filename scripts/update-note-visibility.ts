@@ -1,23 +1,23 @@
 import "dotenv/config";
-import { turso } from "../src/db/turso";
+import { d1 } from "../src/db/d1";
 
 async function updateNoteVisibility() {
   try {
     console.log("Updating note visibility to PUBLIC...\n");
-    
-    const result = await turso.execute({
+
+    await d1.execute({
       sql: `UPDATE notes SET visibility = 'PUBLIC' WHERE slug = ?`,
       args: ["state-of-remote-work"],
     });
-    
-    console.log(`✅ Updated ${result.rowsAffected} note(s)`);
-    
+
+    console.log(`✅ Updated note visibility`);
+
     // Verify the update
-    const check = await turso.execute({
+    const check = await d1.execute({
       sql: `SELECT id, title, slug, visibility FROM notes WHERE slug = ?`,
       args: ["state-of-remote-work"],
     });
-    
+
     if (check.rows.length > 0) {
       const note = check.rows[0];
       console.log("\n✅ Verified:");

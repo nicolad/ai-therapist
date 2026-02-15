@@ -1,5 +1,5 @@
 import type { QueryResolvers } from "./../../types.generated";
-import { tursoTools } from "@/src/db";
+import { d1Tools } from "@/src/db";
 
 export const notes: NonNullable<QueryResolvers['notes']> = async (
   _parent,
@@ -11,7 +11,7 @@ export const notes: NonNullable<QueryResolvers['notes']> = async (
     throw new Error("Authentication required");
   }
 
-  const notesList = await tursoTools.listNotesForEntity(
+  const notesList = await d1Tools.listNotesForEntity(
     args.entityId,
     args.entityType,
     userEmail,

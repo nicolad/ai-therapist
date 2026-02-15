@@ -9,10 +9,14 @@
  *   pnpm tsx scripts/build-claim-cards-remote-work.ts
  */
 
-import { createClient } from "@libsql/client";
+import { d1 } from "../src/db/d1";
 import * as dotenv from "dotenv";
 import { buildClaimCards } from "../schema/resolvers/Mutation/buildClaimCards";
-import { TURSO_DATABASE_URL, TURSO_AUTH_TOKEN } from "../src/config/turso";
+import {
+  CLOUDFLARE_ACCOUNT_ID,
+  CLOUDFLARE_DATABASE_ID,
+  CLOUDFLARE_D1_TOKEN,
+} from "../src/config/d1";
 
 // Load environment variables
 dotenv.config();
@@ -22,11 +26,6 @@ if (typeof globalThis !== "undefined") {
   (globalThis as any).AI_SDK_LOG_WARNINGS = false;
 }
 
-const client = createClient({
-  url: TURSO_DATABASE_URL,
-  authToken: TURSO_AUTH_TOKEN,
-});
-
 type StorageDetection = {
   table: string;
   noteIdColumn: string;
@@ -34,7 +33,7 @@ type StorageDetection = {
 } | null;
 
 async function listTables(): Promise<string[]> {
-  const res = await client.execute({
+  const res = await d1.execute({
     sql: `SELECT name FROM sqlite_master WHERE type='table' ORDER BY name`,
     args: [],
   });
@@ -42,7 +41,7 @@ async function listTables(): Promise<string[]> {
 }
 
 async function tableColumns(table: string): Promise<string[]> {
-  const res = await client.execute({
+  const res = await d1.execute({
     sql: `PRAGMA table_info(${table})`,
     args: [],
   });
@@ -84,7 +83,7 @@ async function claimExists(
   claim: string,
 ): Promise<boolean> {
   const sql = `SELECT 1 AS ok FROM ${storage.table} WHERE ${storage.noteIdColumn} = ? AND ${storage.claimColumn} = ? LIMIT 1`;
-  const res = await client.execute({ sql, args: [noteId, claim] });
+  const res = await d1.execute({ sql, args: [noteId, claim] });
   return res.rows.length > 0;
 }
 
@@ -96,7 +95,7 @@ async function verifyLinkTable(
 
   // Check for notes_claims linking table
   if (tables.includes("notes_claims")) {
-    const res = await client.execute({
+    const res = await d1.execute({
       sql: "SELECT COUNT(*) as count FROM notes_claims WHERE note_id = ?",
       args: [noteId],
     });
@@ -119,7 +118,7 @@ async function main() {
 
   try {
     // 1. Get the note
-    const noteResult = await client.execute({
+    const noteResult = await d1.execute({
       sql: "SELECT id, slug, content FROM notes WHERE slug = ?",
       args: ["state-of-remote-work"],
     });

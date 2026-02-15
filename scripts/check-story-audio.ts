@@ -1,11 +1,11 @@
 import "dotenv/config";
-import { turso } from "../src/db/turso";
+import { d1 } from "../src/db/d1";
 
 async function checkStoryAudio() {
   try {
     console.log("Checking stories table for audio columns...\n");
 
-    const result = await turso.execute(`
+    const result = await d1.execute(`
       SELECT id, audio_key, audio_url, audio_generated_at, created_at 
       FROM stories 
       ORDER BY created_at DESC 

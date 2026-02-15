@@ -212,7 +212,7 @@ type Note {
 }
 
 # ============================================
-# Audio & Job Types (Turso-only)
+# Audio & Job Types
 # ============================================
 
 type GenerationJob {

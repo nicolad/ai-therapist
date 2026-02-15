@@ -489,31 +489,16 @@ export async function refreshClaimCard(
 /**
  * Database persistence for claim cards
  */
-import { createClient } from "@libsql/client";
-import type { Client } from "@libsql/client";
+import { d1 } from "@/src/db/d1";
 import path from "path";
-import { TURSO_DATABASE_URL, TURSO_AUTH_TOKEN } from "@/src/config/turso";
-
-let tursoClient: Client | null = null;
-
-function getTursoClient(): Client {
-  if (!tursoClient) {
-    tursoClient = createClient({
-      url: TURSO_DATABASE_URL,
-      authToken: TURSO_AUTH_TOKEN,
-    });
-  }
-  return tursoClient;
-}
 
 export async function saveClaimCard(
   card: ClaimCard,
   noteId?: number,
 ): Promise<void> {
-  const turso = getTursoClient();
   const confidenceInt = Math.round(card.confidence * 100);
 
-  await turso.execute({
+  await d1.execute({
     sql: `INSERT OR REPLACE INTO claim_cards
       (id, note_id, claim, scope, verdict, confidence, evidence, queries, provenance, notes, created_at, updated_at)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
@@ -535,7 +520,7 @@ export async function saveClaimCard(
 
   // Link to note if provided
   if (noteId) {
-    await turso.execute({
+    await d1.execute({
       sql: `INSERT OR IGNORE INTO notes_claims (note_id, claim_id) VALUES (?, ?)`,
       args: [noteId, card.id],
     });
@@ -543,8 +528,7 @@ export async function saveClaimCard(
 }
 
 export async function getClaimCard(claimId: string): Promise<ClaimCard | null> {
-  const turso = getTursoClient();
-  const result = await turso.execute({
+  const result = await d1.execute({
     sql: `SELECT * FROM claim_cards WHERE id = ?`,
     args: [claimId],
   });
@@ -570,8 +554,7 @@ export async function getClaimCard(claimId: string): Promise<ClaimCard | null> {
 export async function getClaimCardsForNote(
   noteId: number,
 ): Promise<ClaimCard[]> {
-  const turso = getTursoClient();
-  const result = await turso.execute({
+  const result = await d1.execute({
     sql: `SELECT cc.* FROM claim_cards cc
       INNER JOIN notes_claims nc ON cc.id = nc.claim_id
       WHERE nc.note_id = ?
@@ -595,13 +578,12 @@ export async function getClaimCardsForNote(
 }
 
 export async function deleteClaimCard(claimId: string): Promise<void> {
-  const turso = getTursoClient();
-  await turso.execute({
+  await d1.execute({
     sql: `DELETE FROM notes_claims WHERE claim_id = ?`,
     args: [claimId],
   });
 
-  await turso.execute({
+  await d1.execute({
     sql: `DELETE FROM claim_cards WHERE id = ?`,
     args: [claimId],
   });

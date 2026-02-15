@@ -8,7 +8,7 @@ import {
   createCompletenessScorer,
   createContextRelevanceScorerLLM,
 } from "@mastra/evals/scorers/prebuilt";
-import { tursoTools } from "@/src/db";
+import { d1Tools } from "@/src/db";
 import { ragTools } from "@/src/tools/rag.tools";
 import { sourceTools } from "@/src/tools/sources.tools";
 import { extractorTools } from "@/src/tools/extractor.tools";
@@ -23,12 +23,12 @@ const deepseek = createDeepSeek({
  * Deep Research Workflow
  *
  * Multi-step workflow with eval-gated quality control:
- * 1. Load goal + notes from Turso
+ * 1. Load goal + notes from D1 database
  * 2. Plan query (goal type + keywords)
  * 3. Multi-source search (Crossref, PubMed, Semantic Scholar)
  * 4. Extract + gate each candidate with scorers
  * 5. Repair failed extractions once
- * 6. Persist top results + embed into Turso vectors
+ * 6. Persist top results to D1 database
  */
 
 // Input/Output schemas
@@ -58,8 +58,8 @@ const loadContextStep = createStep({
     notes: z.array(z.object({ id: z.number().int(), content: z.string() })),
   }),
   execute: async ({ inputData }) => {
-    const goal = await tursoTools.getGoal(inputData.goalId, inputData.userId);
-    const notes = await tursoTools.listNotesForEntity(
+    const goal = await d1Tools.getGoal(inputData.goalId, inputData.userId);
+    const notes = await d1Tools.listNotesForEntity(
       inputData.goalId,
       "Goal",
       inputData.userId,
@@ -635,7 +635,7 @@ const persistStep = createStep({
       );
 
       // Persist to DB
-      const rowId = await tursoTools.upsertTherapyResearch(
+      const rowId = await d1Tools.upsertTherapyResearch(
         inputData.goalId,
         inputData.userId,
         research,

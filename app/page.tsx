@@ -267,7 +267,7 @@ export default function Home() {
                   Apollo Server
                 </Text>
                 <Text size="2" color="gray">
-                  Turso (LibSQL)
+                  Cloudflare D1
                 </Text>
               </Flex>
               <Flex direction="column" gap="1">

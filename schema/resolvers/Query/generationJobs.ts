@@ -1,7 +1,9 @@
 import type { QueryResolvers } from "./../../types.generated";
-import { turso } from "@/src/db";
+import { d1 } from "@/src/db";
 
-export const generationJobs: NonNullable<QueryResolvers['generationJobs']> = async (_parent, args, _ctx) => {
+export const generationJobs: NonNullable<
+  QueryResolvers["generationJobs"]
+> = async (_parent, args, _ctx) => {
   let sql = `SELECT * FROM generation_jobs`;
   const queryArgs: any[] = [];
   const conditions: string[] = [];
@@ -22,7 +24,7 @@ export const generationJobs: NonNullable<QueryResolvers['generationJobs']> = asy
 
   sql += ` ORDER BY created_at DESC`;
 
-  const result = await turso.execute({ sql, args: queryArgs });
+  const result = await d1.execute({ sql, args: queryArgs });
 
   return result.rows.map((row) => ({
     id: row.id as string,

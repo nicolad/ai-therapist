@@ -1,31 +1,18 @@
-import { drizzle } from "drizzle-orm/libsql";
-import { createClient } from "@libsql/client";
+import { drizzle } from "drizzle-orm/d1";
 import * as schema from "./schema";
-import { turso } from "./turso";
-import { TURSO_DATABASE_URL, TURSO_AUTH_TOKEN } from "@/src/config/turso";
+import { d1 } from "./d1";
+import {
+  CLOUDFLARE_ACCOUNT_ID,
+  CLOUDFLARE_DATABASE_ID,
+  CLOUDFLARE_D1_TOKEN,
+} from "@/src/config/d1";
 
-let dbInstance: ReturnType<typeof drizzle> | null = null;
+// Note: For D1, drizzle ORM integration requires a D1Database binding
+// This is typically available in Cloudflare Workers runtime
+// For now, we'll use the raw D1 client for queries
 
-function getDb() {
-  if (dbInstance) {
-    return dbInstance;
-  }
-
-  const client = createClient({
-    url: TURSO_DATABASE_URL,
-    authToken: TURSO_AUTH_TOKEN,
-  });
-
-  dbInstance = drizzle(client, { schema });
-  return dbInstance;
-}
-
-export const db = new Proxy({} as ReturnType<typeof drizzle>, {
-  get(target, prop) {
-    const instance = getDb();
-    return (instance as any)[prop];
-  },
-});
+// Placeholder for when running in Cloudflare Workers context
+export const db = null as any;
 
 /**
  * Database operations for goals, research, questions, notes, and jobs
@@ -36,7 +23,7 @@ export const db = new Proxy({} as ReturnType<typeof drizzle>, {
 // ============================================
 
 export async function getGoal(goalId: number, createdBy: string) {
-  const result = await turso.execute({
+  const result = await d1.execute({
     sql: `SELECT * FROM goals WHERE id = ? AND user_id = ?`,
     args: [goalId, createdBy],
   });
@@ -64,7 +51,7 @@ export async function getGoal(goalId: number, createdBy: string) {
 }
 
 export async function getGoalBySlug(slug: string, createdBy: string) {
-  const result = await turso.execute({
+  const result = await d1.execute({
     sql: `SELECT * FROM goals WHERE slug = ? AND user_id = ?`,
     args: [slug, createdBy],
   });
@@ -111,7 +98,7 @@ export async function listGoals(
 
   sql += ` ORDER BY created_at DESC`;
 
-  const result = await turso.execute({ sql, args });
+  const result = await d1.execute({ sql, args });
   return result.rows.map((row) => ({
     id: row.id as number,
     familyMemberId: row.family_member_id as number,
@@ -133,7 +120,7 @@ export async function createGoal(params: {
 }) {
   const status = "active";
 
-  const result = await turso.execute({
+  const result = await d1.execute({
     sql: `INSERT INTO goals (family_member_id, user_id, slug, title, description, status)
           VALUES (?, ?, ?, ?, ?, ?)
           RETURNING id`,
@@ -186,7 +173,7 @@ export async function updateGoal(
   fields.push("updated_at = datetime('now')");
   args.push(goalId, createdBy);
 
-  await turso.execute({
+  await d1.execute({
     sql: `UPDATE goals SET ${fields.join(", ")} WHERE id = ? AND user_id = ?`,
     args,
   });
@@ -220,7 +207,7 @@ export async function upsertTherapyResearch(
   let existingId: number | null = null;
 
   if (research.doi) {
-    const checkDoi = await turso.execute({
+    const checkDoi = await d1.execute({
       sql: `SELECT id FROM therapy_research WHERE goal_id = ? AND doi = ?`,
       args: [goalId, research.doi],
     });
@@ -230,7 +217,7 @@ export async function upsertTherapyResearch(
   }
 
   if (!existingId) {
-    const checkTitle = await turso.execute({
+    const checkTitle = await d1.execute({
       sql: `SELECT id FROM therapy_research WHERE goal_id = ? AND title = ?`,
       args: [goalId, research.title],
     });
@@ -266,7 +253,7 @@ export async function upsertTherapyResearch(
 
   if (existingId) {
     // Update existing
-    await turso.execute({
+    await d1.execute({
       sql: `UPDATE therapy_research 
             SET therapeutic_goal_type = ?,
                 authors = ?,
@@ -303,12 +290,13 @@ export async function upsertTherapyResearch(
     return existingId;
   } else {
     // Insert new
-    const result = await turso.execute({
+    const result = await d1.execute({
       sql: `INSERT INTO therapy_research (
               goal_id, therapeutic_goal_type, title, authors, year, journal, doi, url,
               abstract, key_findings, therapeutic_techniques, evidence_level,
               relevance_score, extracted_by, extraction_confidence
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            RETURNING id`,
       args: [
         goalId,
         research.therapeuticGoalType,
@@ -327,12 +315,15 @@ export async function upsertTherapyResearch(
         extractionConfidence,
       ],
     });
-    return Number(result.lastInsertRowid);
+    if (!result.rows || result.rows.length === 0) {
+      throw new Error("Failed to insert therapy research: no ID returned");
+    }
+    return Number(result.rows[0].id);
   }
 }
 
 export async function listTherapyResearch(goalId: number) {
-  const result = await turso.execute({
+  const result = await d1.execute({
     sql: `SELECT * FROM therapy_research WHERE goal_id = ? ORDER BY relevance_score DESC, created_at DESC`,
     args: [goalId],
   });
@@ -362,7 +353,7 @@ export async function listTherapyResearch(goalId: number) {
 }
 
 export async function getResearchForNote(noteId: number) {
-  const result = await turso.execute({
+  const result = await d1.execute({
     sql: `SELECT tr.* FROM therapy_research tr
           INNER JOIN notes_research nr ON tr.id = nr.research_id
           WHERE nr.note_id = ?
@@ -399,7 +390,7 @@ export async function getResearchForNote(noteId: number) {
 // ============================================
 
 export async function getNoteById(noteId: number, userId: string) {
-  const result = await turso.execute({
+  const result = await d1.execute({
     sql: `SELECT * FROM notes WHERE id = ?`,
     args: [noteId],
   });
@@ -419,14 +410,14 @@ export async function getNoteById(noteId: number, userId: string) {
     title: (row.title as string) || null,
     content: row.content as string,
     tags: row.tags ? JSON.parse(row.tags as string) : [],
-    visibility: (row.visibility as string) || 'PRIVATE',
+    visibility: (row.visibility as string) || "PRIVATE",
     createdAt: row.created_at as string,
     updatedAt: row.updated_at as string,
   };
 }
 
 export async function getNoteBySlug(slug: string, userId: string) {
-  const result = await turso.execute({
+  const result = await d1.execute({
     sql: `SELECT * FROM notes WHERE slug = ?`,
     args: [slug],
   });
@@ -446,14 +437,14 @@ export async function getNoteBySlug(slug: string, userId: string) {
     title: (row.title as string) || null,
     content: row.content as string,
     tags: row.tags ? JSON.parse(row.tags as string) : [],
-    visibility: (row.visibility as string) || 'PRIVATE',
+    visibility: (row.visibility as string) || "PRIVATE",
     createdAt: row.created_at as string,
     updatedAt: row.updated_at as string,
   };
 }
 
 export async function getAllNotesForUser(userId: string) {
-  const result = await turso.execute({
+  const result = await d1.execute({
     sql: `SELECT * FROM notes WHERE user_id = ? ORDER BY created_at DESC`,
     args: [userId],
   });
@@ -468,7 +459,7 @@ export async function getAllNotesForUser(userId: string) {
     title: (row.title as string) || null,
     content: row.content as string,
     tags: row.tags ? JSON.parse(row.tags as string) : [],
-    visibility: (row.visibility as string) || 'PRIVATE',
+    visibility: (row.visibility as string) || "PRIVATE",
     createdAt: row.created_at as string,
     updatedAt: row.updated_at as string,
   }));
@@ -479,7 +470,7 @@ export async function listNotesForEntity(
   entityType: string,
   userId: string,
 ) {
-  const result = await turso.execute({
+  const result = await d1.execute({
     sql: `SELECT * FROM notes WHERE entity_id = ? AND entity_type = ? AND user_id = ? ORDER BY created_at DESC`,
     args: [entityId, entityType, userId],
   });
@@ -494,7 +485,7 @@ export async function listNotesForEntity(
     title: (row.title as string) || null,
     content: row.content as string,
     tags: row.tags ? JSON.parse(row.tags as string) : [],
-    visibility: (row.visibility as string) || 'PRIVATE',
+    visibility: (row.visibility as string) || "PRIVATE",
     createdAt: row.created_at as string,
     updatedAt: row.updated_at as string,
   }));
@@ -521,7 +512,7 @@ export async function createNote(params: {
       .replace(/^-+|-+$/g, "")
       .substring(0, 50);
 
-  const result = await turso.execute({
+  const result = await d1.execute({
     sql: `INSERT INTO notes (entity_id, entity_type, user_id, note_type, slug, content, created_by, tags)
           VALUES (?, ?, ?, ?, ?, ?, ?, ?)
           RETURNING id`,
@@ -588,7 +579,7 @@ export async function updateNote(
   fields.push("updated_at = datetime('now')");
   args.push(noteId, userId);
 
-  await turso.execute({
+  await d1.execute({
     sql: `UPDATE notes SET ${fields.join(", ")} WHERE id = ? AND user_id = ?`,
     args,
   });
@@ -599,14 +590,14 @@ export async function linkResearchToNote(
   researchIds: number[],
 ) {
   // First, remove existing links
-  await turso.execute({
+  await d1.execute({
     sql: `DELETE FROM notes_research WHERE note_id = ?`,
     args: [noteId],
   });
 
   // Then add new links
   for (const researchId of researchIds) {
-    await turso.execute({
+    await d1.execute({
       sql: `INSERT INTO notes_research (note_id, research_id) VALUES (?, ?)`,
       args: [noteId, researchId],
     });
@@ -625,7 +616,7 @@ export async function canViewerReadNote(
   noteId: number,
   viewerEmail: string | null,
 ): Promise<{ canRead: boolean; canEdit: boolean; reason: string }> {
-  const result = await turso.execute({
+  const result = await d1.execute({
     sql: `
       SELECT
         n.visibility,
@@ -643,11 +634,11 @@ export async function canViewerReadNote(
       WHERE n.id = ?
       LIMIT 1;
     `,
-    args: [viewerEmail || '', normalizeEmail(viewerEmail || ''), noteId],
+    args: [viewerEmail || "", normalizeEmail(viewerEmail || ""), noteId],
   });
 
   if (result.rows.length === 0) {
-    return { canRead: false, canEdit: false, reason: 'NOT_FOUND' };
+    return { canRead: false, canEdit: false, reason: "NOT_FOUND" };
   }
 
   const row = result.rows[0];
@@ -656,43 +647,43 @@ export async function canViewerReadNote(
   const visibility = row.visibility as string;
 
   if (!canRead) {
-    return { canRead: false, canEdit: false, reason: 'FORBIDDEN' };
+    return { canRead: false, canEdit: false, reason: "FORBIDDEN" };
   }
 
   // Check if viewer is owner
   if (viewerEmail === ownerEmail) {
-    return { canRead: true, canEdit: true, reason: 'OWNER' };
+    return { canRead: true, canEdit: true, reason: "OWNER" };
   }
 
   // Check if public
-  if (visibility === 'PUBLIC') {
-    return { canRead: true, canEdit: false, reason: 'PUBLIC' };
+  if (visibility === "PUBLIC") {
+    return { canRead: true, canEdit: false, reason: "PUBLIC" };
   }
 
   // Check share role
-  const shareResult = await turso.execute({
+  const shareResult = await d1.execute({
     sql: `SELECT role FROM note_shares WHERE note_id = ? AND email = ?`,
-    args: [noteId, normalizeEmail(viewerEmail || '')],
+    args: [noteId, normalizeEmail(viewerEmail || "")],
   });
 
   if (shareResult.rows.length > 0) {
     const role = shareResult.rows[0].role as string;
     return {
       canRead: true,
-      canEdit: role === 'EDITOR',
+      canEdit: role === "EDITOR",
       reason: `SHARED_${role}`,
     };
   }
 
-  return { canRead: true, canEdit: false, reason: 'SHARED' };
+  return { canRead: true, canEdit: false, reason: "SHARED" };
 }
 
 export async function setNoteVisibility(
   noteId: number,
-  visibility: 'PRIVATE' | 'PUBLIC',
+  visibility: "PRIVATE" | "PUBLIC",
   userId: string,
 ) {
-  await turso.execute({
+  await d1.execute({
     sql: `UPDATE notes SET visibility = ?, updated_at = datetime('now') WHERE id = ? AND user_id = ?`,
     args: [visibility, noteId, userId],
   });
@@ -703,12 +694,12 @@ export async function setNoteVisibility(
 export async function shareNote(
   noteId: number,
   email: string,
-  role: 'READER' | 'EDITOR',
+  role: "READER" | "EDITOR",
   createdBy: string,
 ) {
   const normalizedEmail = normalizeEmail(email);
 
-  await turso.execute({
+  await d1.execute({
     sql: `
       INSERT INTO note_shares (note_id, email, role, created_by)
       VALUES (?, ?, ?, ?)
@@ -718,7 +709,7 @@ export async function shareNote(
     args: [noteId, normalizedEmail, role, createdBy],
   });
 
-  const result = await turso.execute({
+  const result = await d1.execute({
     sql: `SELECT * FROM note_shares WHERE note_id = ? AND email = ?`,
     args: [noteId, normalizedEmail],
   });
@@ -740,16 +731,16 @@ export async function unshareNote(
 ) {
   const normalizedEmail = normalizeEmail(email);
 
-  const result = await turso.execute({
-    sql: `DELETE FROM note_shares WHERE note_id = ? AND email = ?`,
+  const result = await d1.execute({
+    sql: `DELETE FROM note_shares WHERE note_id = ? AND email = ? RETURNING id`,
     args: [noteId, normalizedEmail],
   });
 
-  return (result.rowsAffected || 0) > 0;
+  return result.rows.length > 0;
 }
 
 export async function getNoteShares(noteId: number) {
-  const result = await turso.execute({
+  const result = await d1.execute({
     sql: `SELECT * FROM note_shares WHERE note_id = ? ORDER BY created_at DESC`,
     args: [noteId],
   });
@@ -766,7 +757,7 @@ export async function getNoteShares(noteId: number) {
 export async function getSharedNotes(viewerEmail: string) {
   const normalizedEmail = normalizeEmail(viewerEmail);
 
-  const result = await turso.execute({
+  const result = await d1.execute({
     sql: `
       SELECT n.*
       FROM notes n
@@ -787,7 +778,7 @@ export async function getSharedNotes(viewerEmail: string) {
     title: (row.title as string) || null,
     content: row.content as string,
     tags: row.tags ? JSON.parse(row.tags as string) : [],
-    visibility: (row.visibility as string) || 'PRIVATE',
+    visibility: (row.visibility as string) || "PRIVATE",
     createdAt: row.created_at as string,
     updatedAt: row.updated_at as string,
   }));
@@ -798,7 +789,7 @@ export async function getSharedNotes(viewerEmail: string) {
 // ============================================
 
 export async function listStories(goalId: number, createdBy: string) {
-  const result = await turso.execute({
+  const result = await d1.execute({
     sql: `SELECT * FROM stories WHERE goal_id = ? AND user_id = ? ORDER BY created_at DESC`,
     args: [goalId, createdBy],
   });
@@ -817,7 +808,7 @@ export async function listStories(goalId: number, createdBy: string) {
 }
 
 export async function getStory(storyId: number, createdBy: string) {
-  const result = await turso.execute({
+  const result = await d1.execute({
     sql: `SELECT * FROM stories WHERE id = ? AND user_id = ?`,
     args: [storyId, createdBy],
   });
@@ -845,7 +836,7 @@ export async function createStory(params: {
   createdBy: string;
   content: string;
 }) {
-  const result = await turso.execute({
+  const result = await d1.execute({
     sql: `INSERT INTO stories (goal_id, user_id, content)
           VALUES (?, ?, ?)
           RETURNING id`,
@@ -873,14 +864,14 @@ export async function updateStory(
   fields.push("updated_at = datetime('now')");
   args.push(storyId, createdBy);
 
-  await turso.execute({
+  await d1.execute({
     sql: `UPDATE stories SET ${fields.join(", ")} WHERE id = ? AND user_id = ?`,
     args,
   });
 }
 
 export async function deleteStory(storyId: number, createdBy: string) {
-  await turso.execute({
+  await d1.execute({
     sql: `DELETE FROM stories WHERE id = ? AND user_id = ?`,
     args: [storyId, createdBy],
   });
@@ -897,7 +888,7 @@ export async function createGenerationJob(
   goalId: number,
   storyId?: number,
 ) {
-  await turso.execute({
+  await d1.execute({
     sql: `INSERT INTO generation_jobs (id, user_id, type, goal_id, story_id, status, progress)
           VALUES (?, ?, ?, ?, ?, 'RUNNING', 0)`,
     args: [id, userId, type, goalId, storyId || null],
@@ -939,14 +930,14 @@ export async function updateGenerationJob(
   fields.push("updated_at = datetime('now')");
   args.push(id);
 
-  await turso.execute({
+  await d1.execute({
     sql: `UPDATE generation_jobs SET ${fields.join(", ")} WHERE id = ?`,
     args,
   });
 }
 
 export async function getGenerationJob(id: string) {
-  const result = await turso.execute({
+  const result = await d1.execute({
     sql: `SELECT * FROM generation_jobs WHERE id = ?`,
     args: [id],
   });
@@ -976,7 +967,7 @@ export async function getGenerationJob(id: string) {
 // ============================================
 
 export async function listTherapeuticQuestions(goalId: number) {
-  const result = await turso.execute({
+  const result = await d1.execute({
     sql: `SELECT * FROM therapeutic_questions WHERE goal_id = ? ORDER BY created_at DESC`,
     args: [goalId],
   });
@@ -999,7 +990,7 @@ export async function listTherapeuticQuestions(goalId: number) {
 // ============================================
 
 export async function listGoalStories(goalId: number) {
-  const result = await turso.execute({
+  const result = await d1.execute({
     sql: `SELECT * FROM goal_stories WHERE goal_id = ? ORDER BY created_at DESC`,
     args: [goalId],
   });
@@ -1016,7 +1007,7 @@ export async function listGoalStories(goalId: number) {
 }
 
 export async function getTextSegmentsForStory(storyId: number) {
-  const result = await turso.execute({
+  const result = await d1.execute({
     sql: `SELECT * FROM text_segments WHERE story_id = ? ORDER BY idx ASC`,
     args: [storyId],
   });
@@ -1032,7 +1023,7 @@ export async function getTextSegmentsForStory(storyId: number) {
 }
 
 export async function getAudioAssetsForStory(storyId: number) {
-  const result = await turso.execute({
+  const result = await d1.execute({
     sql: `SELECT * FROM audio_assets WHERE story_id = ? ORDER BY created_at DESC`,
     args: [storyId],
   });
@@ -1050,7 +1041,7 @@ export async function getAudioAssetsForStory(storyId: number) {
   }));
 }
 
-export const tursoTools = {
+export const d1Tools = {
   getGoal,
   getGoalBySlug,
   listGoals,
@@ -1086,5 +1077,5 @@ export const tursoTools = {
   getAudioAssetsForStory,
 };
 
-// Export turso client for direct database access in scripts
-export { turso };
+// Export d1 client for direct database access
+export { d1 };
