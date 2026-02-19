@@ -156,6 +156,12 @@ export type CreateStoryInput = {
   goalId: Scalars['Int']['input'];
 };
 
+export type CreateSubgoalInput = {
+  description?: InputMaybe<Scalars['String']['input']>;
+  goalId: Scalars['Int']['input'];
+  title: Scalars['String']['input'];
+};
+
 export type DeleteGoalResult = {
   __typename?: 'DeleteGoalResult';
   message?: Maybe<Scalars['String']['output']>;
@@ -184,6 +190,12 @@ export type DeleteResearchResult = {
 
 export type DeleteStoryResult = {
   __typename?: 'DeleteStoryResult';
+  message?: Maybe<Scalars['String']['output']>;
+  success: Scalars['Boolean']['output'];
+};
+
+export type DeleteSubgoalResult = {
+  __typename?: 'DeleteSubgoalResult';
   message?: Maybe<Scalars['String']['output']>;
   success: Scalars['Boolean']['output'];
 };
@@ -299,6 +311,7 @@ export type Goal = {
   slug?: Maybe<Scalars['String']['output']>;
   status: Scalars['String']['output'];
   stories: Array<GoalStory>;
+  subgoals: Array<Subgoal>;
   therapeuticText?: Maybe<Scalars['String']['output']>;
   therapeuticTextGeneratedAt?: Maybe<Scalars['String']['output']>;
   therapeuticTextLanguage?: Maybe<Scalars['String']['output']>;
@@ -358,11 +371,13 @@ export type Mutation = {
   createGoal: Goal;
   createNote: Note;
   createStory: Story;
+  createSubgoal: Subgoal;
   deleteClaimCard: Scalars['Boolean']['output'];
   deleteGoal: DeleteGoalResult;
   deleteNote: DeleteNoteResult;
   deleteResearch: DeleteResearchResult;
   deleteStory: DeleteStoryResult;
+  deleteSubgoal: DeleteSubgoalResult;
   deleteTherapeuticQuestions: DeleteQuestionsResult;
   generateAudio: GenerateAudioResult;
   generateLongFormText: GenerateLongFormTextResult;
@@ -376,6 +391,7 @@ export type Mutation = {
   updateGoal: Goal;
   updateNote: Note;
   updateStory: Story;
+  updateSubgoal: Subgoal;
 };
 
 
@@ -404,6 +420,11 @@ export type MutationCreateStoryArgs = {
 };
 
 
+export type MutationCreateSubgoalArgs = {
+  input: CreateSubgoalInput;
+};
+
+
 export type MutationDeleteClaimCardArgs = {
   id: Scalars['ID']['input'];
 };
@@ -425,6 +446,11 @@ export type MutationDeleteResearchArgs = {
 
 
 export type MutationDeleteStoryArgs = {
+  id: Scalars['Int']['input'];
+};
+
+
+export type MutationDeleteSubgoalArgs = {
   id: Scalars['Int']['input'];
 };
 
@@ -504,6 +530,12 @@ export type MutationUpdateNoteArgs = {
 export type MutationUpdateStoryArgs = {
   id: Scalars['Int']['input'];
   input: UpdateStoryInput;
+};
+
+
+export type MutationUpdateSubgoalArgs = {
+  id: Scalars['Int']['input'];
+  input: UpdateSubgoalInput;
 };
 
 export type Note = {
@@ -739,6 +771,17 @@ export type Story = {
   updatedAt: Scalars['String']['output'];
 };
 
+export type Subgoal = {
+  __typename?: 'Subgoal';
+  createdAt: Scalars['String']['output'];
+  description?: Maybe<Scalars['String']['output']>;
+  goalId: Scalars['Int']['output'];
+  id: Scalars['Int']['output'];
+  status: Scalars['String']['output'];
+  title: Scalars['String']['output'];
+  updatedAt: Scalars['String']['output'];
+};
+
 export type Subscription = {
   __typename?: 'Subscription';
   audioJobStatus: GenerationJob;
@@ -795,6 +838,12 @@ export type UpdateNoteInput = {
 
 export type UpdateStoryInput = {
   content?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type UpdateSubgoalInput = {
+  description?: InputMaybe<Scalars['String']['input']>;
+  status?: InputMaybe<Scalars['String']['input']>;
+  title?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type CheckNoteClaimsMutationVariables = Exact<{
@@ -854,6 +903,13 @@ export type CreateStoryMutationVariables = Exact<{
 
 
 export type CreateStoryMutation = { __typename?: 'Mutation', createStory: { __typename?: 'Story', id: number, goalId: number, createdBy: string, content: string, createdAt: string, updatedAt: string } };
+
+export type CreateSubgoalMutationVariables = Exact<{
+  input: CreateSubgoalInput;
+}>;
+
+
+export type CreateSubgoalMutation = { __typename?: 'Mutation', createSubgoal: { __typename?: 'Subgoal', id: number, goalId: number, title: string, description?: string | null, status: string, createdAt: string, updatedAt: string } };
 
 export type DeleteNoteMutationVariables = Exact<{
   id: Scalars['Int']['input'];
@@ -1491,6 +1547,45 @@ export function useCreateStoryMutation(baseOptions?: Apollo.MutationHookOptions<
 export type CreateStoryMutationHookResult = ReturnType<typeof useCreateStoryMutation>;
 export type CreateStoryMutationResult = Apollo.MutationResult<CreateStoryMutation>;
 export type CreateStoryMutationOptions = Apollo.BaseMutationOptions<CreateStoryMutation, CreateStoryMutationVariables>;
+export const CreateSubgoalDocument = gql`
+    mutation CreateSubgoal($input: CreateSubgoalInput!) {
+  createSubgoal(input: $input) {
+    id
+    goalId
+    title
+    description
+    status
+    createdAt
+    updatedAt
+  }
+}
+    `;
+export type CreateSubgoalMutationFn = Apollo.MutationFunction<CreateSubgoalMutation, CreateSubgoalMutationVariables>;
+
+/**
+ * __useCreateSubgoalMutation__
+ *
+ * To run a mutation, you first call `useCreateSubgoalMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateSubgoalMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createSubgoalMutation, { data, loading, error }] = useCreateSubgoalMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useCreateSubgoalMutation(baseOptions?: Apollo.MutationHookOptions<CreateSubgoalMutation, CreateSubgoalMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateSubgoalMutation, CreateSubgoalMutationVariables>(CreateSubgoalDocument, options);
+      }
+export type CreateSubgoalMutationHookResult = ReturnType<typeof useCreateSubgoalMutation>;
+export type CreateSubgoalMutationResult = Apollo.MutationResult<CreateSubgoalMutation>;
+export type CreateSubgoalMutationOptions = Apollo.BaseMutationOptions<CreateSubgoalMutation, CreateSubgoalMutationVariables>;
 export const DeleteNoteDocument = gql`
     mutation DeleteNote($id: Int!) {
   deleteNote(id: $id) {

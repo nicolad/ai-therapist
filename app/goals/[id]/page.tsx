@@ -19,7 +19,7 @@ import { GlassButton } from "@/app/components/GlassButton";
 import { ArrowLeftIcon } from "@radix-ui/react-icons";
 import { useRouter, useParams } from "next/navigation";
 import dynamic from "next/dynamic";
-import { useGetGoalQuery } from "@/app/__generated__/hooks";
+import { useGetGoalQuery, useCreateSubgoalMutation } from "@/app/__generated__/hooks";
 import { useUser } from "@clerk/nextjs";
 import "./accordion.css";
 
@@ -28,19 +28,24 @@ function GoalPageContent() {
   const params = useParams();
   const paramValue = params.id as string;
   const { user } = useUser();
+  const [showSubgoalForm, setShowSubgoalForm] = useState(false);
+  const [subgoalTitle, setSubgoalTitle] = useState("");
+  const [subgoalDescription, setSubgoalDescription] = useState("");
 
   // Determine if paramValue is a number (ID) or string (slug)
   const isNumericId = /^\d+$/.test(paramValue);
   const goalId = isNumericId ? parseInt(paramValue) : undefined;
   const goalSlug = !isNumericId ? paramValue : undefined;
 
-  const { data, loading, error } = useGetGoalQuery({
+  const { data, loading, error, refetch } = useGetGoalQuery({
     variables: {
       id: goalId,
       slug: goalSlug,
     },
     skip: !goalId && !goalSlug,
   });
+
+  const [createSubgoal] = useCreateSubgoalMutation();
 
   const goal = data?.goal;
 
@@ -80,6 +85,28 @@ function GoalPageContent() {
   const handleAddStory = () => {
     if (!goal) return;
     router.push(`/stories/new?goalId=${goal.id}`);
+  };
+
+  const handleCreateSubgoal = async () => {
+    if (!goal || !subgoalTitle.trim()) return;
+
+    try {
+      await createSubgoal({
+        variables: {
+          input: {
+            goalId: goal.id,
+            title: subgoalTitle,
+            description: subgoalDescription || null,
+          },
+        },
+      });
+      setShowSubgoalForm(false);
+      setSubgoalTitle("");
+      setSubgoalDescription("");
+      refetch();
+    } catch (error) {
+      console.error("Failed to create subgoal:", error);
+    }
   };
 
   return (
@@ -207,6 +234,112 @@ function GoalPageContent() {
           </Flex>
         </Card>
       )}
+
+      {/* Subgoals */}
+      <Card>
+        <Flex direction="column" gap="3" p="4">
+          <Flex justify="between" align="center">
+            <Heading size="4">
+              Subgoals {goal.subgoals ? `(${goal.subgoals.length})` : ""}
+            </Heading>
+            <GlassButton
+              variant="primary"
+              size="medium"
+              onClick={() => setShowSubgoalForm(!showSubgoalForm)}
+            >
+              Add Subgoal
+            </GlassButton>
+          </Flex>
+
+          {showSubgoalForm && (
+            <Card style={{ backgroundColor: "var(--indigo-2)" }}>
+              <Flex direction="column" gap="3" p="4">
+                <input
+                  type="text"
+                  placeholder="Subgoal title"
+                  value={subgoalTitle}
+                  onChange={(e) => setSubgoalTitle(e.target.value)}
+                  style={{
+                    padding: "8px 12px",
+                    borderRadius: "6px",
+                    border: "1px solid var(--gray-6)",
+                    fontSize: "14px",
+                  }}
+                />
+                <textarea
+                  placeholder="Description (optional)"
+                  value={subgoalDescription}
+                  onChange={(e) => setSubgoalDescription(e.target.value)}
+                  style={{
+                    padding: "8px 12px",
+                    borderRadius: "6px",
+                    border: "1px solid var(--gray-6)",
+                    fontSize: "14px",
+                    minHeight: "80px",
+                    fontFamily: "inherit",
+                  }}
+                />
+                <Flex gap="2">
+                  <GlassButton
+                    variant="primary"
+                    size="medium"
+                    onClick={handleCreateSubgoal}
+                  >
+                    Create Subgoal
+                  </GlassButton>
+                  <GlassButton
+                    variant="secondary"
+                    size="medium"
+                    onClick={() => {
+                      setShowSubgoalForm(false);
+                      setSubgoalTitle("");
+                      setSubgoalDescription("");
+                    }}
+                  >
+                    Cancel
+                  </GlassButton>
+                </Flex>
+              </Flex>
+            </Card>
+          )}
+
+          {goal.subgoals && goal.subgoals.length > 0 ? (
+            <Flex direction="column" gap="2">
+              {goal.subgoals.map((subgoal) => (
+                <Card
+                  key={subgoal.id}
+                  style={{
+                    backgroundColor: "var(--gray-2)",
+                  }}
+                >
+                  <Flex direction="column" gap="2" p="3">
+                    <Flex justify="between" align="start" gap="2">
+                      <Heading size="3">{subgoal.title}</Heading>
+                      <Badge color="blue" size="1">
+                        {subgoal.status}
+                      </Badge>
+                    </Flex>
+                    {subgoal.description && (
+                      <Text size="2" color="gray">
+                        {subgoal.description}
+                      </Text>
+                    )}
+                    <Text size="1" color="gray">
+                      Created {new Date(subgoal.createdAt).toLocaleDateString()}
+                    </Text>
+                  </Flex>
+                </Card>
+              ))}
+            </Flex>
+          ) : (
+            !showSubgoalForm && (
+              <Text size="2" color="gray">
+                No subgoals yet. Click "Add Subgoal" to create one.
+              </Text>
+            )
+          )}
+        </Flex>
+      </Card>
 
       {/* User Stories */}
       <Card>

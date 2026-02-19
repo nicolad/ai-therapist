@@ -1,7 +1,7 @@
 import type { MutationResolvers } from "./../../types.generated";
 import { d1 } from "@/src/db";
 
-export const deleteNote: NonNullable<MutationResolvers["deleteNote"]> = async (
+export const deleteNote: NonNullable<MutationResolvers['deleteNote']> = async (
   _parent,
   args,
   ctx,

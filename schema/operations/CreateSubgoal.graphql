@@ -1,0 +1,11 @@
+mutation CreateSubgoal($input: CreateSubgoalInput!) {
+  createSubgoal(input: $input) {
+    id
+    goalId
+    title
+    description
+    status
+    createdAt
+    updatedAt
+  }
+}

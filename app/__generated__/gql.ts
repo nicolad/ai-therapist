@@ -19,6 +19,7 @@ type Documents = {
     "mutation CreateGoal($input: CreateGoalInput!) {\n  createGoal(input: $input) {\n    id\n    slug\n    title\n    description\n    status\n    createdAt\n    updatedAt\n    familyMemberId\n  }\n}": typeof types.CreateGoalDocument,
     "mutation CreateNote($input: CreateNoteInput!) {\n  createNote(input: $input) {\n    id\n    entityId\n    entityType\n    createdBy\n    noteType\n    slug\n    content\n    createdBy\n    tags\n    createdAt\n    updatedAt\n  }\n}": typeof types.CreateNoteDocument,
     "mutation CreateStory($input: CreateStoryInput!) {\n  createStory(input: $input) {\n    id\n    goalId\n    createdBy\n    content\n    createdAt\n    updatedAt\n  }\n}": typeof types.CreateStoryDocument,
+    "mutation CreateSubgoal($input: CreateSubgoalInput!) {\n  createSubgoal(input: $input) {\n    id\n    goalId\n    title\n    description\n    status\n    createdAt\n    updatedAt\n  }\n}": typeof types.CreateSubgoalDocument,
     "mutation DeleteNote($id: Int!) {\n  deleteNote(id: $id) {\n    success\n    message\n  }\n}": typeof types.DeleteNoteDocument,
     "mutation DeleteResearch($goalId: Int!) {\n  deleteResearch(goalId: $goalId) {\n    success\n    message\n    deletedCount\n  }\n}": typeof types.DeleteResearchDocument,
     "mutation DeleteStory($id: Int!) {\n  deleteStory(id: $id) {\n    success\n    message\n  }\n}": typeof types.DeleteStoryDocument,
@@ -43,6 +44,7 @@ const documents: Documents = {
     "mutation CreateGoal($input: CreateGoalInput!) {\n  createGoal(input: $input) {\n    id\n    slug\n    title\n    description\n    status\n    createdAt\n    updatedAt\n    familyMemberId\n  }\n}": types.CreateGoalDocument,
     "mutation CreateNote($input: CreateNoteInput!) {\n  createNote(input: $input) {\n    id\n    entityId\n    entityType\n    createdBy\n    noteType\n    slug\n    content\n    createdBy\n    tags\n    createdAt\n    updatedAt\n  }\n}": types.CreateNoteDocument,
     "mutation CreateStory($input: CreateStoryInput!) {\n  createStory(input: $input) {\n    id\n    goalId\n    createdBy\n    content\n    createdAt\n    updatedAt\n  }\n}": types.CreateStoryDocument,
+    "mutation CreateSubgoal($input: CreateSubgoalInput!) {\n  createSubgoal(input: $input) {\n    id\n    goalId\n    title\n    description\n    status\n    createdAt\n    updatedAt\n  }\n}": types.CreateSubgoalDocument,
     "mutation DeleteNote($id: Int!) {\n  deleteNote(id: $id) {\n    success\n    message\n  }\n}": types.DeleteNoteDocument,
     "mutation DeleteResearch($goalId: Int!) {\n  deleteResearch(goalId: $goalId) {\n    success\n    message\n    deletedCount\n  }\n}": types.DeleteResearchDocument,
     "mutation DeleteStory($id: Int!) {\n  deleteStory(id: $id) {\n    success\n    message\n  }\n}": types.DeleteStoryDocument,
@@ -96,6 +98,10 @@ export function gql(source: "mutation CreateNote($input: CreateNoteInput!) {\n  
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function gql(source: "mutation CreateStory($input: CreateStoryInput!) {\n  createStory(input: $input) {\n    id\n    goalId\n    createdBy\n    content\n    createdAt\n    updatedAt\n  }\n}"): (typeof documents)["mutation CreateStory($input: CreateStoryInput!) {\n  createStory(input: $input) {\n    id\n    goalId\n    createdBy\n    content\n    createdAt\n    updatedAt\n  }\n}"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(source: "mutation CreateSubgoal($input: CreateSubgoalInput!) {\n  createSubgoal(input: $input) {\n    id\n    goalId\n    title\n    description\n    status\n    createdAt\n    updatedAt\n  }\n}"): (typeof documents)["mutation CreateSubgoal($input: CreateSubgoalInput!) {\n  createSubgoal(input: $input) {\n    id\n    goalId\n    title\n    description\n    status\n    createdAt\n    updatedAt\n  }\n}"];
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

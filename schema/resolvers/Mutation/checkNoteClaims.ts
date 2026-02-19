@@ -6,9 +6,7 @@ import { createResearchSourceResolver } from "@/src/adapters/research-resolver.a
 import { createD1StorageAdapter } from "@/src/adapters/d1-storage.adapter";
 import type { LinkedSourceRef } from "@/src/tools/generic-claim-cards.tools";
 
-export const checkNoteClaims: NonNullable<
-  MutationResolvers["checkNoteClaims"]
-> = async (_parent, { input }, _ctx) => {
+export const checkNoteClaims: NonNullable<MutationResolvers['checkNoteClaims']> = async (_parent, { input }, _ctx) => {
   const {
     noteId,
     maxClaims = 12,

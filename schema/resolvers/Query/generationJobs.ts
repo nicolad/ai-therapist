@@ -1,9 +1,7 @@
 import type { QueryResolvers } from "./../../types.generated";
 import { d1 } from "@/src/db";
 
-export const generationJobs: NonNullable<
-  QueryResolvers["generationJobs"]
-> = async (_parent, args, _ctx) => {
+export const generationJobs: NonNullable<QueryResolvers['generationJobs']> = async (_parent, args, _ctx) => {
   let sql = `SELECT * FROM generation_jobs`;
   const queryArgs: any[] = [];
   const conditions: string[] = [];

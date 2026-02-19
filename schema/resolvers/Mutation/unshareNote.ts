@@ -1,9 +1,7 @@
 import type { MutationResolvers } from "./../../types.generated";
 import { d1Tools } from "@/src/db";
 
-export const unshareNote: NonNullable<
-  MutationResolvers["unshareNote"]
-> = async (_parent, args, ctx) => {
+export const unshareNote: NonNullable<MutationResolvers['unshareNote']> = async (_parent, args, ctx) => {
   const userEmail = ctx.userEmail;
   if (!userEmail) {
     throw new Error("Authentication required");

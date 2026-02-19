@@ -155,6 +155,12 @@ export type CreateStoryInput = {
   goalId: Scalars['Int']['input'];
 };
 
+export type CreateSubgoalInput = {
+  description?: InputMaybe<Scalars['String']['input']>;
+  goalId: Scalars['Int']['input'];
+  title: Scalars['String']['input'];
+};
+
 export type DeleteGoalResult = {
   __typename?: 'DeleteGoalResult';
   message?: Maybe<Scalars['String']['output']>;
@@ -183,6 +189,12 @@ export type DeleteResearchResult = {
 
 export type DeleteStoryResult = {
   __typename?: 'DeleteStoryResult';
+  message?: Maybe<Scalars['String']['output']>;
+  success: Scalars['Boolean']['output'];
+};
+
+export type DeleteSubgoalResult = {
+  __typename?: 'DeleteSubgoalResult';
   message?: Maybe<Scalars['String']['output']>;
   success: Scalars['Boolean']['output'];
 };
@@ -298,6 +310,7 @@ export type Goal = {
   slug?: Maybe<Scalars['String']['output']>;
   status: Scalars['String']['output'];
   stories: Array<GoalStory>;
+  subgoals: Array<Subgoal>;
   therapeuticText?: Maybe<Scalars['String']['output']>;
   therapeuticTextGeneratedAt?: Maybe<Scalars['String']['output']>;
   therapeuticTextLanguage?: Maybe<Scalars['String']['output']>;
@@ -357,11 +370,13 @@ export type Mutation = {
   createGoal: Goal;
   createNote: Note;
   createStory: Story;
+  createSubgoal: Subgoal;
   deleteClaimCard: Scalars['Boolean']['output'];
   deleteGoal: DeleteGoalResult;
   deleteNote: DeleteNoteResult;
   deleteResearch: DeleteResearchResult;
   deleteStory: DeleteStoryResult;
+  deleteSubgoal: DeleteSubgoalResult;
   deleteTherapeuticQuestions: DeleteQuestionsResult;
   generateAudio: GenerateAudioResult;
   generateLongFormText: GenerateLongFormTextResult;
@@ -375,6 +390,7 @@ export type Mutation = {
   updateGoal: Goal;
   updateNote: Note;
   updateStory: Story;
+  updateSubgoal: Subgoal;
 };
 
 
@@ -403,6 +419,11 @@ export type MutationCreateStoryArgs = {
 };
 
 
+export type MutationCreateSubgoalArgs = {
+  input: CreateSubgoalInput;
+};
+
+
 export type MutationDeleteClaimCardArgs = {
   id: Scalars['ID']['input'];
 };
@@ -424,6 +445,11 @@ export type MutationDeleteResearchArgs = {
 
 
 export type MutationDeleteStoryArgs = {
+  id: Scalars['Int']['input'];
+};
+
+
+export type MutationDeleteSubgoalArgs = {
   id: Scalars['Int']['input'];
 };
 
@@ -503,6 +529,12 @@ export type MutationUpdateNoteArgs = {
 export type MutationUpdateStoryArgs = {
   id: Scalars['Int']['input'];
   input: UpdateStoryInput;
+};
+
+
+export type MutationUpdateSubgoalArgs = {
+  id: Scalars['Int']['input'];
+  input: UpdateSubgoalInput;
 };
 
 export type Note = {
@@ -738,6 +770,17 @@ export type Story = {
   updatedAt: Scalars['String']['output'];
 };
 
+export type Subgoal = {
+  __typename?: 'Subgoal';
+  createdAt: Scalars['String']['output'];
+  description?: Maybe<Scalars['String']['output']>;
+  goalId: Scalars['Int']['output'];
+  id: Scalars['Int']['output'];
+  status: Scalars['String']['output'];
+  title: Scalars['String']['output'];
+  updatedAt: Scalars['String']['output'];
+};
+
 export type Subscription = {
   __typename?: 'Subscription';
   audioJobStatus: GenerationJob;
@@ -794,6 +837,12 @@ export type UpdateNoteInput = {
 
 export type UpdateStoryInput = {
   content?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type UpdateSubgoalInput = {
+  description?: InputMaybe<Scalars['String']['input']>;
+  status?: InputMaybe<Scalars['String']['input']>;
+  title?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type CheckNoteClaimsMutationVariables = Exact<{
@@ -853,6 +902,13 @@ export type CreateStoryMutationVariables = Exact<{
 
 
 export type CreateStoryMutation = { __typename?: 'Mutation', createStory: { __typename?: 'Story', id: number, goalId: number, createdBy: string, content: string, createdAt: string, updatedAt: string } };
+
+export type CreateSubgoalMutationVariables = Exact<{
+  input: CreateSubgoalInput;
+}>;
+
+
+export type CreateSubgoalMutation = { __typename?: 'Mutation', createSubgoal: { __typename?: 'Subgoal', id: number, goalId: number, title: string, description?: string | null, status: string, createdAt: string, updatedAt: string } };
 
 export type DeleteNoteMutationVariables = Exact<{
   id: Scalars['Int']['input'];
@@ -994,6 +1050,7 @@ export const DeleteClaimCardDocument = {"kind":"Document","definitions":[{"kind"
 export const CreateGoalDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateGoal"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"CreateGoalInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createGoal"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"familyMemberId"}}]}}]}}]} as unknown as DocumentNode<CreateGoalMutation, CreateGoalMutationVariables>;
 export const CreateNoteDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateNote"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"CreateNoteInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createNote"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"entityId"}},{"kind":"Field","name":{"kind":"Name","value":"entityType"}},{"kind":"Field","name":{"kind":"Name","value":"createdBy"}},{"kind":"Field","name":{"kind":"Name","value":"noteType"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}},{"kind":"Field","name":{"kind":"Name","value":"content"}},{"kind":"Field","name":{"kind":"Name","value":"createdBy"}},{"kind":"Field","name":{"kind":"Name","value":"tags"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}}]}}]}}]} as unknown as DocumentNode<CreateNoteMutation, CreateNoteMutationVariables>;
 export const CreateStoryDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateStory"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"CreateStoryInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createStory"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"goalId"}},{"kind":"Field","name":{"kind":"Name","value":"createdBy"}},{"kind":"Field","name":{"kind":"Name","value":"content"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}}]}}]}}]} as unknown as DocumentNode<CreateStoryMutation, CreateStoryMutationVariables>;
+export const CreateSubgoalDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateSubgoal"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"CreateSubgoalInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createSubgoal"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"goalId"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}}]}}]}}]} as unknown as DocumentNode<CreateSubgoalMutation, CreateSubgoalMutationVariables>;
 export const DeleteNoteDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"DeleteNote"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"deleteNote"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"success"}},{"kind":"Field","name":{"kind":"Name","value":"message"}}]}}]}}]} as unknown as DocumentNode<DeleteNoteMutation, DeleteNoteMutationVariables>;
 export const DeleteResearchDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"DeleteResearch"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"goalId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"deleteResearch"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"goalId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"goalId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"success"}},{"kind":"Field","name":{"kind":"Name","value":"message"}},{"kind":"Field","name":{"kind":"Name","value":"deletedCount"}}]}}]}}]} as unknown as DocumentNode<DeleteResearchMutation, DeleteResearchMutationVariables>;
 export const DeleteStoryDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"DeleteStory"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"deleteStory"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"success"}},{"kind":"Field","name":{"kind":"Name","value":"message"}}]}}]}}]} as unknown as DocumentNode<DeleteStoryMutation, DeleteStoryMutationVariables>;

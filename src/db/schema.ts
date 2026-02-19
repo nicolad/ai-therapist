@@ -95,6 +95,23 @@ export const noteShares = sqliteTable("note_shares", {
   createdBy: text("created_by").notNull(), // who created the share
 });
 
+export const subgoals = sqliteTable("subgoals", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  goalId: integer("goal_id")
+    .notNull()
+    .references(() => goals.id, { onDelete: "cascade" }),
+  userId: text("user_id").notNull(),
+  title: text("title").notNull(),
+  description: text("description"),
+  status: text("status").notNull().default("active"),
+  createdAt: text("created_at")
+    .notNull()
+    .default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text("updated_at")
+    .notNull()
+    .default(sql`CURRENT_TIMESTAMP`),
+});
+
 export const stories = sqliteTable("stories", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   goalId: integer("goal_id")

@@ -1,9 +1,7 @@
 import type { QueryResolvers } from "./../../types.generated";
 import { d1 } from "@/src/db";
 
-export const therapeuticQuestions: NonNullable<
-  QueryResolvers["therapeuticQuestions"]
-> = async (_parent, args, _ctx) => {
+export const therapeuticQuestions: NonNullable<QueryResolvers['therapeuticQuestions']> = async (_parent, args, _ctx) => {
   const result = await d1.execute({
     sql: `SELECT * FROM therapeutic_questions WHERE goal_id = ? ORDER BY created_at DESC`,
     args: [args.goalId],

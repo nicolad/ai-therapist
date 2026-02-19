@@ -878,6 +878,114 @@ export async function deleteStory(storyId: number, createdBy: string) {
 }
 
 // ============================================
+// Subgoals
+// ============================================
+
+export async function getSubgoal(subgoalId: number, createdBy: string) {
+  const result = await d1.execute({
+    sql: `SELECT * FROM subgoals WHERE id = ? AND user_id = ?`,
+    args: [subgoalId, createdBy],
+  });
+
+  if (result.rows.length === 0) {
+    return null;
+  }
+
+  const row = result.rows[0];
+  return {
+    id: row.id as number,
+    goalId: row.goal_id as number,
+    title: row.title as string,
+    description: (row.description as string) || null,
+    status: row.status as string,
+    createdAt: row.created_at as string,
+    updatedAt: row.updated_at as string,
+  };
+}
+
+export async function listSubgoalsForGoal(goalId: number, createdBy: string) {
+  const result = await d1.execute({
+    sql: `SELECT * FROM subgoals WHERE goal_id = ? AND user_id = ? ORDER BY created_at DESC`,
+    args: [goalId, createdBy],
+  });
+
+  return result.rows.map((row) => ({
+    id: row.id as number,
+    goalId: row.goal_id as number,
+    title: row.title as string,
+    description: (row.description as string) || null,
+    status: row.status as string,
+    createdAt: row.created_at as string,
+    updatedAt: row.updated_at as string,
+  }));
+}
+
+export async function createSubgoal(params: {
+  goalId: number;
+  createdBy: string;
+  title: string;
+  description?: string | null;
+}) {
+  const result = await d1.execute({
+    sql: `INSERT INTO subgoals (goal_id, user_id, title, description, status)
+          VALUES (?, ?, ?, ?, ?)
+          RETURNING id`,
+    args: [params.goalId, params.createdBy, params.title, params.description || null, "active"],
+  });
+
+  return result.rows[0].id as number;
+}
+
+export async function updateSubgoal(
+  subgoalId: number,
+  createdBy: string,
+  updates: {
+    title?: string;
+    description?: string | null;
+    status?: string;
+  },
+) {
+  const fields: string[] = [];
+  const args: any[] = [];
+
+  if (updates.title !== undefined) {
+    fields.push("title = ?");
+    args.push(updates.title);
+  }
+
+  if (updates.description !== undefined) {
+    fields.push("description = ?");
+    args.push(updates.description);
+  }
+
+  if (updates.status !== undefined) {
+    fields.push("status = ?");
+    args.push(updates.status);
+  }
+
+  if (fields.length === 0) {
+    return null;
+  }
+
+  fields.push("updated_at = datetime('now')");
+  args.push(subgoalId, createdBy);
+
+  await d1.execute({
+    sql: `UPDATE subgoals SET ${fields.join(", ")} WHERE id = ? AND user_id = ?`,
+    args,
+  });
+
+  return getSubgoal(subgoalId, createdBy);
+}
+
+export async function deleteSubgoal(subgoalId: number, createdBy: string) {
+  await d1.execute({
+    sql: `DELETE FROM subgoals WHERE id = ? AND user_id = ?`,
+    args: [subgoalId, createdBy],
+  });
+}
+
+// ============================================
 // Generation Jobs
 // ============================================
 
@@ -1068,6 +1176,11 @@ export const d1Tools = {
   createStory,
   updateStory,
   deleteStory,
+  getSubgoal,
+  listSubgoalsForGoal,
+  createSubgoal,
+  updateSubgoal,
+  deleteSubgoal,
   createGenerationJob,
   updateGenerationJob,
   getGenerationJob,

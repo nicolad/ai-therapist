@@ -1,8 +1,7 @@
-
 import type { MutationResolvers } from "./../../types.generated";
 import { d1Tools } from "@/src/db";
 
-export const shareNote: NonNullable<MutationResolvers["shareNote"]> = async (
+export const shareNote: NonNullable<MutationResolvers['shareNote']> = async (
   _parent,
   args,
   ctx,

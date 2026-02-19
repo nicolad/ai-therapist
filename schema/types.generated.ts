@@ -157,6 +157,12 @@ export type CreateStoryInput = {
   goalId: Scalars['Int']['input'];
 };
 
+export type CreateSubgoalInput = {
+  description?: InputMaybe<Scalars['String']['input']>;
+  goalId: Scalars['Int']['input'];
+  title: Scalars['String']['input'];
+};
+
 export type DeleteGoalResult = {
   __typename?: 'DeleteGoalResult';
   message?: Maybe<Scalars['String']['output']>;
@@ -185,6 +191,12 @@ export type DeleteResearchResult = {
 
 export type DeleteStoryResult = {
   __typename?: 'DeleteStoryResult';
+  message?: Maybe<Scalars['String']['output']>;
+  success: Scalars['Boolean']['output'];
+};
+
+export type DeleteSubgoalResult = {
+  __typename?: 'DeleteSubgoalResult';
   message?: Maybe<Scalars['String']['output']>;
   success: Scalars['Boolean']['output'];
 };
@@ -299,6 +311,7 @@ export type Goal = {
   slug?: Maybe<Scalars['String']['output']>;
   status: Scalars['String']['output'];
   stories: Array<GoalStory>;
+  subgoals: Array<Subgoal>;
   therapeuticText?: Maybe<Scalars['String']['output']>;
   therapeuticTextGeneratedAt?: Maybe<Scalars['String']['output']>;
   therapeuticTextLanguage?: Maybe<Scalars['String']['output']>;
@@ -356,11 +369,13 @@ export type Mutation = {
   createGoal: Goal;
   createNote: Note;
   createStory: Story;
+  createSubgoal: Subgoal;
   deleteClaimCard: Scalars['Boolean']['output'];
   deleteGoal: DeleteGoalResult;
   deleteNote: DeleteNoteResult;
   deleteResearch: DeleteResearchResult;
   deleteStory: DeleteStoryResult;
+  deleteSubgoal: DeleteSubgoalResult;
   deleteTherapeuticQuestions: DeleteQuestionsResult;
   generateAudio: GenerateAudioResult;
   generateLongFormText: GenerateLongFormTextResult;
@@ -374,6 +389,7 @@ export type Mutation = {
   updateGoal: Goal;
   updateNote: Note;
   updateStory: Story;
+  updateSubgoal: Subgoal;
 };
 
 
@@ -402,6 +418,11 @@ export type MutationcreateStoryArgs = {
 };
 
 
+export type MutationcreateSubgoalArgs = {
+  input: CreateSubgoalInput;
+};
+
+
 export type MutationdeleteClaimCardArgs = {
   id: Scalars['ID']['input'];
 };
@@ -423,6 +444,11 @@ export type MutationdeleteResearchArgs = {
 
 
 export type MutationdeleteStoryArgs = {
+  id: Scalars['Int']['input'];
+};
+
+
+export type MutationdeleteSubgoalArgs = {
   id: Scalars['Int']['input'];
 };
 
@@ -502,6 +528,12 @@ export type MutationupdateNoteArgs = {
 export type MutationupdateStoryArgs = {
   id: Scalars['Int']['input'];
   input: UpdateStoryInput;
+};
+
+
+export type MutationupdateSubgoalArgs = {
+  id: Scalars['Int']['input'];
+  input: UpdateSubgoalInput;
 };
 
 export type Note = {
@@ -730,6 +762,17 @@ export type Story = {
   updatedAt: Scalars['String']['output'];
 };
 
+export type Subgoal = {
+  __typename?: 'Subgoal';
+  createdAt: Scalars['String']['output'];
+  description?: Maybe<Scalars['String']['output']>;
+  goalId: Scalars['Int']['output'];
+  id: Scalars['Int']['output'];
+  status: Scalars['String']['output'];
+  title: Scalars['String']['output'];
+  updatedAt: Scalars['String']['output'];
+};
+
 export type Subscription = {
   __typename?: 'Subscription';
   audioJobStatus: GenerationJob;
@@ -786,6 +829,12 @@ export type UpdateNoteInput = {
 
 export type UpdateStoryInput = {
   content?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type UpdateSubgoalInput = {
+  description?: InputMaybe<Scalars['String']['input']>;
+  status?: InputMaybe<Scalars['String']['input']>;
+  title?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -882,11 +931,13 @@ export type ResolversTypes = {
   CreateGoalInput: CreateGoalInput;
   CreateNoteInput: CreateNoteInput;
   CreateStoryInput: CreateStoryInput;
+  CreateSubgoalInput: CreateSubgoalInput;
   DeleteGoalResult: ResolverTypeWrapper<DeleteGoalResult>;
   DeleteNoteResult: ResolverTypeWrapper<DeleteNoteResult>;
   DeleteQuestionsResult: ResolverTypeWrapper<DeleteQuestionsResult>;
   DeleteResearchResult: ResolverTypeWrapper<DeleteResearchResult>;
   DeleteStoryResult: ResolverTypeWrapper<DeleteStoryResult>;
+  DeleteSubgoalResult: ResolverTypeWrapper<DeleteSubgoalResult>;
   EvidenceItem: ResolverTypeWrapper<Omit<EvidenceItem, 'polarity'> & { polarity: ResolversTypes['EvidencePolarity'] }>;
   EvidenceLocator: ResolverTypeWrapper<EvidenceLocator>;
   EvidencePolarity: ResolverTypeWrapper<'CONTRADICTS' | 'IRRELEVANT' | 'MIXED' | 'SUPPORTS'>;
@@ -918,12 +969,14 @@ export type ResolversTypes = {
   Research: ResolverTypeWrapper<Omit<Research, 'goal'> & { goal?: Maybe<ResolversTypes['Goal']> }>;
   ResearchSource: ResolverTypeWrapper<'ARXIV' | 'CROSSREF' | 'DATACITE' | 'EUROPEPMC' | 'OPENALEX' | 'PUBMED' | 'SEMANTIC_SCHOLAR'>;
   Story: ResolverTypeWrapper<Omit<Story, 'goal'> & { goal?: Maybe<ResolversTypes['Goal']> }>;
+  Subgoal: ResolverTypeWrapper<Subgoal>;
   Subscription: ResolverTypeWrapper<Record<PropertyKey, never>>;
   TextSegment: ResolverTypeWrapper<TextSegment>;
   TherapeuticQuestion: ResolverTypeWrapper<TherapeuticQuestion>;
   UpdateGoalInput: UpdateGoalInput;
   UpdateNoteInput: UpdateNoteInput;
   UpdateStoryInput: UpdateStoryInput;
+  UpdateSubgoalInput: UpdateSubgoalInput;
 };
 
 /** Mapping between all available schema types and the resolvers parents */
@@ -948,11 +1001,13 @@ export type ResolversParentTypes = {
   CreateGoalInput: CreateGoalInput;
   CreateNoteInput: CreateNoteInput;
   CreateStoryInput: CreateStoryInput;
+  CreateSubgoalInput: CreateSubgoalInput;
   DeleteGoalResult: DeleteGoalResult;
   DeleteNoteResult: DeleteNoteResult;
   DeleteQuestionsResult: DeleteQuestionsResult;
   DeleteResearchResult: DeleteResearchResult;
   DeleteStoryResult: DeleteStoryResult;
+  DeleteSubgoalResult: DeleteSubgoalResult;
   EvidenceItem: EvidenceItem;
   EvidenceLocator: EvidenceLocator;
   GenerateAudioResult: GenerateAudioResult;
@@ -974,12 +1029,14 @@ export type ResolversParentTypes = {
   Query: Record<PropertyKey, never>;
   Research: Omit<Research, 'goal'> & { goal?: Maybe<ResolversParentTypes['Goal']> };
   Story: Omit<Story, 'goal'> & { goal?: Maybe<ResolversParentTypes['Goal']> };
+  Subgoal: Subgoal;
   Subscription: Record<PropertyKey, never>;
   TextSegment: TextSegment;
   TherapeuticQuestion: TherapeuticQuestion;
   UpdateGoalInput: UpdateGoalInput;
   UpdateNoteInput: UpdateNoteInput;
   UpdateStoryInput: UpdateStoryInput;
+  UpdateSubgoalInput: UpdateSubgoalInput;
 };
 
 export type AudioAssetResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['AudioAsset'] = ResolversParentTypes['AudioAsset']> = {
@@ -1092,6 +1149,11 @@ export type DeleteStoryResultResolvers<ContextType = GraphQLContext, ParentType 
   success?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
 };
 
+export type DeleteSubgoalResultResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['DeleteSubgoalResult'] = ResolversParentTypes['DeleteSubgoalResult']> = {
+  message?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  success?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+};
+
 export type EvidenceItemResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['EvidenceItem'] = ResolversParentTypes['EvidenceItem']> = {
   excerpt?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   locator?: Resolver<Maybe<ResolversTypes['EvidenceLocator']>, ParentType, ContextType>;
@@ -1177,6 +1239,7 @@ export type GoalResolvers<ContextType = GraphQLContext, ParentType extends Resol
   slug?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   status?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   stories?: Resolver<Array<ResolversTypes['GoalStory']>, ParentType, ContextType>;
+  subgoals?: Resolver<Array<ResolversTypes['Subgoal']>, ParentType, ContextType>;
   therapeuticText?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   therapeuticTextGeneratedAt?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   therapeuticTextLanguage?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
@@ -1223,11 +1286,13 @@ export type MutationResolvers<ContextType = GraphQLContext, ParentType extends R
   createGoal?: Resolver<ResolversTypes['Goal'], ParentType, ContextType, RequireFields<MutationcreateGoalArgs, 'input'>>;
   createNote?: Resolver<ResolversTypes['Note'], ParentType, ContextType, RequireFields<MutationcreateNoteArgs, 'input'>>;
   createStory?: Resolver<ResolversTypes['Story'], ParentType, ContextType, RequireFields<MutationcreateStoryArgs, 'input'>>;
+  createSubgoal?: Resolver<ResolversTypes['Subgoal'], ParentType, ContextType, RequireFields<MutationcreateSubgoalArgs, 'input'>>;
   deleteClaimCard?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationdeleteClaimCardArgs, 'id'>>;
   deleteGoal?: Resolver<ResolversTypes['DeleteGoalResult'], ParentType, ContextType, RequireFields<MutationdeleteGoalArgs, 'id'>>;
   deleteNote?: Resolver<ResolversTypes['DeleteNoteResult'], ParentType, ContextType, RequireFields<MutationdeleteNoteArgs, 'id'>>;
   deleteResearch?: Resolver<ResolversTypes['DeleteResearchResult'], ParentType, ContextType, RequireFields<MutationdeleteResearchArgs, 'goalId'>>;
   deleteStory?: Resolver<ResolversTypes['DeleteStoryResult'], ParentType, ContextType, RequireFields<MutationdeleteStoryArgs, 'id'>>;
+  deleteSubgoal?: Resolver<ResolversTypes['DeleteSubgoalResult'], ParentType, ContextType, RequireFields<MutationdeleteSubgoalArgs, 'id'>>;
   deleteTherapeuticQuestions?: Resolver<ResolversTypes['DeleteQuestionsResult'], ParentType, ContextType, RequireFields<MutationdeleteTherapeuticQuestionsArgs, 'goalId'>>;
   generateAudio?: Resolver<ResolversTypes['GenerateAudioResult'], ParentType, ContextType, RequireFields<MutationgenerateAudioArgs, 'goalId'>>;
   generateLongFormText?: Resolver<ResolversTypes['GenerateLongFormTextResult'], ParentType, ContextType, RequireFields<MutationgenerateLongFormTextArgs, 'goalId'>>;
@@ -1241,6 +1306,7 @@ export type MutationResolvers<ContextType = GraphQLContext, ParentType extends R
   updateGoal?: Resolver<ResolversTypes['Goal'], ParentType, ContextType, RequireFields<MutationupdateGoalArgs, 'id' | 'input'>>;
   updateNote?: Resolver<ResolversTypes['Note'], ParentType, ContextType, RequireFields<MutationupdateNoteArgs, 'id' | 'input'>>;
   updateStory?: Resolver<ResolversTypes['Story'], ParentType, ContextType, RequireFields<MutationupdateStoryArgs, 'id' | 'input'>>;
+  updateSubgoal?: Resolver<ResolversTypes['Subgoal'], ParentType, ContextType, RequireFields<MutationupdateSubgoalArgs, 'id' | 'input'>>;
 };
 
 export type NoteResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Note'] = ResolversParentTypes['Note']> = {
@@ -1357,6 +1423,16 @@ export type StoryResolvers<ContextType = GraphQLContext, ParentType extends Reso
   updatedAt?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
 };
 
+export type SubgoalResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Subgoal'] = ResolversParentTypes['Subgoal']> = {
+  createdAt?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  description?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  goalId?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  status?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  title?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+};
+
 export type SubscriptionResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Subscription'] = ResolversParentTypes['Subscription']> = {
   audioJobStatus?: SubscriptionResolver<ResolversTypes['GenerationJob'], "audioJobStatus", ParentType, ContextType, RequireFields<SubscriptionaudioJobStatusArgs, 'jobId'>>;
   researchJobStatus?: SubscriptionResolver<ResolversTypes['GenerationJob'], "researchJobStatus", ParentType, ContextType, RequireFields<SubscriptionresearchJobStatusArgs, 'jobId'>>;
@@ -1400,6 +1476,7 @@ export type Resolvers<ContextType = GraphQLContext> = {
   DeleteQuestionsResult?: DeleteQuestionsResultResolvers<ContextType>;
   DeleteResearchResult?: DeleteResearchResultResolvers<ContextType>;
   DeleteStoryResult?: DeleteStoryResultResolvers<ContextType>;
+  DeleteSubgoalResult?: DeleteSubgoalResultResolvers<ContextType>;
   EvidenceItem?: EvidenceItemResolvers<ContextType>;
   EvidenceLocator?: EvidenceLocatorResolvers<ContextType>;
   EvidencePolarity?: EvidencePolarityResolvers;
@@ -1430,6 +1507,7 @@ export type Resolvers<ContextType = GraphQLContext> = {
   Research?: ResearchResolvers<ContextType>;
   ResearchSource?: ResearchSourceResolvers;
   Story?: StoryResolvers<ContextType>;
+  Subgoal?: SubgoalResolvers<ContextType>;
   Subscription?: SubscriptionResolvers<ContextType>;
   TextSegment?: TextSegmentResolvers<ContextType>;
   TherapeuticQuestion?: TherapeuticQuestionResolvers<ContextType>;

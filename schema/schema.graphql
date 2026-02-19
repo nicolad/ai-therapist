@@ -27,6 +27,11 @@ type Mutation {
   updateGoal(id: Int!, input: UpdateGoalInput!): Goal!
   deleteGoal(id: Int!): DeleteGoalResult!
 
+  # Subgoals
+  createSubgoal(input: CreateSubgoalInput!): Subgoal!
+  updateSubgoal(id: Int!, input: UpdateSubgoalInput!): Subgoal!
+  deleteSubgoal(id: Int!): DeleteSubgoalResult!
+
   # Async generation workflows
   generateResearch(goalId: Int!): GenerateResearchResult!
   deleteResearch(goalId: Int!): DeleteResearchResult!
@@ -118,9 +123,20 @@ type Goal {
   stories: [GoalStory!]!
   userStories: [Story!]!
   notes: [Note!]!
+  subgoals: [Subgoal!]!
   therapeuticText: String
   therapeuticTextLanguage: String
   therapeuticTextGeneratedAt: String
+}
+
+type Subgoal {
+  id: Int!
+  goalId: Int!
+  title: String!
+  description: String
+  status: String!
+  createdAt: String!
+  updatedAt: String!
 }
 
 type Story {
@@ -298,6 +314,18 @@ input UpdateGoalInput {
   status: String
 }
 
+input CreateSubgoalInput {
+  goalId: Int!
+  title: String!
+  description: String
+}
+
+input UpdateSubgoalInput {
+  title: String
+  description: String
+  status: String
+}
+
 input CreateNoteInput {
   entityId: Int!
   entityType: String!
@@ -364,6 +392,11 @@ type GenerateQuestionsResult {
 }
 
 type DeleteGoalResult {
+  success: Boolean!
+  message: String
+}
+
+type DeleteSubgoalResult {
   success: Boolean!
   message: String
 }

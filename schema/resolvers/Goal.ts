@@ -37,4 +37,12 @@ export const Goal: GoalResolvers = {
     }
     return d1Tools.listStories(parent.id, userEmail);
   },
+
+  subgoals: async (parent, _args, ctx) => {
+    const userEmail = ctx.userEmail;
+    if (!userEmail) {
+      return [];
+    }
+    return d1Tools.listSubgoalsForGoal(parent.id, userEmail);
+  },
 };

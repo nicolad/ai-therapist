@@ -127,6 +127,12 @@ input CreateStoryInput {
   goalId: Int!
 }
 
+input CreateSubgoalInput {
+  description: String
+  goalId: Int!
+  title: String!
+}
+
 type DeleteGoalResult {
   message: String
   success: Boolean!
@@ -150,6 +156,11 @@ type DeleteResearchResult {
 }
 
 type DeleteStoryResult {
+  message: String
+  success: Boolean!
+}
+
+type DeleteSubgoalResult {
   message: String
   success: Boolean!
 }
@@ -256,6 +267,7 @@ type Goal {
   slug: String
   status: String!
   stories: [GoalStory!]!
+  subgoals: [Subgoal!]!
   therapeuticText: String
   therapeuticTextGeneratedAt: String
   therapeuticTextLanguage: String
@@ -311,11 +323,13 @@ type Mutation {
   createGoal(input: CreateGoalInput!): Goal!
   createNote(input: CreateNoteInput!): Note!
   createStory(input: CreateStoryInput!): Story!
+  createSubgoal(input: CreateSubgoalInput!): Subgoal!
   deleteClaimCard(id: ID!): Boolean!
   deleteGoal(id: Int!): DeleteGoalResult!
   deleteNote(id: Int!): DeleteNoteResult!
   deleteResearch(goalId: Int!): DeleteResearchResult!
   deleteStory(id: Int!): DeleteStoryResult!
+  deleteSubgoal(id: Int!): DeleteSubgoalResult!
   deleteTherapeuticQuestions(goalId: Int!): DeleteQuestionsResult!
   generateAudio(goalId: Int!, language: String, storyId: Int, text: String, voice: String): GenerateAudioResult!
   generateLongFormText(goalId: Int!, language: String, minutes: Int): GenerateLongFormTextResult!
@@ -329,6 +343,7 @@ type Mutation {
   updateGoal(id: Int!, input: UpdateGoalInput!): Goal!
   updateNote(id: Int!, input: UpdateNoteInput!): Note!
   updateStory(id: Int!, input: UpdateStoryInput!): Story!
+  updateSubgoal(id: Int!, input: UpdateSubgoalInput!): Subgoal!
 }
 
 type Note {
@@ -487,6 +502,16 @@ type Story {
   updatedAt: String!
 }
 
+type Subgoal {
+  createdAt: String!
+  description: String
+  goalId: Int!
+  id: Int!
+  status: String!
+  title: String!
+  updatedAt: String!
+}
+
 type Subscription {
   audioJobStatus(jobId: String!): GenerationJob!
   researchJobStatus(jobId: String!): GenerationJob!
@@ -530,4 +555,10 @@ input UpdateNoteInput {
 
 input UpdateStoryInput {
   content: String
+}
+
+input UpdateSubgoalInput {
+  description: String
+  status: String
+  title: String
 }
