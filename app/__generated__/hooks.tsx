@@ -940,6 +940,13 @@ export type GenerateOpenAiAudioMutationVariables = Exact<{
 
 export type GenerateOpenAiAudioMutation = { __typename?: 'Mutation', generateOpenAIAudio: { __typename?: 'GenerateOpenAIAudioResult', success: boolean, message?: string | null, audioBuffer?: string | null, audioUrl?: string | null, sizeBytes?: number | null, duration?: number | null } };
 
+export type GenerateResearchMutationVariables = Exact<{
+  goalId: Scalars['Int']['input'];
+}>;
+
+
+export type GenerateResearchMutation = { __typename?: 'Mutation', generateResearch: { __typename?: 'GenerateResearchResult', success: boolean, message?: string | null, jobId?: string | null, count?: number | null } };
+
 export type GetAllNotesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -1862,6 +1869,42 @@ export function useGenerateOpenAiAudioMutation(baseOptions?: Apollo.MutationHook
 export type GenerateOpenAiAudioMutationHookResult = ReturnType<typeof useGenerateOpenAiAudioMutation>;
 export type GenerateOpenAiAudioMutationResult = Apollo.MutationResult<GenerateOpenAiAudioMutation>;
 export type GenerateOpenAiAudioMutationOptions = Apollo.BaseMutationOptions<GenerateOpenAiAudioMutation, GenerateOpenAiAudioMutationVariables>;
+export const GenerateResearchDocument = gql`
+    mutation GenerateResearch($goalId: Int!) {
+  generateResearch(goalId: $goalId) {
+    success
+    message
+    jobId
+    count
+  }
+}
+    `;
+export type GenerateResearchMutationFn = Apollo.MutationFunction<GenerateResearchMutation, GenerateResearchMutationVariables>;
+
+/**
+ * __useGenerateResearchMutation__
+ *
+ * To run a mutation, you first call `useGenerateResearchMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useGenerateResearchMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [generateResearchMutation, { data, loading, error }] = useGenerateResearchMutation({
+ *   variables: {
+ *      goalId: // value for 'goalId'
+ *   },
+ * });
+ */
+export function useGenerateResearchMutation(baseOptions?: Apollo.MutationHookOptions<GenerateResearchMutation, GenerateResearchMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<GenerateResearchMutation, GenerateResearchMutationVariables>(GenerateResearchDocument, options);
+      }
+export type GenerateResearchMutationHookResult = ReturnType<typeof useGenerateResearchMutation>;
+export type GenerateResearchMutationResult = Apollo.MutationResult<GenerateResearchMutation>;
+export type GenerateResearchMutationOptions = Apollo.BaseMutationOptions<GenerateResearchMutation, GenerateResearchMutationVariables>;
 export const GetAllNotesDocument = gql`
     query GetAllNotes {
   allNotes {

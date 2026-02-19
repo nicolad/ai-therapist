@@ -18,12 +18,13 @@ import {
   Button,
 } from "@radix-ui/themes";
 import { GlassButton } from "@/app/components/GlassButton";
-import { ArrowLeftIcon, TrashIcon } from "@radix-ui/react-icons";
+import { ArrowLeftIcon, TrashIcon, MagnifyingGlassIcon } from "@radix-ui/react-icons";
 import { useRouter, useParams } from "next/navigation";
 import dynamic from "next/dynamic";
 import {
   useGetGoalQuery,
   useDeleteGoalMutation,
+  useGenerateResearchMutation,
 } from "@/app/__generated__/hooks";
 import { useUser } from "@clerk/nextjs";
 import AddSubGoalButton from "@/app/components/AddSubGoalButton";
@@ -64,6 +65,43 @@ function GoalPageContent() {
     },
     refetchQueries: ["GetGoals", "GetGoal"],
   });
+
+  const [researchMessage, setResearchMessage] = useState<{
+    text: string;
+    type: "success" | "error";
+  } | null>(null);
+
+  const [generateResearch, { loading: generatingResearch }] =
+    useGenerateResearchMutation({
+      onCompleted: (data) => {
+        if (data.generateResearch.success) {
+          setResearchMessage({
+            text:
+              data.generateResearch.message ||
+              "Research generation started. This may take a few minutes.",
+            type: "success",
+          });
+        } else {
+          setResearchMessage({
+            text: data.generateResearch.message || "Failed to generate research.",
+            type: "error",
+          });
+        }
+      },
+      onError: (err) => {
+        setResearchMessage({
+          text: err.message || "An error occurred while generating research.",
+          type: "error",
+        });
+      },
+      refetchQueries: ["GetGoal"],
+    });
+
+  const handleGenerateResearch = async () => {
+    if (!goal) return;
+    setResearchMessage(null);
+    await generateResearch({ variables: { goalId: goal.id } });
+  };
 
   if (loading) {
     return (
@@ -464,10 +502,33 @@ function GoalPageContent() {
       </Card>
 
       {/* Linked Research */}
-      {goal.research && goal.research.length > 0 && (
-        <Card>
-          <Flex direction="column" gap="3" p="4">
-            <Heading size="4">Research ({goal.research.length})</Heading>
+      <Card>
+        <Flex direction="column" gap="3" p="4">
+          <Flex justify="between" align="center">
+            <Heading size="4">
+              Research {goal.research ? `(${goal.research.length})` : ""}
+            </Heading>
+            <GlassButton
+              variant="primary"
+              size="medium"
+              loading={generatingResearch}
+              onClick={handleGenerateResearch}
+            >
+              <MagnifyingGlassIcon />
+              Generate Research
+            </GlassButton>
+          </Flex>
+
+          {researchMessage && (
+            <Text
+              size="2"
+              color={researchMessage.type === "success" ? "green" : "red"}
+            >
+              {researchMessage.text}
+            </Text>
+          )}
+
+          {goal.research && goal.research.length > 0 ? (
             <Accordion.Root type="multiple" style={{ width: "100%" }}>
               {goal.research.map((paper, idx) => (
                 <Accordion.Item
@@ -543,9 +604,14 @@ function GoalPageContent() {
                 </Accordion.Item>
               ))}
             </Accordion.Root>
-          </Flex>
-        </Card>
-      )}
+          ) : (
+            <Text size="2" color="gray">
+              No research yet. Click &ldquo;Generate Research&rdquo; to find
+              relevant therapeutic papers for this goal.
+            </Text>
+          )}
+        </Flex>
+      </Card>
     </Flex>
   );
 }
