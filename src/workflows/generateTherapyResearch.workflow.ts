@@ -153,8 +153,6 @@ const planQueryStep = createStep({
       description: inputData.goal.description ?? "",
       notes: inputData.notes.map((n) => n.content),
       plannerPromptName: inputData.plannerPromptName,
-      timeHorizonDays: 14,
-      roleFamily: "software engineering",
     });
 
     // Sanitize to remove "occupational therapy" poison
@@ -174,7 +172,7 @@ const planQueryStep = createStep({
       goalType:
         plan.goalType ??
         plan.therapeuticGoalType ??
-        "career_interview_self_advocacy",
+        "behavioral_change",
     };
   },
 });
@@ -232,28 +230,28 @@ const searchStep = createStep({
     const crossrefQueries = inputData.crossrefQueries?.length
       ? inputData.crossrefQueries.slice(0, 15)
       : [
-          "job interview self advocacy",
-          "employment interview self presentation",
-          "interview impression management",
-          "interview communication skills training",
-          "job interview confidence building",
+          "evidence-based therapy intervention",
+          "behavioral change psychological treatment",
+          "cognitive behavioral therapy techniques",
+          "emotional regulation therapeutic approach",
+          "psychological resilience building",
         ];
 
     const semanticQueries = inputData.semanticScholarQueries?.length
       ? inputData.semanticScholarQueries.slice(0, 20)
       : [
-          "job interview self advocacy",
-          "employment interview self presentation strategies",
-          "interview impression management",
-          "job interview communication training",
-          "self promotion in job interviews",
+          "evidence-based psychological intervention",
+          "behavioral change therapy outcomes",
+          "cognitive behavioral treatment effectiveness",
+          "emotional regulation therapy",
+          "therapeutic techniques mental health",
         ];
 
     const pubmedQueries = inputData.pubmedQueries?.length
       ? inputData.pubmedQueries.slice(0, 12)
       : [
-          "job interview anxiety intervention",
-          "employment interview communication skills",
+          "psychological therapy intervention outcomes",
+          "behavioral treatment evidence-based",
         ];
 
     console.log(`   Crossref: ${crossrefQueries.length} queries`);
@@ -304,19 +302,9 @@ const searchStep = createStep({
       "court",
       "police",
       "legal",
-      "child",
       "abuse",
       "occupational therapy",
       "pre-admission",
-      "intake interview",
-      "diagnostic interview",
-      "therapy session",
-      "treatment outcome",
-      "clinical interview",
-      "patient interview",
-      "counseling interview",
-      "motivational interview",
-      "therapeutic alliance",
     ];
 
     const bad = new RegExp(
@@ -324,33 +312,10 @@ const searchStep = createStep({
       "i",
     );
 
-    // Require at least ONE job interview domain term in the title
-    const requiredTerms = [
-      "job interview",
-      "employment interview",
-      "selection interview",
-      "hiring interview",
-      "interview self",
-      "interview presentation",
-      "interview impression",
-      "interview communication",
-      "interview confidence",
-      "interview skills",
-      "interview training",
-      "interview preparation",
-      "interview performance",
-      "applicant",
-    ];
-
-    const required = new RegExp(
-      `\\b(${requiredTerms.map(escapeRegExp).join("|")})`,
-      "i",
-    );
-
     const deduped = sourceTools.dedupeCandidates(combined);
     const titleFiltered = deduped.filter((c: any) => {
       const title = c.title ?? "";
-      return !bad.test(title) && required.test(title);
+      return !bad.test(title);
     });
 
     console.log(`🔗 After dedup: ${deduped.length} candidates`);
@@ -440,7 +405,10 @@ const enrichAbstractsStep = createStep({
 
     return {
       ...inputData,
-      candidates: [...withAbstracts, ...candidates.slice(ENRICH_CANDIDATES_LIMIT)],
+      candidates: [
+        ...withAbstracts,
+        ...candidates.slice(ENRICH_CANDIDATES_LIMIT),
+      ],
     };
   },
 });
@@ -448,7 +416,14 @@ const enrichAbstractsStep = createStep({
 // Plain async function for single-paper extraction.
 // Not a Mastra step — avoids the `step.execute!()` anti-pattern.
 async function extractOnePaper(params: {
-  candidate: { title: string; doi?: string; url?: string; year?: number; source: string; [key: string]: any };
+  candidate: {
+    title: string;
+    doi?: string;
+    url?: string;
+    year?: number;
+    source: string;
+    [key: string]: any;
+  };
   goalType: string;
   goalTitle: string;
   goalDescription: string | null;
@@ -616,7 +591,9 @@ const persistStep = createStep({
       .filter((r) => r.blended >= BLENDED_THRESHOLD)
       .sort((a, b) => b.blended - a.blended);
 
-    console.log(`   With key findings + blended ≥ ${BLENDED_THRESHOLD}: ${qualified.length}`);
+    console.log(
+      `   With key findings + blended ≥ ${BLENDED_THRESHOLD}: ${qualified.length}`,
+    );
 
     const top = qualified.slice(0, PERSIST_CANDIDATES_LIMIT);
 
