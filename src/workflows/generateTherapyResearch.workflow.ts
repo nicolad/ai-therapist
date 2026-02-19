@@ -170,9 +170,7 @@ const planQueryStep = createStep({
       ...inputData,
       ...plan,
       goalType:
-        plan.goalType ??
-        plan.therapeuticGoalType ??
-        "behavioral_change",
+        plan.goalType ?? plan.therapeuticGoalType ?? "behavioral_change",
     };
   },
 });

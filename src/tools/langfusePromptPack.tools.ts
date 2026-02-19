@@ -128,7 +128,13 @@ export async function ensureLangfusePromptPackForGoal(params: {
   } = params;
 
   const goalSignature = sha256(
-    JSON.stringify({ goalId, goalTitle, goalDescription, notes, PROMPT_TEMPLATE_VERSION }),
+    JSON.stringify({
+      goalId,
+      goalTitle,
+      goalDescription,
+      notes,
+      PROMPT_TEMPLATE_VERSION,
+    }),
   );
 
   const plannerName = `research.plan.goal_${goalId}`;

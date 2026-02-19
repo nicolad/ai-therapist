@@ -18,13 +18,18 @@ import {
   Button,
 } from "@radix-ui/themes";
 import { GlassButton } from "@/app/components/GlassButton";
-import { ArrowLeftIcon, TrashIcon, MagnifyingGlassIcon } from "@radix-ui/react-icons";
+import {
+  ArrowLeftIcon,
+  TrashIcon,
+  MagnifyingGlassIcon,
+} from "@radix-ui/react-icons";
 import { useRouter, useParams } from "next/navigation";
 import dynamic from "next/dynamic";
 import {
   useGetGoalQuery,
   useDeleteGoalMutation,
   useGenerateResearchMutation,
+  useDeleteResearchMutation,
 } from "@/app/__generated__/hooks";
 import { useUser } from "@clerk/nextjs";
 import AddSubGoalButton from "@/app/components/AddSubGoalButton";
@@ -71,6 +76,30 @@ function GoalPageContent() {
     type: "success" | "error";
   } | null>(null);
 
+  const [deleteResearch, { loading: deletingResearch }] =
+    useDeleteResearchMutation({
+      onCompleted: (data) => {
+        if (data.deleteResearch.success) {
+          setResearchMessage({
+            text: data.deleteResearch.message || "Research deleted.",
+            type: "success",
+          });
+        } else {
+          setResearchMessage({
+            text: data.deleteResearch.message || "Failed to delete research.",
+            type: "error",
+          });
+        }
+      },
+      onError: (err) => {
+        setResearchMessage({
+          text: err.message || "An error occurred while deleting research.",
+          type: "error",
+        });
+      },
+      refetchQueries: ["GetGoal"],
+    });
+
   const [generateResearch, { loading: generatingResearch }] =
     useGenerateResearchMutation({
       onCompleted: (data) => {
@@ -83,7 +112,8 @@ function GoalPageContent() {
           });
         } else {
           setResearchMessage({
-            text: data.generateResearch.message || "Failed to generate research.",
+            text:
+              data.generateResearch.message || "Failed to generate research.",
             type: "error",
           });
         }
@@ -508,15 +538,57 @@ function GoalPageContent() {
             <Heading size="4">
               Research {goal.research ? `(${goal.research.length})` : ""}
             </Heading>
-            <GlassButton
-              variant="primary"
-              size="medium"
-              loading={generatingResearch}
-              onClick={handleGenerateResearch}
-            >
-              <MagnifyingGlassIcon />
-              Generate Research
-            </GlassButton>
+            <Flex gap="2" align="center">
+              {goal.research && goal.research.length > 0 && (
+                <AlertDialog.Root>
+                  <AlertDialog.Trigger>
+                    <GlassButton
+                      variant="destructive"
+                      size="medium"
+                      loading={deletingResearch}
+                    >
+                      <TrashIcon />
+                      Delete Research
+                    </GlassButton>
+                  </AlertDialog.Trigger>
+                  <AlertDialog.Content maxWidth="450px">
+                    <AlertDialog.Title>Delete Research</AlertDialog.Title>
+                    <AlertDialog.Description size="2">
+                      This will permanently delete all {goal.research.length}{" "}
+                      research paper{goal.research.length !== 1 ? "s" : ""} for
+                      this goal. This action cannot be undone.
+                    </AlertDialog.Description>
+                    <Flex gap="3" mt="4" justify="end">
+                      <AlertDialog.Cancel>
+                        <Button variant="soft" color="gray">
+                          Cancel
+                        </Button>
+                      </AlertDialog.Cancel>
+                      <AlertDialog.Action>
+                        <Button
+                          variant="solid"
+                          color="red"
+                          onClick={() =>
+                            deleteResearch({ variables: { goalId: goal.id } })
+                          }
+                        >
+                          Delete
+                        </Button>
+                      </AlertDialog.Action>
+                    </Flex>
+                  </AlertDialog.Content>
+                </AlertDialog.Root>
+              )}
+              <GlassButton
+                variant="primary"
+                size="medium"
+                loading={generatingResearch}
+                onClick={handleGenerateResearch}
+              >
+                <MagnifyingGlassIcon />
+                Generate Research
+              </GlassButton>
+            </Flex>
           </Flex>
 
           {researchMessage && (

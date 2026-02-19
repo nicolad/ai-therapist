@@ -357,6 +357,29 @@ export async function listTherapyResearch(goalId: number) {
   }));
 }
 
+export async function deleteTherapyResearch(goalId: number): Promise<number> {
+  // Count research rows before deleting
+  const countResult = await d1.execute({
+    sql: `SELECT COUNT(*) as cnt FROM therapy_research WHERE goal_id = ?`,
+    args: [goalId],
+  });
+  const count = (countResult.rows[0]?.cnt as number) ?? 0;
+
+  // Delete linked notes_research rows first
+  await d1.execute({
+    sql: `DELETE FROM notes_research WHERE research_id IN (SELECT id FROM therapy_research WHERE goal_id = ?)`,
+    args: [goalId],
+  });
+
+  // Delete the research rows
+  await d1.execute({
+    sql: `DELETE FROM therapy_research WHERE goal_id = ?`,
+    args: [goalId],
+  });
+
+  return count;
+}
+
 export async function getResearchForNote(noteId: number) {
   const result = await d1.execute({
     sql: `SELECT tr.* FROM therapy_research tr
