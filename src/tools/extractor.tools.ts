@@ -44,7 +44,7 @@ async function getCompiledTextPrompt(params: {
 }
 
 /**
- * Planner output schema (career interview self-advocacy)
+ * Planner output schema (therapeutic/psychological research)
  * NOTE: This is what your Langfuse planner template must produce.
  */
 const PlanSchema = z.object({
@@ -68,7 +68,7 @@ export type ResearchPlan = z.infer<typeof PlanSchema>;
 /**
  * Extractor output schema (generic therapeutic/psychological research)
  */
-const CareerResearchSchema = z.object({
+const ResearchExtractionSchema = z.object({
   domain: z.enum([
     "cbt",
     "act",
@@ -111,7 +111,7 @@ const CareerResearchSchema = z.object({
   rejectReason: z.string().nullable(),
 });
 
-export type ExtractedCareerResearch = z.infer<typeof CareerResearchSchema>;
+export type ExtractedResearchV2 = z.infer<typeof ResearchExtractionSchema>;
 
 // Legacy schema for backward compatibility
 const TherapyResearchSchema = z.object({
@@ -153,11 +153,11 @@ const TherapyResearchSchema = z.object({
 export type ExtractedResearch = z.infer<typeof TherapyResearchSchema>;
 
 /**
- * Convert legacy ExtractedResearch to new CareerResearchSchema format
+ * Convert legacy ExtractedResearch to new ResearchExtractionSchema format
  */
-function convertLegacyToCareerSchema(
+function convertLegacyToResearchSchema(
   legacy: ExtractedResearch,
-): ExtractedCareerResearch {
+): ExtractedResearchV2 {
   return {
     domain: "other", // default domain for legacy conversions
     paperMeta: {
@@ -222,7 +222,7 @@ export async function extractResearch(params: {
   goalType: string;
   paper: PaperDetails;
   extractorPromptName: string; // from workflow ensure step
-}): Promise<ExtractedCareerResearch> {
+}): Promise<ExtractedResearchV2> {
   const { goalTitle, goalDescription, goalType, paper, extractorPromptName } =
     params;
 
@@ -272,7 +272,7 @@ CRITICAL: Return VALID JSON ONLY. No markdown, no code blocks, no extra text.`;
   try {
     const { object } = await generateObject({
       model: deepseek("deepseek-chat"),
-      schema: CareerResearchSchema,
+      schema: ResearchExtractionSchema,
       prompt: compiledPrompt + schemaInstructions,
     });
 
@@ -288,7 +288,7 @@ CRITICAL: Return VALID JSON ONLY. No markdown, no code blocks, no extra text.`;
       goalDescription,
       paper,
     });
-    return convertLegacyToCareerSchema(legacyResult);
+    return convertLegacyToResearchSchema(legacyResult);
   }
 }
 
@@ -447,24 +447,13 @@ export function sanitizePlan(plan: {
   inclusion?: string[];
   exclusion?: string[];
 }) {
-  // Replace "occupational therapy" with "occupational psychology"
-  const ban = /\boccupational therapy\b/gi;
-  const replacement = "occupational psychology";
-
-  const fixString = (s: string) => s.replace(ban, replacement);
-  const fixArray = (arr: string[]) => (arr ?? []).map(fixString);
-
   return {
     ...plan,
-    therapeuticGoalType: plan.therapeuticGoalType
-      ? fixString(plan.therapeuticGoalType)
-      : undefined,
-    goalType: plan.goalType ? fixString(plan.goalType) : undefined,
-    keywords: fixArray(plan.keywords),
-    semanticScholarQueries: fixArray(plan.semanticScholarQueries ?? []),
-    crossrefQueries: fixArray(plan.crossrefQueries ?? []),
-    pubmedQueries: fixArray(plan.pubmedQueries ?? []),
-    inclusion: fixArray(plan.inclusion ?? []),
+    keywords: plan.keywords ?? [],
+    semanticScholarQueries: plan.semanticScholarQueries ?? [],
+    crossrefQueries: plan.crossrefQueries ?? [],
+    pubmedQueries: plan.pubmedQueries ?? [],
+    inclusion: plan.inclusion ?? [],
     exclusion: plan.exclusion ?? [],
   };
 }

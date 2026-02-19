@@ -16,6 +16,9 @@ function sha256(input: string): string {
   return crypto.createHash("sha256").update(input).digest("hex");
 }
 
+// Bump this to force prompt regeneration for all goals when templates change
+const PROMPT_TEMPLATE_VERSION = "v2-generic-therapy";
+
 function extractVars(template: string): string[] {
   const vars = new Set<string>();
   const re = /\{\{\s*([a-zA-Z0-9_]+)\s*\}\}/g;
@@ -35,59 +38,6 @@ function assertOnlyAllowedVars(
   if (unknown.length) {
     throw new Error(
       `[${where}] Unknown Langfuse variables: ${unknown.join(", ")}. Allowed: ${allowed.join(", ")}`,
-    );
-  }
-}
-
-const REQUIRED_EXCLUSIONS = [
-  "forensic",
-  "legal",
-  "police",
-  "child",
-  "witness",
-  "court",
-  "medical",
-] as const;
-
-function assertGuardrails(template: string, where: string) {
-  const t = template.toLowerCase();
-
-  // Must disambiguate job interview domain
-  if (
-    !/(job interview|employment interview|selection interview)/i.test(template)
-  ) {
-    throw new Error(
-      `[${where}] Missing job interview disambiguation ("job interview" OR "employment interview" OR "selection interview").`,
-    );
-  }
-
-  // Must include ALL explicit exclusions (not just one)
-  const missing = REQUIRED_EXCLUSIONS.filter((x) => !t.includes(x));
-  if (missing.length) {
-    throw new Error(
-      `[${where}] Missing explicit exclusions: ${missing.join(", ")}.`,
-    );
-  }
-
-  // Avoid poison term (robust to whitespace/hyphen/newlines)
-  if (/occupational[\s-]+therapy/i.test(template)) {
-    throw new Error(
-      `[${where}] Contains "occupational therapy" (must be occupational psychology / industrial-organizational psychology / I-O psychology).`,
-    );
-  }
-
-  // Fail-closed for missing/short abstracts (make sure "200" is explicitly present)
-  const hasAbstract = t.includes("abstract");
-  const has200 = /\b200\b/.test(t);
-  const hasMissingOrInsufficient =
-    t.includes("missing") ||
-    t.includes("insufficient") ||
-    t.includes("too short") ||
-    t.includes("fewer than");
-
-  if (!(hasAbstract && has200 && hasMissingOrInsufficient)) {
-    throw new Error(
-      `[${where}] Missing fail-closed rule for missing/short abstracts (must reference abstract + 200 + missing/insufficient semantics).`,
     );
   }
 }
@@ -120,26 +70,8 @@ async function safeGetTextPrompt(
   }
 }
 
-function normalizeTemplate(template: string): string {
-  // 1) Hard replace poison variants (spaces/newlines/hyphens)
-  let out = template.replace(
-    /occupational[\s-]+therapy/gi,
-    "occupational psychology",
-  );
-
-  // 2) If the model uses generic "therapy" in an I-O context, prefer "psychology".
-  //    Keep it conservative: only replace standalone "therapy" when NOT followed by common research words.
-  out = out.replace(
-    /\btherapy\b(?!\s+(research|study|intervention|treatment|program|trial))/gi,
-    "psychology",
-  );
-
-  return out;
-}
-
 function ensureMetaLine(template: string, metaLine: string): string {
   if (template.includes(metaLine)) return template;
-  // Append in a way that's hard to break JSON-ish prompt formatting.
   return `${template}\n\n${metaLine}\n`;
 }
 
@@ -196,7 +128,7 @@ export async function ensureLangfusePromptPackForGoal(params: {
   } = params;
 
   const goalSignature = sha256(
-    JSON.stringify({ goalId, goalTitle, goalDescription, notes }),
+    JSON.stringify({ goalId, goalTitle, goalDescription, notes, PROMPT_TEMPLATE_VERSION }),
   );
 
   const plannerName = `research.plan.goal_${goalId}`;
@@ -222,13 +154,7 @@ export async function ensureLangfusePromptPackForGoal(params: {
   console.log("🔄 Generating new Langfuse prompt templates with OpenAI...");
 
   // Allowed variables for Langfuse mustache templates
-  const plannerVars = [
-    "goalTitle",
-    "goalDescription",
-    "notes",
-    "timeHorizonDays",
-    "roleFamily",
-  ];
+  const plannerVars = ["goalTitle", "goalDescription", "notes"];
   const extractorVars = [
     "goalTitle",
     "goalDescription",
@@ -249,71 +175,67 @@ export async function ensureLangfusePromptPackForGoal(params: {
     try {
       console.log(`  Attempt ${attempt}/3...`);
 
-      const { object } = await generateObject({
+      const { object: candidate } = await generateObject({
         model: deepseek("deepseek-chat"),
-        temperature: 1.0, // lower variance => fewer guardrail violations
+        temperature: 1.0,
         schema: PromptPackSchema,
         prompt: `
-You are generating Langfuse Prompt Management TEXT templates for ONE specific workplace/career goal.
+You are generating Langfuse Prompt Management TEXT templates for a therapeutic/psychological research system.
+These prompts will be used to find and extract relevant psychological research papers for a given therapy goal.
 
-Context for writing good templates:
+Context:
 Goal Title: ${goalTitle}
 Goal Description: ${goalDescription}
 Notes:
 - ${notes.join("\n- ")}
 
 TASK
-Generate two Langfuse TEXT prompt templates (strings) that use ONLY {{variables}}.
+Generate two Langfuse TEXT prompt templates (strings) that use ONLY {{variables}} for interpolation.
 
 TEMPLATE A: plannerPrompt
 - Input variables allowed: ${plannerVars.map((v) => `{{${v}}}`).join(", ")}
-- Output: JSON for a research query plan for job interview self-advocacy (NOT clinical therapy).
-- Must include these exact phrases: "job interview" OR "employment interview" OR "selection interview"
-- Must explicitly mention excluding: forensic, legal, police, child, witness, court, and medical diagnostic contexts (LIST ALL TERMS)
-- CRITICAL: Use "occupational psychology" or "industrial-organizational psychology" or "I-O psychology" NEVER "occupational therapy"
-- Must instruct: produce MULTIPLE smaller queries (query pack) rather than one long query
-- Must include fail-closed rule: abstract < 200 characters OR missing => reject (mention 200 explicitly)
+- Output: JSON for a multi-source research query plan.
+- The plan should identify the therapeutic goal type, relevant psychological keywords,
+  and diverse search queries for Semantic Scholar, Crossref, and PubMed.
+- Queries should target evidence-based psychological interventions, therapeutic techniques,
+  and clinical research related to the goal.
+- Include fail-closed rule: if abstract is fewer than 200 characters or missing, reject the paper.
+- Must produce MULTIPLE smaller queries (query pack) rather than one long query for better recall.
 
 TEMPLATE B: extractorPrompt
 - Input variables allowed: ${extractorVars.map((v) => `{{${v}}}`).join(", ")}
-- Output: STRICT-FORMAT JSON extraction for career interview self-advocacy evidence (NOT clinical therapy).
-- REQUIRED JSON FIELDS (all must be present):
-  * domain: enum ["io_psych", "career_coaching", "communication_training", "other"]
+- Output: STRICT JSON extraction of therapeutic research relevance from a paper.
+- REQUIRED JSON FIELDS:
+  * domain: enum ["cbt", "act", "dbt", "behavioral", "psychodynamic", "somatic", "humanistic", "other"]
   * paperMeta: {title, authors[], year, venue, doi, url}
   * studyType: enum ["meta-analysis", "RCT", "field study", "lab study", "quasi-experimental", "review", "other"]
-  * populationContext, interventionOrSkill: strings or null
-  * keyFindings: array of strings (3-5)
+  * populationContext: string or null
+  * interventionOrSkill: string or null (the specific therapy technique or intervention studied)
+  * keyFindings: array of strings (3-5 findings directly from the abstract)
   * evidenceSnippets: array of {findingIndex: number, snippet: string}
-  * practicalTakeaways: array of strings (2-4)
-  * relevanceScore: number 0-1
-  * confidence: number 0-1
-  * rejectReason: string or null (use if relevanceScore < 0.5)
-- MUST include explicit fail-closed rule stating:
-  "If abstract is missing or has fewer than 200 characters, return empty extraction with relevanceScore=0 and confidence=0 and rejectReason='insufficient_abstract'"
-- Must explicitly exclude: forensic, legal, police, child, witness, court, medical diagnostic interview domains (LIST ALL TERMS)
-- CRITICAL: Use "occupational psychology" or "industrial-organizational psychology" NEVER "occupational therapy"
+  * practicalTakeaways: array of strings (2-4 actionable insights for therapists/clients)
+  * relevanceScore: number 0-1 (how relevant to the therapeutic goal)
+  * confidence: number 0-1 (confidence in the extraction quality)
+  * rejectReason: string or null
+- MUST include fail-closed rule: "If abstract is missing or has fewer than 200 characters, return empty extraction with relevanceScore=0 and confidence=0 and rejectReason='insufficient_abstract'"
+- Score 0.1 or lower if paper is NOT about psychological/therapeutic research.
 
 CRITICAL REQUIREMENTS FOR BOTH TEMPLATES:
-1. NEVER use the phrase "occupational therapy" (including "occupational-therapy" or with newlines/spaces) - use "occupational psychology" or "I-O psychology" instead
-2. Must explicitly list exclusion terms: forensic, legal, police, child, witness, court, medical
-3. Must specify job/employment/selection interview context
-4. Must include fail-closed rule for abstracts < 200 characters or missing (mention 200 explicitly)
-5. Include the literal string "${metaLine}" in BOTH templates
-6. Do NOT include any mustache variables besides: ${[...new Set([...plannerVars, ...extractorVars])].map((v) => `{{${v}}}`).join(", ")}
+1. Use ONLY the allowed {{variables}} listed above - no others.
+2. Include the literal string "${metaLine}" in BOTH templates.
+3. Be specific and instructive - these prompts will guide AI to find relevant therapy research.
 
 Return JSON with keys: plannerPrompt, extractorPrompt.
         `.trim(),
       });
 
-      let candidate: PromptPack = object;
-
       // Normalize + force signature line
       candidate.plannerPrompt = ensureMetaLine(
-        normalizeTemplate(candidate.plannerPrompt),
+        candidate.plannerPrompt,
         metaLine,
       );
       candidate.extractorPrompt = ensureMetaLine(
-        normalizeTemplate(candidate.extractorPrompt),
+        candidate.extractorPrompt,
         metaLine,
       );
 
@@ -328,9 +250,6 @@ Return JSON with keys: plannerPrompt, extractorPrompt.
         extractorVars,
         "extractorPrompt",
       );
-
-      assertGuardrails(candidate.plannerPrompt, "plannerPrompt");
-      assertGuardrails(candidate.extractorPrompt, "extractorPrompt");
 
       pack = candidate;
       console.log(`  ✅ Valid prompts generated on attempt ${attempt}`);
