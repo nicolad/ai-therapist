@@ -1,13 +1,5 @@
 import { createWorkflow, createStep } from "@mastra/core/workflows";
 import { z } from "zod";
-import { createDeepSeek } from "@ai-sdk/deepseek";
-import { createResearchGroundingScorer } from "@/src/scorers";
-import {
-  createFaithfulnessScorer,
-  createHallucinationScorer,
-  createCompletenessScorer,
-  createContextRelevanceScorerLLM,
-} from "@mastra/evals/scorers/prebuilt";
 import { d1Tools } from "@/src/db";
 import { ragTools } from "@/src/tools/rag.tools";
 import { sourceTools } from "@/src/tools/sources.tools";
@@ -15,21 +7,28 @@ import { extractorTools } from "@/src/tools/extractor.tools";
 import { openAlexTools } from "@/src/tools/openalex.tools";
 import { langfusePromptPackTools } from "@/src/tools/langfusePromptPack.tools";
 
-const deepseek = createDeepSeek({
-  apiKey: process.env.DEEPSEEK_API_KEY,
-});
-
 /**
  * Deep Research Workflow
  *
- * Multi-step workflow with eval-gated quality control:
+ * Multi-step workflow with quality gating:
  * 1. Load goal + notes from D1 database
- * 2. Plan query (goal type + keywords)
- * 3. Multi-source search (Crossref, PubMed, Semantic Scholar)
- * 4. Extract + gate each candidate with scorers
- * 5. Repair failed extractions once
- * 6. Persist top results to D1 database
+ * 2. Ensure Langfuse prompts exist (DeepSeek generates goal-specific templates)
+ * 3. Plan query (goal type + keywords + multi-source query expansion)
+ * 4. Multi-source search (Crossref, PubMed, Semantic Scholar)
+ * 5. Enrich abstracts via OpenAlex (controlled concurrency)
+ * 6. Extract + gate each candidate (batch processing with per-candidate error handling)
+ * 7. Persist top results to D1 database + vector store
  */
+
+// Tunable constants
+const ENRICH_CANDIDATES_LIMIT = 300;
+const ENRICH_CONCURRENCY = 15;
+const EXTRACT_CANDIDATES_LIMIT = 50;
+const EXTRACTION_BATCH_SIZE = 6;
+const PERSIST_CANDIDATES_LIMIT = 50;
+const RELEVANCE_THRESHOLD = 0.6;
+const CONFIDENCE_THRESHOLD = 0.5;
+const BLENDED_THRESHOLD = 0.45;
 
 // Input/Output schemas
 const inputSchema = z.object({
@@ -122,7 +121,7 @@ const ensurePromptsStep = createStep({
   },
 });
 
-// Step 3: Plan query (now uses Langfuse-backed planner prompt)
+// Step 3: Plan query (uses Langfuse-backed planner prompt)
 const planQueryStep = createStep({
   id: "plan-query",
   inputSchema: z.object({
@@ -230,7 +229,6 @@ const searchStep = createStep({
     console.log(`\n🔍 Multi-source search with query expansion...\n`);
 
     // Fallback queries if planner didn't provide them
-    const defaultQuery = inputData.keywords.join(" ");
     const crossrefQueries = inputData.crossrefQueries?.length
       ? inputData.crossrefQueries.slice(0, 15)
       : [
@@ -262,8 +260,7 @@ const searchStep = createStep({
     console.log(`   Semantic Scholar: ${semanticQueries.length} queries`);
     console.log(`   PubMed: ${pubmedQueries.length} queries\n`);
 
-    // Execute queries with rate limiting (sequential with delays)
-    // to avoid overwhelming free APIs
+    // Sequential with delays to respect free-tier API rate limits
     const delay = (ms: number) =>
       new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -271,14 +268,14 @@ const searchStep = createStep({
     const crossrefBatches: any[][] = [];
     for (const q of crossrefQueries) {
       crossrefBatches.push(await sourceTools.searchCrossref(q, PER_QUERY));
-      await delay(500); // 500ms between Crossref requests
+      await delay(500);
     }
 
     console.log("Fetching PubMed results...");
     const pubmedBatches: any[][] = [];
     for (const q of pubmedQueries) {
       pubmedBatches.push(await sourceTools.searchPubMed(q, PER_QUERY));
-      await delay(1000); // 1s between PubMed requests (NCBI rate limit: 3/sec without API key)
+      await delay(1000); // NCBI rate limit: 3 req/sec without API key
     }
 
     console.log("Fetching Semantic Scholar results...");
@@ -287,7 +284,7 @@ const searchStep = createStep({
       semanticBatches.push(
         await sourceTools.searchSemanticScholar(q, PER_QUERY),
       );
-      await delay(1000); // 1s between Semantic Scholar requests (rate limit: 100/5min)
+      await delay(1000); // Semantic Scholar: 100 req/5 min
     }
 
     const combined = [
@@ -300,7 +297,7 @@ const searchStep = createStep({
       `📚 Raw results: Crossref(${crossrefBatches.flat().length}), PubMed(${pubmedBatches.flat().length}), Semantic(${semanticBatches.flat().length})`,
     );
 
-    // Light title blacklist (avoid obvious wrong-domain papers)
+    // Title blacklist: avoid obvious out-of-domain papers
     const badTerms = [
       "forensic",
       "witness",
@@ -309,8 +306,7 @@ const searchStep = createStep({
       "legal",
       "child",
       "abuse",
-      "medical",
-      "occupational therapy", // poison term
+      "occupational therapy",
       "pre-admission",
       "intake interview",
       "diagnostic interview",
@@ -328,7 +324,7 @@ const searchStep = createStep({
       "i",
     );
 
-    // Require at least ONE of these terms for job interview domain
+    // Require at least ONE job interview domain term in the title
     const requiredTerms = [
       "job interview",
       "employment interview",
@@ -354,15 +350,13 @@ const searchStep = createStep({
     const deduped = sourceTools.dedupeCandidates(combined);
     const titleFiltered = deduped.filter((c: any) => {
       const title = c.title ?? "";
-      // Must NOT contain bad terms AND must contain at least one required term
       return !bad.test(title) && required.test(title);
     });
 
     console.log(`🔗 After dedup: ${deduped.length} candidates`);
     console.log(`🚫 After title filter: ${titleFiltered.length} candidates`);
 
-    // DON'T filter on abstract length yet - we'll enrich them next!
-    // Only filter book chapters
+    // Filter book chapters but keep candidates without abstracts (enriched next)
     const filtered = sourceTools.filterBookChapters(titleFiltered);
 
     console.log(
@@ -376,7 +370,7 @@ const searchStep = createStep({
   },
 });
 
-// Step 5: Enrich abstracts from OpenAlex
+// Step 5: Enrich abstracts from OpenAlex (controlled concurrency)
 const enrichAbstractsStep = createStep({
   id: "enrich-abstracts",
   inputSchema: z.object({
@@ -406,25 +400,24 @@ const enrichAbstractsStep = createStep({
 
     console.log(`\n🔬 Enriching abstracts from OpenAlex...\n`);
 
-    // Enrich top 300 candidates (avoid hammering OpenAlex)
-    const N = 300;
-    const slice = candidates.slice(0, N);
+    const slice = candidates.slice(0, ENRICH_CANDIDATES_LIMIT);
 
-    const enriched = await Promise.all(
-      slice.map(async (c: any, idx: number) => {
+    // Use mapLimit to cap concurrent OpenAlex requests
+    const enriched = await sourceTools.mapLimit(
+      slice,
+      ENRICH_CONCURRENCY,
+      async (c: any, idx: number) => {
         const doi = (c.doi ?? "").toString().trim();
         if (!doi || c.abstract) {
-          // Already has abstract or no DOI
           return c;
         }
 
-        if (idx % 50 === 0 && idx > 0) {
+        if (idx > 0 && idx % 50 === 0) {
           console.log(`   Enriched ${idx} / ${slice.length}...`);
         }
 
         try {
           const oa = await openAlexTools.fetchAbstractByDoi(doi);
-
           return {
             ...c,
             _enrichedAbstract: oa.abstract,
@@ -432,10 +425,10 @@ const enrichAbstractsStep = createStep({
             _enrichedVenue: oa.venue,
             _enrichedAuthors: oa.authors,
           };
-        } catch (err) {
+        } catch {
           return c;
         }
-      }),
+      },
     );
 
     const withAbstracts = enriched.filter(
@@ -447,50 +440,34 @@ const enrichAbstractsStep = createStep({
 
     return {
       ...inputData,
-      candidates: [...withAbstracts, ...candidates.slice(N)],
+      candidates: [...withAbstracts, ...candidates.slice(ENRICH_CANDIDATES_LIMIT)],
     };
   },
 });
 
-// Step 6: Extract one paper with Langfuse-backed extraction
-const extractOneStep = createStep({
-  id: "extract-one",
-  inputSchema: z.object({
-    candidate: z.object({
-      title: z.string(),
-      doi: z.string().optional(),
-      url: z.string().optional(),
-      year: z.number().int().optional(),
-      source: z.string(),
-    }),
-    goalType: z.string(),
-    goalTitle: z.string(),
-    goalDescription: z.string().nullable(),
-    extractorPromptName: z.string(),
-  }),
-  outputSchema: z.object({
-    ok: z.boolean(),
-    score: z.number(),
-    research: z.any().optional(),
-    reason: z.string().optional(),
-  }),
-  execute: async ({ inputData }) => {
-    // 1. Fetch paper details
-    const paper = await sourceTools.fetchPaperDetails(inputData.candidate);
+// Plain async function for single-paper extraction.
+// Not a Mastra step — avoids the `step.execute!()` anti-pattern.
+async function extractOnePaper(params: {
+  candidate: { title: string; doi?: string; url?: string; year?: number; source: string; [key: string]: any };
+  goalType: string;
+  goalTitle: string;
+  goalDescription: string | null;
+  extractorPromptName: string;
+}): Promise<{ ok: boolean; score: number; research?: any; reason: string }> {
+  try {
+    const paper = await sourceTools.fetchPaperDetails(params.candidate);
 
-    // 2. Extract structured JSON using Langfuse-backed prompt
     const extracted = await extractorTools.extract({
-      goalTitle: inputData.goalTitle,
-      goalDescription: inputData.goalDescription ?? "",
-      goalType: inputData.goalType,
+      goalTitle: params.goalTitle,
+      goalDescription: params.goalDescription ?? "",
+      goalType: params.goalType,
       paper,
-      extractorPromptName: inputData.extractorPromptName,
+      extractorPromptName: params.extractorPromptName,
     });
 
-    // 3. Hard gating based on extractor output
     const ok =
-      extracted.relevanceScore >= 0.6 &&
-      extracted.confidence >= 0.5 &&
+      extracted.relevanceScore >= RELEVANCE_THRESHOLD &&
+      extracted.confidence >= CONFIDENCE_THRESHOLD &&
       (extracted.keyFindings?.length ?? 0) > 0;
 
     return {
@@ -498,8 +475,8 @@ const extractOneStep = createStep({
       score: extracted.relevanceScore,
       research: ok
         ? {
-            // Map to legacy schema for backward compatibility
-            therapeuticGoalType: inputData.goalType,
+            // Map to DB schema
+            therapeuticGoalType: params.goalType,
             title: extracted.paperMeta.title,
             authors: extracted.paperMeta.authors,
             year: extracted.paperMeta.year,
@@ -517,10 +494,37 @@ const extractOneStep = createStep({
         : undefined,
       reason: ok ? "passed" : (extracted.rejectReason ?? "failed_thresholds"),
     };
-  },
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error(`Extraction error for "${params.candidate.title}": ${msg}`);
+    return { ok: false, score: 0, reason: "extraction_error" };
+  }
+}
+
+// Step 6: Reshape data for the extraction step
+const prepExtractStep = createStep({
+  id: "prep-extract",
+  inputSchema: z.any(),
+  outputSchema: z.any(),
+  execute: async ({ inputData }) => ({
+    userId: inputData.userId,
+    goalId: inputData.goalId,
+    context: {
+      goal: inputData.goal,
+      notes: inputData.notes,
+    },
+    plan: {
+      goalType: inputData.goalType,
+      extractorPromptName: inputData.extractorPromptName,
+      keywords: inputData.keywords,
+    },
+    search: {
+      candidates: inputData.candidates,
+    },
+  }),
 });
 
-// Step 7: Extract all candidates
+// Step 7: Extract all candidates in batches
 const extractAllStep = createStep({
   id: "extract-all",
   inputSchema: z.object({
@@ -538,32 +542,45 @@ const extractAllStep = createStep({
   execute: async ({ inputData }) => {
     const goal = inputData.context.goal;
     const plan = inputData.plan;
-    const candidates = inputData.search.candidates.slice(0, 30); // Top 30
+    const candidates = inputData.search.candidates.slice(
+      0,
+      EXTRACT_CANDIDATES_LIMIT,
+    );
 
-    const results = [];
+    console.log(
+      `\n🧠 Extracting ${candidates.length} candidates (batches of ${EXTRACTION_BATCH_SIZE})...\n`,
+    );
 
-    // Process in batches of 6
-    for (let i = 0; i < candidates.length; i += 6) {
-      const batch = candidates.slice(i, i + 6);
+    const results: any[] = [];
+
+    for (let i = 0; i < candidates.length; i += EXTRACTION_BATCH_SIZE) {
+      const batch = candidates.slice(i, i + EXTRACTION_BATCH_SIZE);
+      const batchNum = Math.floor(i / EXTRACTION_BATCH_SIZE) + 1;
+      const totalBatches = Math.ceil(candidates.length / EXTRACTION_BATCH_SIZE);
+
+      console.log(
+        `   Batch ${batchNum}/${totalBatches} (candidates ${i + 1}-${Math.min(i + EXTRACTION_BATCH_SIZE, candidates.length)})`,
+      );
 
       const batchResults = await Promise.all(
         batch.map((candidate: any) =>
-          extractOneStep.execute!({
-            inputData: {
-              candidate,
-              goalType: plan.goalType,
-              goalTitle: goal.title,
-              goalDescription: goal.description,
-              extractorPromptName: plan.extractorPromptName,
-            },
-            context: {},
-            tools: {},
-          } as any),
+          extractOnePaper({
+            candidate,
+            goalType: plan.goalType,
+            goalTitle: goal.title,
+            goalDescription: goal.description,
+            extractorPromptName: plan.extractorPromptName,
+          }),
         ),
       );
 
       results.push(...batchResults);
     }
+
+    const passed = results.filter((r) => r.ok).length;
+    console.log(
+      `\n   Extraction complete: ${passed}/${results.length} passed initial gate\n`,
+    );
 
     return {
       userId: inputData.userId,
@@ -573,7 +590,7 @@ const extractAllStep = createStep({
   },
 });
 
-// Step 8: Persist results with two-stage gating
+// Step 8: Persist results with two-stage quality gating
 const persistStep = createStep({
   id: "persist",
   inputSchema: z.object({
@@ -585,83 +602,76 @@ const persistStep = createStep({
   execute: async ({ inputData }) => {
     console.log(`\n📊 Extraction results: ${inputData.results.length} total\n`);
 
-    // Two-stage gating approach:
-    // Stage 1: Loose filter - must have key findings
-    // Stage 2: Rank by blended score and take top 50
-
-    const withFindings = inputData.results
+    // Stage 1: must have at least one key finding
+    // Stage 2: rank by blended score (70% relevance + 30% confidence), take top N
+    const qualified = inputData.results
       .filter((r) => r.ok && r.research)
-      .filter((r) => {
-        const research = r.research;
-
-        // Must have at least one key finding
-        if (!research.keyFindings || research.keyFindings.length === 0) {
-          return false;
-        }
-
-        return true;
-      })
+      .filter((r) => (r.research.keyFindings?.length ?? 0) > 0)
       .map((r) => {
-        // Calculate blended score: 70% relevance + 30% extraction confidence
         const relevance = r.research.relevanceScore ?? 0;
         const confidence = r.research.extractionConfidence ?? 0;
         const blended = 0.7 * relevance + 0.3 * confidence;
-
-        return {
-          ...r,
-          blended,
-        };
+        return { ...r, blended };
       })
-      .filter((r) => r.blended >= 0.45) // Looser threshold for volume
+      .filter((r) => r.blended >= BLENDED_THRESHOLD)
       .sort((a, b) => b.blended - a.blended);
 
-    console.log(`   With key findings: ${withFindings.length}`);
-    console.log(
-      `   Above quality threshold (blended ≥ 0.45): ${withFindings.length}\n`,
-    );
+    console.log(`   With key findings + blended ≥ ${BLENDED_THRESHOLD}: ${qualified.length}`);
 
-    // Take top 50 (or whatever we have)
-    const target = Math.min(50, withFindings.length);
-    const top = withFindings.slice(0, target);
+    const top = qualified.slice(0, PERSIST_CANDIDATES_LIMIT);
 
-    console.log(`🎯 Targeting top ${target} papers:\n`);
+    console.log(`\n🎯 Persisting top ${top.length} papers:\n`);
 
     let count = 0;
+    let errors = 0;
+
     for (const r of top) {
       const research = r.research;
+      const displayTitle =
+        research.title.length > 80
+          ? `${research.title.substring(0, 80)}…`
+          : research.title;
 
       console.log(
-        `   ${count + 1}. [${r.blended.toFixed(2)}] ${research.title.substring(0, 80)}...`,
+        `   ${count + errors + 1}. [${r.blended.toFixed(2)}] ${displayTitle}`,
       );
 
-      // Persist to DB
-      const rowId = await d1Tools.upsertTherapyResearch(
-        inputData.goalId,
-        inputData.userId,
-        research,
-      );
-      count++;
+      try {
+        const rowId = await d1Tools.upsertTherapyResearch(
+          inputData.goalId,
+          inputData.userId,
+          research,
+        );
+        count++;
 
-      // Embed into vectors
-      await ragTools.upsertResearchChunks({
-        goalId: inputData.goalId,
-        entityType: "TherapyResearch",
-        entityId: rowId,
-        title: research.title,
-        abstract: research.abstract ?? "",
-        keyFindings: research.keyFindings,
-        techniques: research.therapeuticTechniques,
-      });
+        await ragTools.upsertResearchChunks({
+          goalId: inputData.goalId,
+          entityType: "TherapyResearch",
+          entityId: rowId,
+          title: research.title,
+          abstract: research.abstract ?? "",
+          keyFindings: research.keyFindings,
+          techniques: research.therapeuticTechniques,
+        });
+      } catch (err) {
+        errors++;
+        const msg = err instanceof Error ? err.message : String(err);
+        console.error(`   ⚠️  Failed to persist "${research.title}": ${msg}`);
+      }
     }
 
-    console.log(`\n✨ Persisted ${count} papers to database\n`);
+    console.log(
+      `\n✨ Persisted ${count} papers${errors > 0 ? `, ${errors} failed` : ""}\n`,
+    );
 
     return {
-      success: true,
+      success: count > 0 || errors === 0,
       count,
       message: count
-        ? `Generated ${count} research papers (blended quality score ≥ 0.45, ranked by relevance)`
-        : "No papers met minimum quality thresholds",
+        ? `Generated ${count} research papers (blended quality score ≥ ${BLENDED_THRESHOLD}, ranked by relevance)`
+        : errors > 0
+          ? `All ${errors} persist attempts failed`
+          : "No papers met minimum quality thresholds",
     };
   },
 });
@@ -677,29 +687,7 @@ export const generateTherapyResearchWorkflow = createWorkflow({
   .then(planQueryStep)
   .then(searchStep)
   .then(enrichAbstractsStep)
-  .then(
-    createStep({
-      id: "prep-extract",
-      inputSchema: z.any(),
-      outputSchema: z.any(),
-      execute: async ({ inputData }) => ({
-        userId: inputData.userId,
-        goalId: inputData.goalId,
-        context: {
-          goal: inputData.goal,
-          notes: inputData.notes,
-        },
-        plan: {
-          goalType: inputData.goalType,
-          extractorPromptName: inputData.extractorPromptName,
-          keywords: inputData.keywords,
-        },
-        search: {
-          candidates: inputData.candidates,
-        },
-      }),
-    }),
-  )
+  .then(prepExtractStep)
   .then(extractAllStep)
   .then(persistStep)
   .commit();
