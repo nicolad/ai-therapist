@@ -11,7 +11,7 @@ import {
   Grid,
 } from "@radix-ui/themes";
 import { useRouter } from "next/navigation";
-import { useUser } from "@clerk/nextjs";
+import { useUser, useClerk } from "@clerk/nextjs";
 import {
   RocketIcon,
   FileTextIcon,
@@ -24,6 +24,7 @@ import {
 export default function Home() {
   const router = useRouter();
   const { user, isLoaded } = useUser();
+  const { openSignIn, openSignUp } = useClerk();
   const isPending = !isLoaded;
 
   return (
@@ -67,18 +68,10 @@ export default function Home() {
               </>
             ) : !user ? (
               <>
-                <Button
-                  size="3"
-                  onClick={() => router.push("/sign-up")}
-                  color="indigo"
-                >
+                <Button size="3" onClick={() => openSignUp()} color="indigo">
                   Get Started
                 </Button>
-                <Button
-                  size="3"
-                  variant="soft"
-                  onClick={() => router.push("/sign-in")}
-                >
+                <Button size="3" variant="soft" onClick={() => openSignIn()}>
                   Sign In
                 </Button>
               </>
@@ -108,7 +101,7 @@ export default function Home() {
         <Grid columns={{ initial: "1", md: "2", lg: "3" }} gap="4">
           <Card
             style={{ cursor: "pointer" }}
-            onClick={() => router.push(user ? "/goals" : "/sign-up")}
+            onClick={() => (user ? router.push("/goals") : openSignUp())}
           >
             <Flex direction="column" gap="3" p="2">
               <Flex align="center" gap="2">
@@ -127,7 +120,7 @@ export default function Home() {
 
           <Card
             style={{ cursor: "pointer" }}
-            onClick={() => router.push(user ? "/notes" : "/sign-up")}
+            onClick={() => (user ? router.push("/notes") : openSignUp())}
           >
             <Flex direction="column" gap="3" p="2">
               <Flex align="center" gap="2">
@@ -318,7 +311,7 @@ export default function Home() {
                   : "Sign up to create therapeutic goals backed by research and track your progress."}
               </Text>
               <Button
-                onClick={() => router.push(user ? "/goals" : "/sign-up")}
+                onClick={() => (user ? router.push("/goals") : openSignUp())}
                 style={{ marginTop: "1rem" }}
               >
                 {user ? "Create Goal" : "Sign Up"}
@@ -336,7 +329,7 @@ export default function Home() {
                   : "Discover research-backed insights, claim verification, and AI-powered audio content."}
               </Text>
               <Button
-                onClick={() => router.push(user ? "/notes" : "/sign-in")}
+                onClick={() => (user ? router.push("/notes") : openSignIn())}
                 style={{ marginTop: "1rem" }}
                 variant={user ? "solid" : "soft"}
               >
