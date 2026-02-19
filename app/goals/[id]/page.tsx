@@ -3,7 +3,12 @@
 import { useState } from "react";
 import * as Accordion from "@radix-ui/react-accordion";
 import * as SeparatorPrimitive from "@radix-ui/react-separator";
-import { ChevronDownIcon } from "@radix-ui/react-icons";
+import {
+  ChevronDownIcon,
+  ArrowLeftIcon,
+  TrashIcon,
+  MagnifyingGlassIcon,
+} from "@radix-ui/react-icons";
 import {
   Box,
   Flex,
@@ -18,7 +23,6 @@ import {
   Button,
 } from "@radix-ui/themes";
 import { GlassButton } from "@/app/components/GlassButton";
-import { ArrowLeftIcon, TrashIcon, MagnifyingGlassIcon } from "@radix-ui/react-icons";
 import { useRouter, useParams } from "next/navigation";
 import dynamic from "next/dynamic";
 import {
